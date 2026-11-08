@@ -263,8 +263,7 @@ function TestsView() {
                       isSelected
                         ? {
                             background: "linear-gradient(135deg, #eeebff 0%, #dcd6ff 100%)",
-                            ringColor: "rgba(91,75,255,0.4)",
-                            boxShadow: "0 0 0 2px rgba(91,75,255,0.3)",
+                            boxShadow: "0 0 0 2px rgba(91,75,255,0.4)",
                           }
                         : undefined
                     }
