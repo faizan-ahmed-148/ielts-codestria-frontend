@@ -199,19 +199,6 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
                 </div>
               </div>
 
-              {/* Demo Access */}
-              <button
-                type="button"
-                onClick={loginAsGuest}
-                className="w-full rounded-2xl border border-dashed border-brand-300 py-3 text-xs font-semibold text-brand-700 hover:border-brand-400 transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer"
-                style={{
-                  background: "linear-gradient(to br, rgba(91,75,255,0.04), rgba(139,92,246,0.04))",
-                  boxShadow: "0 1px 8px rgba(91,75,255,0.08)",
-                }}
-              >
-                <Sparkles className="h-3.5 w-3.5 text-brand-500" />
-                <span>Try Demo — No registration required</span>
-              </button>
             </div>
 
             {/* Footer link */}
