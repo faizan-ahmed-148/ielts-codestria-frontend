@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" fill="none">
+  <defs>
+    <linearGradient id="bgGrad512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5" />
+      <stop offset="45%" stop-color="#3730a3" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="facetTop" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#e0e7ff" />
+    </linearGradient>
+    <linearGradient id="facetMid" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#818cf8" />
+    </linearGradient>
+    <linearGradient id="facetBot" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+    <filter id="shadowGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#4f46e5" flood-opacity="0.45" />
+    </filter>
+  </defs>
+
+  <!-- Squircle Base -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad512)" />
+  <rect width="504" height="504" x="4" y="4" rx="124" stroke="rgba(255,255,255,0.15)" stroke-width="8" />
+
+  <!-- Center Emblem Group with Soft Shadow -->
+  <g filter="url(#shadowGlow)">
+    <!-- Top Cap Diamond -->
+    <path d="M256 112L392 188L256 264L120 188L256 112Z" fill="url(#facetTop)" />
+    <path d="M256 112L392 188L256 224L120 188L256 112Z" fill="#ffffff" opacity="0.9" />
+
+    <!-- Second Tier Shelf -->
+    <path d="M120 228L256 304L392 228L368 256L256 320L144 256L120 228Z" fill="url(#facetMid)" />
+
+    <!-- Third Tier Shelf -->
+    <path d="M144 292L256 356L368 292L344 320L256 372L168 320L144 292Z" fill="url(#facetBot)" />
+
+    <!-- Foundation Base Accent -->
+    <path d="M168 356L256 404L344 356L324 380L256 418L188 380L168 356Z" fill="#c7d2fe" opacity="0.9" />
+  </g>
+
+  <!-- Live Simulation Beacon -->
+  <circle cx="400" cy="112" r="40" fill="#10b981" stroke="#ffffff" stroke-width="16" />
+  <circle cx="400" cy="112" r="18" fill="#ffffff" />
+</svg>

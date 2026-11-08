@@ -1,0 +1,224 @@
+"use client";
+
+import { AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, Mic, Square, Timer as TimerIcon, Volume2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { wordCount } from "@/components/ui";
+import type { SpeakingContent } from "@/lib/content.types";
+import { recognitionSupported, speak, startRecognition } from "@/lib/speech";
+
+export type SpeakingAnswer = { transcript: string; seconds: number };
+type Answers = Record<string, SpeakingAnswer>;
+
+/** Same item keys as speakingItems() in the backend. */
+export function speakingItems(content: SpeakingContent) {
+  const items: { key: string; part: 1 | 2 | 3; topic: string; question: string; bullets?: string[] }[] = [];
+  content.part1.forEach((t, ti) => t.questions.forEach((q, qi) => items.push({ key: `p1-${ti}-${qi}`, part: 1, topic: t.topic, question: q })));
+  items.push({ key: "p2", part: 2, topic: "Long turn", question: content.part2.cueCard, bullets: content.part2.bullets });
+  content.part3.questions.forEach((q, qi) => items.push({ key: `p3-${qi}`, part: 3, topic: content.part3.topic, question: q }));
+  return items;
+}
+
+const PART2_PREP = 60;
+const PART2_MAX = 120;
+const PART_LABELS = { 1: "Part 1 · Interview", 2: "Part 2 · Long turn", 3: "Part 3 · Discussion" } as const;
+
+export function SpeakingRunner({ content, answers, setAnswer }: {
+  content: SpeakingContent;
+  answers: Answers;
+  setAnswer: (key: string, value: SpeakingAnswer) => void;
+}) {
+  const items = speakingItems(content);
+  const [index, setIndex] = useState(() => Math.max(0, items.findIndex((i) => !answers[i.key]?.transcript)));
+  const item = items[index];
+  const answer = answers[item.key] ?? { transcript: "", seconds: 0 };
+
+  const [recording, setRecording] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
+  const [prep, setPrep] = useState<number | null>(null);
+  const [notes, setNotes] = useState("");
+  const [micError, setMicError] = useState("");
+  const stopRef = useRef<(() => string) | null>(null);
+  const baseRef = useRef({ transcript: "", seconds: 0 });
+  const canRecord = recognitionSupported();
+
+  // Stop everything when moving to another question or leaving the page.
+  useEffect(() => () => {
+    stopRef.current?.();
+    window.speechSynthesis?.cancel();
+  }, [index]);
+
+  useEffect(() => {
+    if (!recording) return;
+    const t = setInterval(() => setElapsed((e) => e + 1), 1000);
+    return () => clearInterval(t);
+  }, [recording]);
+
+  useEffect(() => {
+    if (recording && item.part === 2 && elapsed >= PART2_MAX) stop();
+  });
+
+  useEffect(() => {
+    if (prep === null) return;
+    if (prep <= 0) {
+      setPrep(null);
+      start();
+      return;
+    }
+    const t = setTimeout(() => setPrep((p) => (p ?? 1) - 1), 1000);
+    return () => clearTimeout(t);
+  });
+
+  function start() {
+    setMicError("");
+    window.speechSynthesis?.cancel();
+    baseRef.current = { ...answer };
+    setElapsed(0);
+    try {
+      stopRef.current = startRecognition(
+        (text) => setAnswer(item.key, { transcript: `${baseRef.current.transcript} ${text}`.trim(), seconds: baseRef.current.seconds }),
+        (msg) => {
+          setMicError(msg);
+          setRecording(false);
+        },
+      );
+      setRecording(true);
+    } catch (e) {
+      setMicError((e as Error).message);
+    }
+  }
+
+  function stop() {
+    const text = stopRef.current?.() ?? "";
+    stopRef.current = null;
+    setRecording(false);
+    setAnswer(item.key, {
+      transcript: `${baseRef.current.transcript} ${text}`.trim(),
+      seconds: baseRef.current.seconds + elapsed,
+    });
+  }
+
+  const go = (i: number) => {
+    if (recording) stop();
+    setPrep(null);
+    setIndex(i);
+  };
+
+  const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  const answeredCount = items.filter((i) => answers[i.key]?.transcript?.trim()).length;
+
+  return (
+    <div className="mx-auto grid w-full max-w-6xl flex-1 gap-6 px-4 py-8 lg:grid-cols-[1fr_280px]">
+      <div className="space-y-4">
+        {!canRecord && (
+          <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            Your browser doesn't support speech-to-text. Use Chrome or Edge to answer by speaking, or type your answers below.
+          </div>
+        )}
+
+        <div className="card overflow-hidden">
+          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/70 px-6 py-3">
+            <span className="text-xs font-semibold tracking-wider text-violet-700 uppercase">{PART_LABELS[item.part]}</span>
+            <span className="text-xs text-slate-500">Question {index + 1} of {items.length}</span>
+          </div>
+          <div className="p-6 sm:p-8">
+            <div className="text-sm font-medium text-slate-500">{item.topic}</div>
+            <div className="mt-2 flex items-start gap-4">
+              <p className="flex-1 text-2xl leading-snug font-semibold tracking-tight">{item.question}</p>
+              <button onClick={() => speak(item.question + (item.bullets ? ". You should say: " + item.bullets.join(". ") : ""))}
+                className="btn-secondary shrink-0" title="Hear the examiner ask the question">
+                <Volume2 className="h-4 w-4" /> <span className="hidden sm:inline">Listen</span>
+              </button>
+            </div>
+
+            {item.bullets && (
+              <div className="mt-5 rounded-2xl border border-violet-100 bg-violet-50/50 p-5">
+                <p className="text-sm font-semibold text-violet-900">You should say:</p>
+                <ul className="mt-2 space-y-1.5 text-sm text-slate-700">
+                  {item.bullets.map((b) => <li key={b} className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-violet-400" />{b}</li>)}
+                </ul>
+                <p className="mt-3 text-xs text-slate-500">You have 1 minute to prepare and can make notes. Then speak for 1–2 minutes.</p>
+              </div>
+            )}
+
+            {item.part === 2 && prep !== null && (
+              <div className="mt-5 space-y-2">
+                <div className="flex items-center gap-2 text-sm font-semibold text-amber-700"><TimerIcon className="h-4 w-4" /> Preparation time: {prep}s</div>
+                <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Your notes (these aren't marked)" className="input h-24" />
+              </div>
+            )}
+
+            {/* Recorder */}
+            <div className="mt-8 flex flex-col items-center gap-3">
+              {recording ? (
+                <>
+                  <button onClick={stop} className="relative flex h-20 w-20 items-center justify-center rounded-full bg-red-600 text-white shadow-lg shadow-red-600/30 transition hover:bg-red-700" aria-label="Stop recording">
+                    <span className="absolute inset-0 animate-ping rounded-full bg-red-500 opacity-30" />
+                    <Square className="relative h-7 w-7 fill-current" />
+                  </button>
+                  <div className="font-mono text-lg font-semibold text-red-600 tabular-nums">{mmss(elapsed)}{item.part === 2 ? ` / ${mmss(PART2_MAX)}` : ""}</div>
+                  <div className="text-sm text-slate-500">Listening… press stop when you finish your answer.</div>
+                </>
+              ) : canRecord && prep === null ? (
+                item.part === 2 && !answer.transcript ? (
+                  <div className="flex flex-wrap justify-center gap-3">
+                    <button onClick={() => setPrep(PART2_PREP)} className="btn-primary btn-lg"><TimerIcon className="h-5 w-5" /> Start 1-minute preparation</button>
+                    <button onClick={start} className="btn-secondary btn-lg">Skip & speak now</button>
+                  </div>
+                ) : (
+                  <>
+                    <button onClick={start} className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg shadow-brand-600/30 transition hover:scale-105 hover:bg-brand-700" aria-label="Start speaking">
+                      <Mic className="h-8 w-8" />
+                    </button>
+                    <div className="text-sm font-medium text-slate-600">{answer.transcript ? "Tap to add to your answer" : "Tap to start speaking"}</div>
+                  </>
+                )
+              ) : null}
+              {micError && <div className="text-sm text-red-600">{micError}</div>}
+            </div>
+
+            <div className="mt-8">
+              <div className="flex items-center justify-between">
+                <label className="label mb-0">Your answer</label>
+                <span className="text-xs text-slate-500">{wordCount(answer.transcript)} words · {answer.seconds}s spoken</span>
+              </div>
+              <textarea
+                value={answer.transcript}
+                readOnly={recording}
+                onChange={(e) => setAnswer(item.key, { transcript: e.target.value, seconds: answer.seconds || Math.round(wordCount(e.target.value) / 2.2) })}
+                placeholder={canRecord ? "Your words appear here as you speak. You can correct any recognition mistakes." : "Type what you would say…"}
+                className="input mt-1.5 h-32 leading-relaxed"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-between">
+          <button onClick={() => go(index - 1)} disabled={index === 0} className="btn-secondary"><ChevronLeft className="h-4 w-4" /> Previous</button>
+          <button onClick={() => go(index + 1)} disabled={index === items.length - 1} className="btn-primary">Next question <ChevronRight className="h-4 w-4" /></button>
+        </div>
+      </div>
+
+      <aside className="card h-fit overflow-hidden lg:sticky lg:top-24">
+        <div className="border-b border-slate-100 px-4 py-3">
+          <div className="text-sm font-semibold">Questions</div>
+          <div className="text-xs text-slate-500">{answeredCount} of {items.length} answered</div>
+        </div>
+        <div className="scroll-thin max-h-[60vh] overflow-y-auto p-2">
+          {([1, 2, 3] as const).map((part) => (
+            <div key={part} className="mb-2">
+              <div className="px-2 py-1.5 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">{PART_LABELS[part]}</div>
+              {items.map((it, i) => it.part !== part ? null : (
+                <button key={it.key} onClick={() => go(i)}
+                  className={`flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-xs transition ${i === index ? "bg-brand-50 font-semibold text-brand-700" : "text-slate-600 hover:bg-slate-50"}`}>
+                  {answers[it.key]?.transcript ? <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-500" /> : <span className="mx-[3px] h-2 w-2 shrink-0 rounded-full bg-slate-300" />}
+                  <span className="truncate">{it.question}</span>
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
+      </aside>
+    </div>
+  );
+}
