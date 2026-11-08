@@ -75,6 +75,22 @@ body {
   color: #3640c4;
 }
 
+@utility bg-navy {
+  background-color: #12141a;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #09090b 0%, #4351e8 60%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-brand {
+  background: linear-gradient(135deg, #4351e8 0%, #6366f1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 /* ─── Refined Scrollbar ─────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 5px;

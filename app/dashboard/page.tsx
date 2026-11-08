@@ -57,16 +57,16 @@ function DashboardView() {
         title={
           <>
             <span>{greeting()}, </span>
-            <span className="gradient-text">{(user?.name || "Candidate").split(" ")[0]}</span>
+            <span className="text-zinc-900 font-bold">{(user?.name || "Candidate").split(" ")[0]}</span>
           </>
         }
-        description="Here's an overview of your IELTS preparation."
+        description="Here's an overview of your IELTS exam preparation and recent attempts."
         actions={
           <Link
             href="/profile"
-            className="btn-secondary text-xs flex items-center gap-1.5 shadow-2xs hover:border-slate-300"
+            className="btn btn-secondary text-xs flex items-center gap-1.5 shadow-2xs"
           >
-            <Settings className="h-3.5 w-3.5 text-slate-500" />
+            <Settings className="h-3.5 w-3.5 text-zinc-500" />
             <span>Profile &amp; Settings</span>
           </Link>
         }
@@ -84,159 +84,145 @@ function DashboardView() {
         <>
           <ContinueCard data={data} />
 
-          {/* Quick Practice Tools & Diagnostic Suite */}
+          {/* Quick Practice Studios */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {/* Study Roadmap – blue */}
+            {/* Study Roadmap */}
             <Link
               href="/study-plan"
-              className="card card-hover p-4 flex items-center justify-between group hover:border-blue-300"
+              className="card card-hover p-4 flex items-center justify-between group rounded-xl border border-zinc-200/80 bg-white shadow-2xs"
             >
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 text-white shadow-md shadow-blue-200 group-hover:scale-110 transition-transform">
+                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700 border border-blue-200/60 group-hover:scale-105 transition-transform">
                   <Calendar className="h-5 w-5" />
                 </span>
                 <div>
-                  <div className="font-semibold text-slate-900 text-xs sm:text-sm">Study Roadmap</div>
-                  <p className="text-[11px] text-slate-500">Daily checklist &amp; target band plan</p>
+                  <div className="font-semibold text-zinc-900 text-xs sm:text-sm">Study Roadmap</div>
+                  <p className="text-[11px] text-zinc-500">Daily checklist &amp; target band plan</p>
                 </div>
               </div>
-              <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
+              <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-0.5 transition-all" />
             </Link>
 
-            {/* Band 9 Essays – purple */}
+            {/* Band 9 Essays */}
             <Link
               href="/model-answers"
-              className="card card-hover p-4 flex items-center justify-between group hover:border-purple-300"
+              className="card card-hover p-4 flex items-center justify-between group rounded-xl border border-zinc-200/80 bg-white shadow-2xs"
             >
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 text-white shadow-md shadow-purple-200 group-hover:scale-110 transition-transform">
+                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50 text-purple-700 border border-purple-200/60 group-hover:scale-105 transition-transform">
                   <PenTool className="h-5 w-5" />
                 </span>
                 <div>
-                  <div className="font-semibold text-slate-900 text-xs sm:text-sm">Band 9 Essays</div>
-                  <p className="text-[11px] text-slate-500">Annotated models &amp; Band 6 critiques</p>
+                  <div className="font-semibold text-zinc-900 text-xs sm:text-sm">Band 9 Essays</div>
+                  <p className="text-[11px] text-zinc-500">Annotated models &amp; Band 6 critiques</p>
                 </div>
               </div>
-              <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-purple-600 group-hover:translate-x-1 transition-all" />
+              <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-0.5 transition-all" />
             </Link>
 
-            {/* Vocab Lab – emerald */}
+            {/* Vocab Lab */}
             <Link
               href="/vocabulary"
-              className="card card-hover p-4 flex items-center justify-between group hover:border-emerald-300"
+              className="card card-hover p-4 flex items-center justify-between group rounded-xl border border-zinc-200/80 bg-white shadow-2xs"
             >
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-md shadow-emerald-200 group-hover:scale-110 transition-transform">
+                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/60 group-hover:scale-105 transition-transform">
                   <Sparkles className="h-5 w-5" />
                 </span>
                 <div>
-                  <div className="font-semibold text-slate-900 text-xs sm:text-sm">Vocab Lab</div>
-                  <p className="text-[11px] text-slate-500">Academic flashcards &amp; audio drill</p>
+                  <div className="font-semibold text-zinc-900 text-xs sm:text-sm">Vocab Lab</div>
+                  <p className="text-[11px] text-zinc-500">Academic flashcards &amp; audio drill</p>
                 </div>
               </div>
-              <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
+              <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-0.5 transition-all" />
             </Link>
 
-            {/* Speaking Studio – amber */}
+            {/* Speaking Studio */}
             <Link
               href="/speaking-practice"
-              className="card card-hover p-4 flex items-center justify-between group hover:border-amber-300"
+              className="card card-hover p-4 flex items-center justify-between group rounded-xl border border-zinc-200/80 bg-white shadow-2xs"
             >
               <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-white shadow-md shadow-amber-200 group-hover:scale-110 transition-transform">
+                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-700 border border-amber-200/60 group-hover:scale-105 transition-transform">
                   <Mic className="h-5 w-5" />
                 </span>
                 <div>
-                  <div className="font-semibold text-slate-900 text-xs sm:text-sm">Speaking Studio</div>
-                  <p className="text-[11px] text-slate-500">Part 2 cue card &amp; audio recorder</p>
+                  <div className="font-semibold text-zinc-900 text-xs sm:text-sm">Speaking Studio</div>
+                  <p className="text-[11px] text-zinc-500">Part 2 cue card &amp; audio recorder</p>
                 </div>
               </div>
-              <ArrowRight className="h-4 w-4 text-slate-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all" />
+              <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-0.5 transition-all" />
             </Link>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 stagger">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             {[
               {
                 label: "Tests started",
                 value: data.totals.testsStarted,
                 Icon: PlayCircle,
-                gradient: "from-brand-400 to-brand-600",
-                shadow: "shadow-brand-200",
-                border: "border-t-brand-500",
               },
               {
                 label: "Full tests completed",
                 value: data.totals.testsCompleted,
                 Icon: Award,
-                gradient: "from-emerald-400 to-emerald-600",
-                shadow: "shadow-emerald-200",
-                border: "border-t-emerald-500",
               },
               {
                 label: "Modules completed",
                 value: data.totals.modulesCompleted,
                 Icon: CheckCircle2,
-                gradient: "from-sky-400 to-sky-600",
-                shadow: "shadow-sky-200",
-                border: "border-t-sky-500",
               },
               {
                 label: "Modules in progress",
                 value: data.totals.inProgress,
                 Icon: Clock,
-                gradient: "from-amber-400 to-amber-600",
-                shadow: "shadow-amber-200",
-                border: "border-t-amber-500",
               },
-            ].map(({ label, value, Icon, gradient, shadow, border }) => (
-              <div key={label} className={`card p-4 sm:p-5 border-t-2 ${border} animate-fade-up`}>
+            ].map(({ label, value, Icon }) => (
+              <div key={label} className="card p-4 sm:p-5 rounded-xl border border-zinc-200/80 bg-white shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-slate-500 sm:text-sm">{label}</span>
-                  <span
-                    className={`flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white shadow-md ${shadow}`}
-                  >
-                    <Icon className="h-[18px] w-[18px]" />
+                  <span className="text-xs font-medium text-zinc-500 sm:text-sm">{label}</span>
+                  <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-zinc-700 border border-zinc-200/60">
+                    <Icon className="h-4 w-4" />
                   </span>
                 </div>
-                <div className="mt-3 text-3xl font-bold tracking-tight tabular-nums animate-scale-in">{value}</div>
+                <div className="mt-3 text-2xl font-bold font-mono tracking-tight text-zinc-900 tabular-nums">{value}</div>
               </div>
             ))}
           </div>
 
           <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
             {/* Band by Module */}
-            <section className="card p-6">
+            <section className="card p-6 rounded-xl border border-zinc-200/80 bg-white shadow-2xs">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-semibold">Your band by module</h2>
-                  <p className="text-sm text-slate-500">Average of all your completed attempts</p>
+                  <h2 className="text-base font-bold text-zinc-900">Your band by module</h2>
+                  <p className="text-xs text-zinc-500">Average of all your completed attempts</p>
                 </div>
-                <div className="flex items-center gap-3 rounded-2xl bg-gradient-to-br from-brand-50 to-purple-50 px-4 py-2 border border-brand-100">
-                  <Target className="h-4 w-4 text-brand-600" />
-                  <div className="text-sm">
-                    <div className="text-xs text-slate-500">Estimated overall</div>
-                    <div className="font-bold">{estimate !== null ? estimate.toFixed(1) : "Complete all 4"}</div>
+                <div className="flex items-center gap-2.5 rounded-xl bg-zinc-50 px-3 py-1.5 border border-zinc-200/70">
+                  <Target className="h-4 w-4 text-indigo-600" />
+                  <div className="text-xs">
+                    <div className="text-[10px] text-zinc-500 font-medium">Estimated overall</div>
+                    <div className="font-bold text-zinc-900">{estimate !== null ? estimate.toFixed(1) : "Complete all 4"}</div>
                   </div>
                 </div>
               </div>
-              <div className="mt-6 grid gap-4 sm:grid-cols-2 stagger">
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 {MODULE_ORDER.map((m) => {
                   const count = data.trend.filter((t) => t.module === m).length;
-                  const { Icon, label, color } = MODULE_INFO[m] as { Icon: React.ElementType; label: string; color?: string };
+                  const { Icon, label } = MODULE_INFO[m] as { Icon: React.ElementType; label: string };
                   return (
                     <div
                       key={m}
-                      className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-gradient-to-br from-white to-slate-50/60 p-4 hover-lift animate-fade-up"
+                      className="flex items-center gap-3.5 rounded-xl border border-zinc-200/70 bg-zinc-50/50 p-3.5 hover:border-zinc-300 transition-colors"
                     >
-                      <BandRing band={data.averages[m]} size={60} />
+                      <BandRing band={data.averages[m]} size={52} />
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2 font-semibold">
-                          <Icon className="h-4 w-4 text-brand-500 shrink-0" />
+                        <div className="flex items-center gap-2 font-semibold text-xs text-zinc-900">
+                          <Icon className="h-3.5 w-3.5 text-zinc-500 shrink-0" />
                           <span>{label}</span>
                         </div>
-                        <div className="text-xs text-slate-500 mt-0.5">
+                        <div className="text-[11px] text-zinc-500 mt-0.5">
                           {count ? `${count} attempt${count > 1 ? "s" : ""} completed` : "Not attempted yet"}
                         </div>
                       </div>
@@ -248,27 +234,33 @@ function DashboardView() {
             </section>
 
             {/* Recent Activity */}
-            <section className="card flex flex-col p-6">
+            <section className="card flex flex-col p-6 rounded-xl border border-zinc-200/80 bg-white shadow-2xs">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Recent activity</h2>
-                <ListChecks className="h-5 w-5 text-slate-300" />
+                <h2 className="text-base font-bold text-zinc-900">Recent activity</h2>
+                <ListChecks className="h-4 w-4 text-zinc-400" />
               </div>
               {data.recent.length === 0 ? (
                 <div className="flex flex-1 flex-col items-center justify-center py-10 text-center">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-400"><Clock className="h-6 w-6" /></span>
-                  <p className="mt-3 text-sm font-medium">No activity yet</p>
-                  <p className="text-sm text-slate-500">Your attempts will show up here.</p>
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 text-zinc-400">
+                    <Clock className="h-5 w-5" />
+                  </span>
+                  <p className="mt-2.5 text-xs font-semibold text-zinc-800">No activity yet</p>
+                  <p className="text-xs text-zinc-500">Your attempts will show up here.</p>
                 </div>
               ) : (
-                <ul className="-mx-2 mt-3 divide-y divide-slate-100">
+                <ul className="-mx-2 mt-3 divide-y divide-zinc-100 text-xs">
                   {data.recent.slice(0, 7).map((a) => (
                     <li key={a.id}>
-                      <Link href={a.status === "IN_PROGRESS" ? `/attempt/${a.id}` : `/attempt/${a.id}/result`}
-                        className="flex items-center gap-3 rounded-xl px-2 py-3 transition hover:bg-slate-50">
+                      <Link
+                        href={a.status === "IN_PROGRESS" ? `/attempt/${a.id}` : `/attempt/${a.id}/result`}
+                        className="flex items-center gap-3 rounded-lg px-2 py-2.5 transition hover:bg-zinc-50"
+                      >
                         <ModuleIcon module={a.module} size="sm" />
                         <div className="min-w-0 flex-1">
-                          <div className="truncate text-sm font-medium">{MODULE_INFO[a.module].label} · {a.test.type === "ACADEMIC" ? "Academic" : "General"} {a.test.book}, Test {a.test.testNumber}</div>
-                          <div className="text-xs text-slate-500">{timeAgo(a.submittedAt ?? a.startedAt)}</div>
+                          <div className="truncate font-semibold text-zinc-900">
+                            {MODULE_INFO[a.module].label} · {a.test.type === "ACADEMIC" ? "Academic" : "General"} {a.test.book}, Test {a.test.testNumber}
+                          </div>
+                          <div className="text-[11px] text-zinc-500">{timeAgo(a.submittedAt ?? a.startedAt)}</div>
                         </div>
                         {a.band !== null ? <BandBadge band={a.band} /> : <StatusPill status={a.status} />}
                       </Link>
@@ -288,30 +280,28 @@ function ContinueCard({ data }: { data: Dashboard }) {
   const current = data.inProgress[0];
   if (!current) {
     return (
-      <section className="relative overflow-hidden rounded-3xl bg-navy p-8 text-white">
-        {/* Gradient mesh overlay */}
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_0%,rgba(99,102,241,0.55),transparent_55%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_80%,rgba(139,92,246,0.3),transparent_50%)]" />
-        {/* Animated orb decorations */}
-        <div className="pointer-events-none absolute -top-10 right-16 h-40 w-40 rounded-full bg-brand-500/20 blur-3xl animate-float" />
-        <div className="pointer-events-none absolute bottom-0 right-4 h-28 w-28 rounded-full bg-purple-500/15 blur-2xl animate-float" style={{ animationDelay: "1.5s" }} />
-        <div className="pointer-events-none absolute top-8 right-1/3 h-16 w-16 rounded-full bg-indigo-400/20 blur-xl animate-float" style={{ animationDelay: "0.8s" }} />
-
+      <section className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-[#12141a] p-6 sm:p-8 text-white shadow-md">
         <div className="relative flex flex-wrap items-center justify-between gap-6">
           <div className="max-w-xl">
-            <div className="eyebrow text-brand-300">
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-indigo-400">
               {data.totals.testsStarted ? "Keep the momentum" : "Get started"}
             </div>
-            <h2 className="mt-2 text-2xl font-bold">
+            <h2 className="mt-2 text-2xl font-bold text-white">
               {data.totals.testsStarted ? "Start your next mock test" : "Take your first mock test"}
             </h2>
-            <p className="mt-2 text-slate-300">Choose your track. You can take the four modules in any order.</p>
+            <p className="mt-2 text-xs sm:text-sm text-zinc-300">Choose your track. You can take the four modules in any order.</p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Link href="/tests?type=ACADEMIC" className="btn bg-white text-slate-900 hover:bg-slate-100 glow-brand-sm">
+          <div className="flex flex-wrap gap-2.5">
+            <Link
+              href="/tests?type=ACADEMIC"
+              className="btn btn-primary bg-white text-zinc-900 hover:bg-zinc-100 font-semibold px-4 py-2 text-xs shadow-xs"
+            >
               <GraduationCap className="h-4 w-4" /> Academic
             </Link>
-            <Link href="/tests?type=GENERAL" className="btn bg-white/10 text-white ring-1 ring-white/20 hover:bg-white/20">
+            <Link
+              href="/tests?type=GENERAL"
+              className="btn btn-secondary bg-zinc-900/80 border-zinc-700 text-zinc-200 hover:bg-zinc-800 font-semibold px-4 py-2 text-xs"
+            >
               <Briefcase className="h-4 w-4" /> General Training
             </Link>
           </div>
@@ -325,21 +315,12 @@ function ContinueCard({ data }: { data: Dashboard }) {
   const href = nextProgress?.status === "IN_PROGRESS" ? `/attempt/${nextProgress.attemptId}` : `/tests/${current.test.id}`;
 
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-navy p-6 text-white sm:p-8">
-      {/* Gradient mesh overlay */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_85%_0%,rgba(99,102,241,0.55),transparent_55%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_5%_90%,rgba(139,92,246,0.25),transparent_50%)]" />
-      {/* Animated orb decorations */}
-      <div className="pointer-events-none absolute -top-12 right-20 h-48 w-48 rounded-full bg-brand-500/25 blur-3xl animate-float" />
-      <div className="pointer-events-none absolute bottom-2 right-8 h-32 w-32 rounded-full bg-purple-500/20 blur-2xl animate-float" style={{ animationDelay: "2s" }} />
-      <div className="pointer-events-none absolute top-10 right-1/2 h-20 w-20 rounded-full bg-indigo-400/15 blur-xl animate-float" style={{ animationDelay: "1s" }} />
-      <div className="pointer-events-none absolute -bottom-4 left-1/4 h-24 w-24 rounded-full bg-brand-600/15 blur-2xl animate-float" style={{ animationDelay: "3s" }} />
-
+    <section className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-[#12141a] p-6 sm:p-8 text-white shadow-md">
       <div className="relative grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
         <div>
-          <div className="eyebrow text-brand-300">Continue where you left off</div>
-          <h2 className="mt-2 text-2xl font-bold">{current.test.title}</h2>
-          <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="text-[11px] font-semibold uppercase tracking-wider text-indigo-400">Continue where you left off</div>
+          <h2 className="mt-1.5 text-2xl font-bold text-white">{current.test.title}</h2>
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {MODULE_ORDER.map((m) => {
               const p = current.modules[m];
               const { Icon } = MODULE_INFO[m];
@@ -348,35 +329,41 @@ function ContinueCard({ data }: { data: Dashboard }) {
               return (
                 <div
                   key={m}
-                  className={`flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm ring-1 ${
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs border ${
                     done
-                      ? "bg-emerald-400/15 ring-emerald-300/40 shadow-sm shadow-emerald-500/10"
+                      ? "bg-emerald-950/40 border-emerald-700/60 text-emerald-300"
                       : inProg
-                      ? "bg-amber-400/15 ring-amber-300/50 shadow-sm shadow-amber-500/10"
-                      : "bg-white/5 ring-white/10"
+                      ? "bg-amber-950/40 border-amber-700/60 text-amber-300"
+                      : "bg-zinc-900/80 border-zinc-800 text-zinc-400"
                   }`}
                 >
-                  {done
-                    ? <CheckCircle2 className="h-4 w-4 text-emerald-300 shrink-0" />
-                    : <Icon className={`h-4 w-4 shrink-0 ${inProg ? "text-amber-300" : "text-slate-400"}`} />
-                  }
-                  <span className="font-medium truncate">{MODULE_INFO[m].label}</span>
-                  {done && <span className="ml-auto font-bold tabular-nums text-emerald-200">{p.band!.toFixed(1)}</span>}
+                  {done ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+                  ) : (
+                    <Icon className={`h-3.5 w-3.5 shrink-0 ${inProg ? "text-amber-400" : "text-zinc-500"}`} />
+                  )}
+                  <span className="font-semibold truncate">{MODULE_INFO[m].label}</span>
+                  {done && <span className="ml-auto font-mono font-bold text-emerald-300">{p.band!.toFixed(1)}</span>}
                 </div>
               );
             })}
           </div>
         </div>
         <div className="flex flex-col items-start gap-2 lg:items-end">
-          <Link href={href} className="btn-primary px-6 py-3 text-base glow-brand-sm">
-            {nextProgress?.status === "IN_PROGRESS"
-              ? `Resume ${MODULE_INFO[next!].label}`
-              : next
-              ? `Start ${MODULE_INFO[next].label}`
-              : "View test"}
-            <ArrowRight className="h-4 w-4" />
+          <Link
+            href={href}
+            className="btn btn-primary bg-white text-zinc-900 hover:bg-zinc-100 font-semibold px-5 py-2.5 text-xs shadow-sm inline-flex items-center gap-1.5"
+          >
+            <span>
+              {nextProgress?.status === "IN_PROGRESS"
+                ? `Resume ${MODULE_INFO[next!].label}`
+                : next
+                ? `Start ${MODULE_INFO[next].label}`
+                : "View test"}
+            </span>
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
-          <span className="text-sm text-slate-400">{current.completedModules} of 4 modules done</span>
+          <span className="text-xs text-zinc-400">{current.completedModules} of 4 modules done</span>
         </div>
       </div>
     </section>
@@ -392,37 +379,40 @@ function timeAgo(date: string) {
   return new Date(date).toLocaleDateString();
 }
 
-const TREND_COLORS = { LISTENING: "#0ea5e9", READING: "#10b981", WRITING: "#f59e0b", SPEAKING: "#8b5cf6" } as const;
+const TREND_COLORS = { LISTENING: "#4351e8", READING: "#10b981", WRITING: "#f59e0b", SPEAKING: "#8b5cf6" } as const;
 
 function Trend({ trend }: { trend: Dashboard["trend"] }) {
-  const W = 640, H = 180, L = 28, R = 12, T = 12, B = 20;
+  const W = 640, H = 160, L = 24, R = 12, T = 12, B = 20;
   const x = (i: number) => L + (i / Math.max(trend.length - 1, 1)) * (W - L - R);
   const y = (b: number) => T + (1 - b / 9) * (H - T - B);
   return (
-    <div className="mt-8 border-t border-slate-100 pt-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h3 className="text-sm font-semibold">Band over time</h3>
-        <div className="flex flex-wrap gap-4 text-xs text-slate-500">
+    <div className="mt-6 border-t border-zinc-100 pt-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-xs font-bold text-zinc-900 uppercase tracking-wide">Band score progression</h3>
+        <div className="flex flex-wrap gap-3 text-xs text-zinc-500">
           {MODULE_ORDER.map((m) => (
-            <span key={m} className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: TREND_COLORS[m] }} />{MODULE_INFO[m].label}</span>
+            <span key={m} className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full" style={{ background: TREND_COLORS[m] }} />
+              {MODULE_INFO[m].label}
+            </span>
           ))}
         </div>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} className="mt-3 w-full">
         {[0, 3, 6, 9].map((b) => (
           <g key={b}>
-            <line x1={L} x2={W - R} y1={y(b)} y2={y(b)} stroke="#f1f5f9" />
-            <text x={L - 8} y={y(b) + 4} fontSize="11" textAnchor="end" fill="#94a3b8">{b}</text>
+            <line x1={L} x2={W - R} y1={y(b)} y2={y(b)} stroke="#f4f4f5" />
+            <text x={L - 6} y={y(b) + 3} fontSize="10" textAnchor="end" fill="#a1a1aa">{b}</text>
           </g>
         ))}
         {MODULE_ORDER.map((m) => {
           const pts = trend.map((t, i) => ({ ...t, i })).filter((t) => t.module === m);
           return pts.length > 1 ? (
-            <polyline key={m} fill="none" stroke={TREND_COLORS[m]} strokeOpacity="0.35" strokeWidth="2" points={pts.map((p) => `${x(p.i)},${y(p.band)}`).join(" ")} />
+            <polyline key={m} fill="none" stroke={TREND_COLORS[m]} strokeOpacity="0.4" strokeWidth="2" points={pts.map((p) => `${x(p.i)},${y(p.band)}`).join(" ")} />
           ) : null;
         })}
         {trend.map((t, i) => (
-          <circle key={i} cx={x(i)} cy={y(t.band)} r={5} fill="#fff" stroke={TREND_COLORS[t.module]} strokeWidth="2.5">
+          <circle key={i} cx={x(i)} cy={y(t.band)} r={4.5} fill="#fff" stroke={TREND_COLORS[t.module]} strokeWidth="2">
             <title>{`${MODULE_INFO[t.module].label}: ${t.band} (${new Date(t.date).toLocaleDateString()})`}</title>
           </circle>
         ))}

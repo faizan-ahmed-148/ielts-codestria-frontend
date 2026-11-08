@@ -92,32 +92,25 @@ function TestsView() {
       <PageHeader
         eyebrow="Official Cambridge Exam Library"
         title={`${label} Full Mock Tests`}
-        description="Authentic examination papers matching the official computer-delivered IELTS exam by Cambridge University Press & Assessment, British Council and IDP."
+        description="Authentic examination papers matching the official computer-delivered IELTS exam format by Cambridge University Press & Assessment, British Council and IDP."
         actions={
-          <div className="inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-xs">
+          <div className="inline-flex rounded-xl border border-zinc-200/80 bg-zinc-100 p-1">
             {(
               [
                 ["ACADEMIC", "Academic Track", GraduationCap],
-                ["GENERAL", "General Training Track", Briefcase],
+                ["GENERAL", "General Training", Briefcase],
               ] as const
             ).map(([t, l, Icon]) => (
               <button
                 key={t}
                 onClick={() => router.replace(`/tests?type=${t}`)}
-                className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                className={`flex items-center gap-2 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition cursor-pointer ${
                   type === t
-                    ? "text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-white text-zinc-900 shadow-2xs"
+                    : "text-zinc-600 hover:text-zinc-900"
                 }`}
-                style={
-                  type === t
-                    ? {
-                        background: "linear-gradient(135deg, #5b4bff 0%, #8b5cf6 60%, #3b82f6 100%)",
-                      }
-                    : undefined
-                }
               >
-                <Icon className="h-4 w-4" /> {l}
+                <Icon className="h-3.5 w-3.5" /> {l}
               </button>
             ))}
           </div>
@@ -129,34 +122,31 @@ function TestsView() {
       {!books ? (
         <div className="space-y-4">
           <Skeleton className="h-20" />
-          <Skeleton className="h-64" />
-          <Skeleton className="h-64" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-64" />)}</div>
         </div>
       ) : (
         <>
           {/* Progress Banner & Filter Bar */}
-          <div className="card flex flex-wrap items-center justify-between gap-6 p-6 shadow-xs">
+          <div className="card flex flex-wrap items-center justify-between gap-6 p-5 rounded-xl border border-zinc-200/80 bg-white shadow-2xs">
             <div className="min-w-60 flex-1">
-              <div className="flex justify-between text-sm">
-                <span className="font-bold text-slate-900">Your {label} Progress</span>
-                <span className="font-medium text-slate-500">
+              <div className="flex justify-between text-xs">
+                <span className="font-bold text-zinc-900">Your {label} Progress</span>
+                <span className="font-medium text-zinc-500">
                   {count("COMPLETED")} of {all.length} tests completed
                 </span>
               </div>
-              {/* Animated progress bar */}
-              <div className="mt-2.5 h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-zinc-100">
                 <div
-                  className="h-full rounded-full transition-all duration-700 ease-out"
+                  className="h-full rounded-full bg-zinc-900 transition-all duration-500 ease-out"
                   style={{
                     width: `${(count("COMPLETED") / Math.max(all.length, 1)) * 100}%`,
-                    background: "linear-gradient(90deg, #5b4bff 0%, #10b981 100%)",
                   }}
                 />
               </div>
             </div>
 
             {/* Status Pills */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1.5">
               {(
                 [
                   ["all", "All Tests", all.length],
@@ -168,22 +158,14 @@ function TestsView() {
                 <button
                   key={key}
                   onClick={() => setFilter(key)}
-                  className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition cursor-pointer ${
                     filter === key
-                      ? "text-white shadow-sm"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      ? "bg-zinc-900 text-white shadow-2xs"
+                      : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200/80 hover:text-zinc-900"
                   }`}
-                  style={
-                    filter === key
-                      ? {
-                          background: "linear-gradient(135deg, #5b4bff 0%, #8b5cf6 100%)",
-                          boxShadow: "0 2px 8px rgba(91,75,255,0.35)",
-                        }
-                      : undefined
-                  }
                 >
                   {l}{" "}
-                  <span className={filter === key ? "text-brand-200" : "text-slate-400"}>{n}</span>
+                  <span className={filter === key ? "text-zinc-300" : "text-zinc-400"}>({n})</span>
                 </button>
               ))}
             </div>
@@ -192,53 +174,45 @@ function TestsView() {
           {/* Cambridge Bookshelf Series Selector */}
           <div className="space-y-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-slate-500 uppercase">
-                <BookOpen className="h-4 w-4 text-brand-600" />
-                <span>Cambridge IELTS Book Volumes</span>
+              <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-zinc-500 uppercase">
+                <BookOpen className="h-4 w-4 text-zinc-700" />
+                <span>Cambridge IELTS Volumes</span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setSortOrder((s) => (s === "desc" ? "asc" : "desc"))}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-xs cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200/80 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition shadow-2xs cursor-pointer"
                   title="Toggle descending / ascending order"
                 >
                   <ArrowDownWideNarrow
-                    className={`h-3.5 w-3.5 text-brand-600 transition ${sortOrder === "asc" ? "rotate-180" : ""}`}
+                    className={`h-3.5 w-3.5 text-zinc-500 transition ${sortOrder === "asc" ? "rotate-180" : ""}`}
                   />
-                  <span>{sortOrder === "desc" ? "Order: Descending (Latest First)" : "Order: Ascending (Oldest First)"}</span>
+                  <span>{sortOrder === "desc" ? "Latest First" : "Oldest First"}</span>
                 </button>
 
                 <div className="relative w-44 sm:w-56">
-                  <Search className="absolute top-2.5 left-2.5 h-4 w-4 text-slate-400" />
+                  <Search className="absolute top-2.5 left-2.5 h-3.5 w-3.5 text-zinc-400" />
                   <input
                     type="text"
                     placeholder="Search tests..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white py-1.5 pr-3 pl-8 text-xs outline-none focus:border-brand-500"
+                    className="w-full rounded-lg border border-zinc-200/80 bg-white py-1.5 pr-3 pl-8 text-xs text-zinc-900 outline-none focus:border-zinc-400"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-2.5 overflow-x-auto pb-2 scroll-thin">
+            <div className="flex gap-2 overflow-x-auto pb-2 scroll-thin">
               {/* All Volumes pill */}
               <button
                 onClick={() => setBook(null)}
-                className={`shrink-0 rounded-xl px-4 py-2.5 text-xs font-bold transition cursor-pointer ${
+                className={`shrink-0 rounded-lg px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
                   book === null
-                    ? "text-white shadow-sm"
-                    : "border border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+                    ? "bg-zinc-900 text-white shadow-2xs"
+                    : "border border-zinc-200/80 bg-white text-zinc-700 hover:bg-zinc-50"
                 }`}
-                style={
-                  book === null
-                    ? {
-                        background: "linear-gradient(135deg, #5b4bff 0%, #8b5cf6 100%)",
-                        boxShadow: "0 2px 8px rgba(91,75,255,0.35)",
-                      }
-                    : undefined
-                }
               >
                 All Volumes ({books.length})
               </button>
@@ -246,115 +220,77 @@ function TestsView() {
               {[...books]
                 .sort((a, b) => (sortOrder === "desc" ? b.book - a.book : a.book - b.book))
                 .map((b) => {
-                const bookMeta = CAMBRIDGE_BOOKS.find((meta) => meta.volume === b.book);
-                const done = b.tests.filter((t) => t.status === "COMPLETED").length;
-                const isSelected = book === b.book;
+                  const done = b.tests.filter((t) => t.status === "COMPLETED").length;
+                  const isSelected = book === b.book;
 
-                return (
-                  <button
-                    key={b.book}
-                    onClick={() => setBook(b.book)}
-                    className={`relative flex shrink-0 items-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-bold transition ${
-                      isSelected
-                        ? "border-brand-400 text-brand-800 ring-2"
-                        : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
-                    }`}
-                    style={
-                      isSelected
-                        ? {
-                            background: "linear-gradient(135deg, #eeebff 0%, #dcd6ff 100%)",
-                            boxShadow: "0 0 0 2px rgba(91,75,255,0.4)",
-                          }
-                        : undefined
-                    }
-                  >
-                    <span
-                      className="h-3 w-3 rounded-full shrink-0 shadow-sm"
-                      style={{
-                        backgroundColor: bookMeta?.coverAccent || "#4f46e5",
-                        boxShadow: `0 0 6px ${bookMeta?.coverAccent || "#4f46e5"}80`,
-                      }}
-                    />
-                    <span>Book {b.book}</span>
-                    <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-500">
-                      {done}/{b.tests.length}
-                    </span>
-                    {done === b.tests.length && (
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                    )}
-                  </button>
-                );
-              })}
+                  return (
+                    <button
+                      key={b.book}
+                      onClick={() => setBook(b.book)}
+                      className={`flex shrink-0 items-center gap-2 rounded-lg border px-3.5 py-2 text-xs font-semibold transition cursor-pointer ${
+                        isSelected
+                          ? "border-zinc-900 bg-zinc-900 text-white shadow-2xs"
+                          : "border-zinc-200/80 bg-white text-zinc-700 hover:bg-zinc-50"
+                      }`}
+                    >
+                      <span>Book {b.book}</span>
+                      <span className={`rounded px-1.5 py-0.2 text-[10px] ${isSelected ? "bg-zinc-800 text-zinc-300" : "bg-zinc-100 text-zinc-500"}`}>
+                        {done}/{b.tests.length}
+                      </span>
+                      {done === b.tests.length && (
+                        <CheckCircle2 className={`h-3 w-3 ${isSelected ? "text-emerald-400" : "text-emerald-600"}`} />
+                      )}
+                    </button>
+                  );
+                })}
             </div>
           </div>
 
           {shown.length === 0 && (
-            <div className="card p-12 text-center text-slate-500">
+            <div className="card p-12 text-center text-xs text-zinc-500 rounded-xl border border-zinc-200 bg-white">
               No Cambridge tests match your current search or filter criteria.
             </div>
           )}
 
           {/* Book Sections */}
-          <div className="space-y-10">
+          <div className="space-y-8">
             {shown.map(({ book: n, tests }) => {
               const meta = CAMBRIDGE_BOOKS.find((m) => m.volume === n);
               const completedCount = tests.filter((t) => t.status === "COMPLETED").length;
 
               return (
-                <section key={n} className="space-y-4">
+                <section key={n} className="space-y-3">
                   {/* Cambridge Book Header Banner */}
-                  <div className="relative flex flex-col gap-2 overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs sm:flex-row sm:items-center sm:justify-between">
-                    {/* Gradient left accent */}
-                    <div
-                      className="absolute left-0 top-0 h-full w-1 rounded-l-2xl"
-                      style={{
-                        background: `linear-gradient(to bottom, ${meta?.coverAccent || "#4338ca"}, ${meta?.coverAccent || "#4338ca"}80)`,
-                      }}
-                    />
-                    <div className="flex items-center gap-4 pl-3">
-                      {/* More vivid book spine cover */}
-                      <div
-                        className="flex h-14 w-11 shrink-0 flex-col items-center justify-center rounded-lg shadow-md"
-                        style={{
-                          background: `linear-gradient(145deg, ${meta?.coverAccent || "#4338ca"}, ${meta?.coverAccent || "#4338ca"}cc)`,
-                          color: "#ffffff",
-                          boxShadow: `0 4px 12px ${meta?.coverAccent || "#4338ca"}60`,
-                        }}
-                      >
-                        <span className="text-[9px] font-bold tracking-widest uppercase">IELTS</span>
-                        <span className="text-lg font-extrabold leading-none">{n}</span>
+                  <div className="flex flex-col gap-2 rounded-xl border border-zinc-200/80 bg-white p-4 shadow-2xs sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-11 w-9 shrink-0 flex-col items-center justify-center rounded-md bg-zinc-900 text-white shadow-xs">
+                        <span className="text-[8px] font-bold tracking-widest uppercase text-zinc-400">VOL</span>
+                        <span className="text-base font-extrabold leading-none">{n}</span>
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h2 className="text-lg font-bold text-slate-900">
+                          <h2 className="text-sm font-bold text-zinc-900">
                             Cambridge IELTS {n} · {label}
                           </h2>
                           {meta?.badge && (
-                            <span
-                              className="rounded-full px-2.5 py-0.5 text-[10px] font-bold text-white"
-                              style={{
-                                background: "linear-gradient(135deg, #5b4bff 0%, #8b5cf6 100%)",
-                              }}
-                            >
+                            <span className="rounded-md bg-zinc-100 border border-zinc-200/60 px-2 py-0.5 text-[10px] font-semibold text-zinc-700">
                               {meta.badge}
                             </span>
                           )}
                         </div>
-                        <p className="mt-0.5 text-xs text-slate-500">
-                          {meta?.description || "Authentic examination papers with realistic examination standards."}
+                        <p className="text-xs text-zinc-500">
+                          {meta?.description || "Authentic examination papers matching official test standards."}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 pl-3 sm:pl-0">
-                      <span className="text-xs font-semibold text-slate-600">
-                        {completedCount}/{tests.length} Complete
-                      </span>
+                    <div className="text-xs font-semibold text-zinc-600">
+                      {completedCount}/{tests.length} Complete
                     </div>
                   </div>
 
                   {/* Test Cards Grid */}
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
                     {tests.map((t) => (
                       <TestCard key={t.id} t={t} />
                     ))}
@@ -371,61 +307,38 @@ function TestsView() {
 
 function TestCard({ t }: { t: Test }) {
   const cta =
-    t.status === "COMPLETED" ? "Review Results" : t.status === "IN_PROGRESS" ? "Resume Exam" : "Start Full Test";
-
-  const accentColor =
-    t.status === "COMPLETED"
-      ? "#10b981"
-      : t.status === "IN_PROGRESS"
-      ? "#f59e0b"
-      : "#5b4bff";
+    t.status === "COMPLETED" ? "Review Results" : t.status === "IN_PROGRESS" ? "Resume Exam" : "Start Test";
 
   return (
     <Link
       href={`/tests/${t.id}`}
-      className="card card-hover group relative flex flex-col justify-between overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
-      style={{ "--hover-shadow": `0 20px 40px ${accentColor}20` } as React.CSSProperties}
+      className="card card-hover group flex flex-col justify-between rounded-xl border border-zinc-200/80 bg-white p-4 shadow-2xs transition-all hover:border-zinc-300 hover:shadow-xs"
     >
-      {/* Colored left accent line */}
-      <div
-        className="absolute left-0 top-0 h-full w-[3px] rounded-l-2xl transition-all duration-300 group-hover:w-1"
-        style={{ backgroundColor: accentColor }}
-      />
-
-      <div className="pl-1">
+      <div>
         {/* Header row */}
         <div className="flex items-start justify-between gap-2">
           <div>
-            <div
-              className="text-xs font-bold tracking-wider uppercase"
-              style={{ color: accentColor }}
-            >
+            <div className="text-[10px] font-bold tracking-wider uppercase text-zinc-500">
               Practice Paper {t.testNumber}
             </div>
-            <div className="mt-1 text-sm font-semibold text-slate-900">{t.title}</div>
+            <div className="mt-0.5 text-xs font-bold text-zinc-900">{t.title}</div>
           </div>
           {/* Status badge */}
           {t.overallBand !== null ? (
             <BandBadge band={t.overallBand} />
           ) : t.status === "IN_PROGRESS" ? (
-            <span
-              className="shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold text-white shadow-sm"
-              style={{
-                background: "linear-gradient(135deg, #f59e0b, #d97706)",
-                boxShadow: "0 2px 8px rgba(245,158,11,0.4)",
-              }}
-            >
+            <span className="shrink-0 rounded-md bg-amber-50 border border-amber-200/60 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
               In progress
             </span>
           ) : (
-            <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-bold text-slate-500">
+            <span className="shrink-0 rounded-md bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-500">
               Not started
             </span>
           )}
         </div>
 
         {/* 4 Modules Status Grid */}
-        <div className="mt-4 space-y-2 rounded-xl bg-slate-50/80 p-3">
+        <div className="mt-3 space-y-1.5 rounded-lg bg-zinc-50/80 p-2.5 border border-zinc-200/60">
           {MODULE_ORDER.map((m) => {
             const p = t.modules[m];
             const { Icon, label } = MODULE_INFO[m];
@@ -434,23 +347,23 @@ function TestCard({ t }: { t: Test }) {
 
             return (
               <div key={m} className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <Icon
-                    className={`h-3.5 w-3.5 ${
+                    className={`h-3 w-3 ${
                       isDone
-                        ? "text-emerald-500"
+                        ? "text-emerald-600"
                         : inProg
-                        ? "text-amber-500"
-                        : "text-slate-300"
+                        ? "text-amber-600"
+                        : "text-zinc-400"
                     }`}
                   />
-                  <span className={p.status === "NOT_STARTED" ? "text-slate-400" : "font-medium text-slate-700"}>
+                  <span className={p.status === "NOT_STARTED" ? "text-zinc-400" : "font-medium text-zinc-700"}>
                     {label}
                   </span>
                 </div>
                 <span
-                  className={`font-bold tabular-nums ${
-                    isDone ? "text-emerald-600" : inProg ? "text-amber-600" : "text-slate-400"
+                  className={`font-mono text-xs font-bold ${
+                    isDone ? "text-emerald-700" : inProg ? "text-amber-700" : "text-zinc-400"
                   }`}
                 >
                   {p.band !== null ? `Band ${p.band.toFixed(1)}` : inProg ? "..." : "–"}
@@ -462,17 +375,11 @@ function TestCard({ t }: { t: Test }) {
       </div>
 
       {/* CTA row */}
-      <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-3 pl-1">
-        <span
-          className="text-xs font-bold transition-colors group-hover:opacity-80"
-          style={{ color: accentColor }}
-        >
+      <div className="mt-4 flex items-center justify-between border-t border-zinc-100 pt-2.5 text-xs">
+        <span className="font-semibold text-zinc-900 group-hover:text-indigo-600 transition-colors">
           {cta}
         </span>
-        <ArrowRight
-          className="h-4 w-4 transition-all duration-200 group-hover:translate-x-1.5"
-          style={{ color: accentColor }}
-        />
+        <ArrowRight className="h-3.5 w-3.5 text-zinc-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition-all" />
       </div>
     </Link>
   );
