@@ -20,7 +20,7 @@ import {
   type TestOverview,
   type WritingFeedback,
 } from "@/lib/api";
-import { createAttempt, getAttemptDetails, fetchTestOverview } from "@/lib/test-runner-service";
+import { createAttempt, getAttemptDetails, fetchTestOverview, submitExamAttempt } from "@/lib/test-runner-service";
 import { testPath } from "@/lib/seo";
 import { getCEFRLevel } from "@/lib/cambridge-library";
 import type { ListeningContent, ReadingContent, SpeakingContent, WritingContent } from "@/lib/content.types";
@@ -79,8 +79,13 @@ function ResultView() {
     setError("");
     setRetrying(true);
     try {
-      await api(`/attempts/${id}/retry-scoring`, { method: "POST" });
-      setReloadKey((k) => k + 1);
+      if (id.startsWith("local-att-")) {
+        const updated = await submitExamAttempt(id);
+        setAttempt(updated);
+      } else {
+        await api(`/attempts/${id}/retry-scoring`, { method: "POST" });
+        setReloadKey((k) => k + 1);
+      }
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -149,18 +154,22 @@ function ResultView() {
               <p className="text-sm text-surface-500">Your answers are saved. No band was produced — Writing and Speaking bands come only from the AI provider you connect.</p>
             </div>
           </div>
-          <ErrorBox message={attempt.error ?? "Unknown error"} />
+          <ErrorBox
+            message={
+              attempt.error === "Internal server error"
+                ? "The AI provider rejected the request (invalid or unauthorized API key). Please verify your Groq/OpenAI key in Profile → AI scoring, then retry below."
+                : (attempt.error ?? "Unknown error")
+            }
+          />
           {error && <ErrorBox message={error} />}
           <div className="flex flex-wrap items-center gap-3">
             <Link href="/profile#ai" className="btn-primary inline-flex items-center gap-2">
               <KeyRound className="h-4 w-4" /> Configure AI key
             </Link>
-            {!id.startsWith("local-att-") && (
-              <button onClick={retry} disabled={retrying} className="btn-secondary inline-flex items-center gap-2">
-                {retrying ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
-                {retrying ? "Retrying…" : "Retry AI scoring"}
-              </button>
-            )}
+            <button onClick={retry} disabled={retrying} className="btn-secondary inline-flex items-center gap-2">
+              {retrying ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+              {retrying ? "Retrying…" : "Retry AI scoring"}
+            </button>
           </div>
           <p className="text-xs text-surface-500">
             Add your OpenAI, Groq or Anthropic key under <strong>Profile → AI Scoring</strong>, then submit the test again.

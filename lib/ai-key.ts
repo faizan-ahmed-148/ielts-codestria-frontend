@@ -7,6 +7,7 @@ export const AI_PROVIDERS = [
     keyPrefix: "sk-",
     consoleUrl: "https://platform.openai.com/api-keys",
     model: "gpt-4o-mini",
+    isFree: false,
   },
   {
     id: "GROQ",
@@ -14,6 +15,8 @@ export const AI_PROVIDERS = [
     keyPrefix: "gsk_",
     consoleUrl: "https://console.groq.com/keys",
     model: "openai/gpt-oss-120b",
+    isFree: true,
+    tag: "100% Free",
   },
   {
     id: "ANTHROPIC",
@@ -21,6 +24,7 @@ export const AI_PROVIDERS = [
     keyPrefix: "sk-ant-",
     consoleUrl: "https://console.anthropic.com/settings/keys",
     model: "claude-3-5-sonnet",
+    isFree: false,
   },
 ] as const;
 

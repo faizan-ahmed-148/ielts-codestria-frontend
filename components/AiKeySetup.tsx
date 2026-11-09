@@ -10,6 +10,7 @@ import {
   KeyRound,
   Loader2,
   ShieldCheck,
+  Sparkles,
   Trash2,
   X,
 } from "lucide-react";
@@ -126,8 +127,9 @@ export function AiKeySettings({ onSaved, compact = false }: AiKeySettingsProps) 
         <div className="border-b border-surface-100 pb-4">
           <h2 className="font-display text-lg font-bold text-surface-900">AI scoring key</h2>
           <p className="mt-1 text-sm leading-relaxed text-surface-500">
-            Writing and Speaking bands are produced only by an AI model. Connect your own OpenAI, Groq or Anthropic key
-            to enable them — only one provider can be active at a time.
+            Writing and Speaking bands are produced only by an AI model. We recommend{" "}
+            <strong className="font-semibold text-emerald-700">Groq (100% Free)</strong> for fast, free grading with
+            no credit card required, or you can connect OpenAI / Anthropic.
           </p>
         </div>
       )}
@@ -174,6 +176,7 @@ export function AiKeySettings({ onSaved, compact = false }: AiKeySettingsProps) 
           <div className={compact ? "grid gap-2" : "grid gap-3 sm:grid-cols-3"}>
             {AI_PROVIDERS.map((p) => {
               const active = provider === p.id;
+              const isGroq = p.id === "GROQ";
               return (
                 <button
                   key={p.id}
@@ -188,16 +191,35 @@ export function AiKeySettings({ onSaved, compact = false }: AiKeySettingsProps) 
                       : "border-surface-200 bg-white text-surface-700 hover:bg-surface-50"
                   }`}
                 >
-                  <span>
-                    <span className="block">{p.label}</span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="block font-bold text-surface-900">{p.label}</span>
+                      {isGroq && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-emerald-800 ring-1 ring-emerald-300">
+                          <Sparkles className="h-2.5 w-2.5 text-emerald-600" />
+                          100% Free
+                        </span>
+                      )}
+                    </div>
                     <span className="mt-0.5 block text-[11px] font-medium text-surface-500">{p.model}</span>
-                  </span>
-                  {active && <Check className="h-4 w-4" />}
+                  </div>
+                  {active && <Check className="h-4 w-4 shrink-0 text-brand-600" />}
                 </button>
               );
             })}
           </div>
         </div>
+
+        {provider === "GROQ" && (
+          <div className="flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50/70 px-3.5 py-2.5 text-xs text-emerald-900">
+            <span className="inline-flex items-center rounded-md bg-emerald-200/90 px-1.5 py-0.5 text-[10px] font-extrabold uppercase text-emerald-800 shrink-0">
+              Recommended
+            </span>
+            <span className="leading-relaxed">
+              <strong>Groq is 100% free</strong> with generous rate limits and zero credit card required. Ideal for full IELTS practice.
+            </span>
+          </div>
+        )}
 
         <div>
           <div className="mb-1.5 flex items-center justify-between gap-3">
@@ -208,9 +230,14 @@ export function AiKeySettings({ onSaved, compact = false }: AiKeySettingsProps) 
               href={selected.consoleUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-brand-600 hover:text-brand-700 hover:underline"
+              className={`inline-flex items-center gap-1 text-xs font-semibold ${
+                selected.id === "GROQ"
+                  ? "rounded-lg bg-emerald-50 px-2 py-0.5 font-bold text-emerald-700 ring-1 ring-emerald-200 hover:bg-emerald-100"
+                  : "text-brand-600 hover:text-brand-700 hover:underline"
+              }`}
             >
-              Get a {selected.label} key <ExternalLink className="h-3 w-3" />
+              {selected.id === "GROQ" ? "Get free Groq key (no card needed)" : `Get a ${selected.label} key`}{" "}
+              <ExternalLink className="h-3 w-3" />
             </a>
           </div>
           <div className="relative">
@@ -296,8 +323,9 @@ export function AiKeyModal({
           <div>
             <h2 className="font-display text-xl font-bold text-surface-900">{title}</h2>
             <p className="mt-1 text-sm leading-relaxed text-surface-500">
-              Writing and Speaking are graded only by the AI provider you connect. Pick OpenAI, Groq or Anthropic and
-              paste your key.
+              Writing and Speaking are graded only by the AI provider you connect. We recommend{" "}
+              <strong className="font-semibold text-emerald-700">Groq (100% Free)</strong> — instant setup with no
+              credit card required.
             </p>
           </div>
           <button
