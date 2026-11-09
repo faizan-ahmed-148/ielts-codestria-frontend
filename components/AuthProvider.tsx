@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { api, type User } from "@/lib/api";
+import { ApiError, api, type User } from "@/lib/api";
 
 interface AuthState {
   user: User | null;
@@ -26,7 +26,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem("ielts_current_user", JSON.stringify(u));
         } catch {}
       })
-      .catch(() => {
+      .catch((err) => {
+        // A 401/403 means the session is really gone (expired, or the account
+        // was deleted). Never resurrect it from the local cache.
+        if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+          try {
+            localStorage.removeItem("ielts_current_user");
+          } catch {}
+          setUser(null);
+          return;
+        }
+        // Offline/network failure only: keep the last known user.
         try {
           const stored = localStorage.getItem("ielts_current_user");
           if (stored) {
