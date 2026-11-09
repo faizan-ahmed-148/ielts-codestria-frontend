@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, BookOpen, ChevronRight, FileText, Mic, Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/ui";
+import { AdBanner } from "@/components/AdBanner";
 
 type RubricTab = "task2" | "task1" | "speaking";
 
@@ -244,6 +245,8 @@ export default function BandDescriptorsPage() {
           </article>
         ))}
       </div>
+
+      <AdBanner minHeight={100} />
 
       {/* CTA */}
       <div className="flex flex-col items-start justify-between gap-6 rounded-2xl border border-brand-200/70 bg-brand-50/60 p-6 sm:p-8 lg:flex-row lg:items-center">

@@ -17,6 +17,21 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  // Redirect legacy / singular /test paths to /tests.
+  async redirects() {
+    return [
+      {
+        source: "/test",
+        destination: "/tests",
+        permanent: true,
+      },
+      {
+        source: "/test/:path*",
+        destination: "/tests/:path*",
+        permanent: true,
+      },
+    ];
+  },
   // Proxy the NestJS API so the auth cookie stays same-origin.
   async rewrites() {
     return [{ source: "/api/:path*", destination: `${API_URL}/api/:path*` }];

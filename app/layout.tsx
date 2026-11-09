@@ -5,6 +5,7 @@ import { AuthProvider } from "@/components/AuthProvider";
 import { GoogleTag } from "@/components/GoogleTag";
 import { JsonLd } from "@/components/JsonLd";
 import {
+  ADSENSE_CLIENT_ID,
   DEFAULT_DESCRIPTION,
   DEFAULT_KEYWORDS,
   DEFAULT_TITLE,
@@ -104,6 +105,7 @@ export const metadata: Metadata = {
   other: {
     "msapplication-TileColor": "#4356e8",
     "msapplication-config": "none",
+    "google-adsense-account": ADSENSE_CLIENT_ID,
   },
 };
 
@@ -113,11 +115,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossOrigin="anonymous" />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
         />
         <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-friendly site summary" />
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
+          crossOrigin="anonymous"
+        />
         <JsonLd />
       </head>
       <body className="min-h-full font-sans text-surface-900 bg-surface-50 selection:bg-brand-500/15 selection:text-brand-800">

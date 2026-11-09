@@ -9,6 +9,7 @@ export const SITE_NAME = "Codestria IELTS";
 export const SITE_LOCALE = "en_GB";
 export const SITE_TWITTER = "@codestria";
 export const PUBLISHER_URL = "https://codestria.com";
+export const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID ?? "ca-pub-1275878727832310";
 
 export const DEFAULT_TITLE =
   "Codestria IELTS · Official Computer-Delivered CD-IELTS Simulator";

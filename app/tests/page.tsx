@@ -24,6 +24,7 @@ import {
   ProgressBar,
   Skeleton,
 } from "@/components/ui";
+import { AdBanner } from "@/components/AdBanner";
 import type { BookList, TestType } from "@/lib/api";
 import { track } from "@/lib/analytics";
 import { CAMBRIDGE_BOOKS } from "@/lib/cambridge-library";
@@ -285,53 +286,58 @@ function TestsView() {
 
           {/* Book sections */}
           <div className="space-y-9">
-            {shown.map(({ book: n, tests }) => {
+            {shown.map(({ book: n, tests }, index) => {
               const meta = CAMBRIDGE_BOOKS.find((m) => m.volume === n);
               const completedCount = tests.filter((t) => t.status === "COMPLETED").length;
 
               return (
-                <section key={n} className="space-y-3.5">
-                  <div className="flex flex-col gap-3 rounded-2xl border border-surface-200 bg-white p-4 shadow-xs sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                    <div className="flex items-center gap-3.5">
-                      <div className="flex h-12 w-10 shrink-0 flex-col items-center justify-center rounded-xl bg-surface-900 text-white shadow-sm">
-                        <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-surface-400">
-                          VOL
-                        </span>
-                        <span className="text-lg font-extrabold leading-none">{n}</span>
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="font-display text-[15px] font-bold text-surface-900">
-                            Cambridge IELTS {n} · {label}
-                          </h2>
-                          {meta?.badge && <span className="badge-brand">{meta.badge}</span>}
+                <div key={n} className="space-y-9">
+                  <section className="space-y-3.5">
+                    <div className="flex flex-col gap-3 rounded-2xl border border-surface-200 bg-white p-4 shadow-xs sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                      <div className="flex items-center gap-3.5">
+                        <div className="flex h-12 w-10 shrink-0 flex-col items-center justify-center rounded-xl bg-surface-900 text-white shadow-sm">
+                          <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-surface-400">
+                            VOL
+                          </span>
+                          <span className="text-lg font-extrabold leading-none">{n}</span>
                         </div>
-                        <p className="mt-0.5 text-[13px] leading-relaxed text-surface-500">
-                          {meta?.description ||
-                            "Authentic examination papers matching official test standards."}
-                        </p>
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h2 className="font-display text-[15px] font-bold text-surface-900">
+                              Cambridge IELTS {n} · {label}
+                            </h2>
+                            {meta?.badge && <span className="badge-brand">{meta.badge}</span>}
+                          </div>
+                          <p className="mt-0.5 text-[13px] leading-relaxed text-surface-500">
+                            {meta?.description ||
+                              "Authentic examination papers matching official test standards."}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 sm:shrink-0">
+                        <span className="text-[13px] font-semibold text-surface-500">
+                          {completedCount}/{tests.length} complete
+                        </span>
+                        <div className="h-1.5 w-20 overflow-hidden rounded-full bg-surface-100">
+                          <div
+                            className="h-full rounded-full bg-emerald-500"
+                            style={{ width: `${(completedCount / tests.length) * 100}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3 sm:shrink-0">
-                      <span className="text-[13px] font-semibold text-surface-500">
-                        {completedCount}/{tests.length} complete
-                      </span>
-                      <div className="h-1.5 w-20 overflow-hidden rounded-full bg-surface-100">
-                        <div
-                          className="h-full rounded-full bg-emerald-500"
-                          style={{ width: `${(completedCount / tests.length) * 100}%` }}
-                        />
-                      </div>
+                    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                      {tests.map((t) => (
+                        <TestCard key={t.id} t={t} book={n} type={type} />
+                      ))}
                     </div>
-                  </div>
+                  </section>
 
-                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    {tests.map((t) => (
-                      <TestCard key={t.id} t={t} book={n} type={type} />
-                    ))}
-                  </div>
-                </section>
+                  {/* High-traffic ad slot directly beneath the newest volume */}
+                  {index === 0 && <AdBanner minHeight={100} className="my-6" />}
+                </div>
               );
             })}
           </div>

@@ -13,6 +13,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { BandRing, MODULE_INFO, PageHeader } from "@/components/ui";
+import { AdBanner } from "@/components/AdBanner";
 import type { ModuleKind } from "@/lib/content.types";
 
 // Official IELTS raw to band conversions matching backend/src/scoring/bands.ts
@@ -540,6 +541,9 @@ export default function BandCalculatorPage() {
           </div>
         </div>
       )}
+
+      {/* High-visibility monetization banner */}
+      <AdBanner className="mt-8" minHeight={100} />
     </div>
   );
 }

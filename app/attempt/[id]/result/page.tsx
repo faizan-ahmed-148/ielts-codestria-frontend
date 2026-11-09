@@ -8,6 +8,7 @@ import { PageSpinner } from "@/components/AuthProvider";
 import { ChartView } from "@/components/ChartView";
 import { Logo } from "@/components/Logo";
 import { countQuestions, QuestionGroups } from "@/components/Questions";
+import { AdBanner } from "@/components/AdBanner";
 import { type SpeakingAnswer, speakingItems } from "@/components/runners/SpeakingRunner";
 import { BandRing, bandTone, ErrorBox, MODULE_INFO, MODULE_ORDER, ModuleIcon, wordCount } from "@/components/ui";
 import {
@@ -324,6 +325,9 @@ function ResultView() {
               <span>Scoring Engine: Codestria IELTS v2.4 (ielts.codestria.com)</span>
             </div>
           </section>
+
+          {/* High-engagement test result banner */}
+          <AdBanner className="my-6" minHeight={100} />
 
           {(attempt.module === "READING" || attempt.module === "LISTENING") && <ObjectiveReview attempt={attempt} />}
           {attempt.module === "WRITING" && <WritingReview attempt={attempt} />}
