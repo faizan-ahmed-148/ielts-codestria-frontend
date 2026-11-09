@@ -151,7 +151,7 @@ export default function Home() {
           <div className="mt-8 grid items-center gap-12 lg:grid-cols-12">
             {/* Left hero copy */}
             <div className="lg:col-span-6 text-center md:text-left">
-              <h1 className="text-4xl font-extrabold tracking-tight text-zinc-900 sm:text-5xl xl:text-6xl leading-[1.08]">
+              <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl lg:text-5xl xl:text-6xl leading-[1.12]">
                 The{" "}
                 <span className="gradient-brand">
                   Computer-Delivered
@@ -160,14 +160,14 @@ export default function Home() {
                 IELTS Simulation Engine.
               </h1>
 
-              <p className="mt-5 text-base sm:text-lg leading-relaxed text-zinc-600 max-w-xl">
+              <p className="mt-5 text-sm sm:text-base leading-relaxed text-zinc-600 max-w-xl">
                 Practice official Cambridge examination papers (Volumes 19 → 12) under authentic{" "}
                 <strong className="text-zinc-900 font-semibold">British Council &amp; IDP test room conditions</strong>.
                 Dual-pane reader, 3-color highlighters, synchronized audio, and instant Band&nbsp;9 scoring.
               </p>
 
               {/* CTA Buttons */}
-              <div className="mt-8 flex flex-wrap justify-center md:justify-start gap-3">
+              <div className="mt-7 flex flex-wrap justify-center md:justify-start gap-3">
                 <Link
                   href="/tests?type=ACADEMIC"
                   className="btn btn-primary px-5 py-2.5 text-xs font-semibold shadow-sm hover:shadow group"
@@ -490,19 +490,26 @@ export default function Home() {
           </div>
 
           {/* Book cards grid */}
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {filteredBooks.map((book) => (
               <div
                 key={book.volume}
-                className="group flex flex-col justify-between overflow-hidden rounded-xl border border-zinc-200/80 bg-white p-5 shadow-2xs hover:border-zinc-300 hover:shadow-xs transition-all duration-150"
+                className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-zinc-200/90 bg-white p-5 shadow-2xs hover:border-zinc-300 hover:shadow-md transition-all duration-200"
               >
                 <div>
-                  <div className="flex items-center justify-between">
-                    <span className="rounded-md bg-zinc-100 border border-zinc-200/70 px-2.5 py-0.5 text-[11px] font-bold text-zinc-800">
-                      Volume {book.volume}
-                    </span>
+                  {/* Volume spine indicator */}
+                  <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="h-2.5 w-2.5 rounded-full shrink-0"
+                        style={{ backgroundColor: book.coverAccent || "#4351e8" }}
+                      />
+                      <span className="font-mono text-xs font-bold text-zinc-900 uppercase tracking-wide">
+                        Volume {book.volume}
+                      </span>
+                    </div>
                     {book.volume >= 17 ? (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-indigo-50 border border-indigo-200/60 px-2 py-0.5 text-[10px] font-semibold text-indigo-700">
+                      <span className="inline-flex items-center gap-1 rounded-md bg-indigo-50 border border-indigo-200/60 px-2 py-0.5 text-[11px] font-semibold text-indigo-700">
                         <Sparkles className="h-2.5 w-2.5" />
                         Latest
                       </span>
@@ -513,15 +520,15 @@ export default function Home() {
                     )}
                   </div>
 
-                  <h3 className="mt-3 text-sm font-bold text-zinc-900 group-hover:text-indigo-600 transition-colors">
+                  <h3 className="mt-3.5 text-base font-bold text-zinc-900 group-hover:text-indigo-600 transition-colors">
                     Cambridge IELTS {book.volume}
                   </h3>
-                  <p className="mt-1 text-xs text-zinc-500 leading-relaxed line-clamp-2">
+                  <p className="mt-1.5 text-xs text-zinc-600 leading-relaxed line-clamp-2">
                     {book.description}
                   </p>
 
                   {/* Spec box */}
-                  <div className="mt-4 rounded-lg bg-zinc-50 border border-zinc-200/60 p-2.5 space-y-1 text-xs">
+                  <div className="mt-4 rounded-xl bg-zinc-50 border border-zinc-200/70 p-3 space-y-1.5 text-xs">
                     <div className="flex justify-between">
                       <span className="text-zinc-500">Track:</span>
                       <span className="font-semibold text-zinc-800">Academic &amp; General</span>
@@ -538,19 +545,19 @@ export default function Home() {
                 </div>
 
                 {/* Card footer */}
-                <div className="mt-5 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs">
+                <div className="mt-5 pt-3.5 border-t border-zinc-100 space-y-2">
                   <Link
                     href={`/tests/c${book.volume}-academic-1`}
-                    className="font-semibold text-indigo-600 hover:text-indigo-700 transition inline-flex items-center gap-1"
+                    className="btn btn-primary w-full justify-center py-2 text-xs font-semibold shadow-2xs group-hover:bg-zinc-800"
                   >
-                    <span>Launch Test 1</span>
-                    <ArrowRight className="h-3 w-3" />
+                    <span>Start Test 1</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                   <Link
                     href="/tests?type=ACADEMIC"
-                    className="font-medium text-zinc-500 hover:text-zinc-800 transition"
+                    className="block text-center text-xs font-medium text-zinc-500 hover:text-zinc-900 transition py-0.5"
                   >
-                    All 4 Tests →
+                    All 4 Tests in Vol {book.volume} →
                   </Link>
                 </div>
               </div>
@@ -1022,11 +1029,11 @@ export default function Home() {
               <div className="lg:col-span-8 space-y-3">
                 <div className="flex flex-wrap items-center gap-2.5">
                   <Image
-                    src="/codestria-logo-black.png"
+                    src="/codestria-logo.png"
                     alt="Codestria Logo"
-                    width={140}
-                    height={40}
-                    className="h-6 w-auto"
+                    width={130}
+                    height={38}
+                    className="h-7 w-auto object-contain"
                   />
                   <span className="inline-flex items-center gap-1 rounded-md bg-zinc-100 border border-zinc-200/80 px-2 py-0.5 text-[11px] font-semibold text-zinc-700">
                     <Shield className="h-3 w-3" /> AI &amp; Software Engineering Studio

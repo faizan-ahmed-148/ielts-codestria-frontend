@@ -89,74 +89,74 @@ function DashboardView() {
             {/* Study Roadmap */}
             <Link
               href="/study-plan"
-              className="card card-hover p-4 flex items-center justify-between group rounded-xl border border-zinc-200/80 bg-white shadow-2xs"
+              className="card card-hover p-4 sm:p-5 flex items-center justify-between group rounded-2xl border border-zinc-200/90 bg-white shadow-2xs"
             >
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700 border border-blue-200/60 group-hover:scale-105 transition-transform">
+              <div className="flex items-center gap-3.5">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-700 border border-blue-200/70 group-hover:scale-105 transition-transform shrink-0">
                   <Calendar className="h-5 w-5" />
                 </span>
                 <div>
-                  <div className="font-semibold text-zinc-900 text-xs sm:text-sm">Study Roadmap</div>
-                  <p className="text-[11px] text-zinc-500">Daily checklist &amp; target band plan</p>
+                  <div className="font-bold text-zinc-900 text-sm sm:text-base">Study Roadmap</div>
+                  <p className="text-xs text-zinc-500 mt-0.5">Daily checklist &amp; target band plan</p>
                 </div>
               </div>
-              <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-0.5 transition-all" />
+              <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-0.5 transition-all shrink-0" />
             </Link>
 
             {/* Band 9 Essays */}
             <Link
               href="/model-answers"
-              className="card card-hover p-4 flex items-center justify-between group rounded-xl border border-zinc-200/80 bg-white shadow-2xs"
+              className="card card-hover p-4 sm:p-5 flex items-center justify-between group rounded-2xl border border-zinc-200/90 bg-white shadow-2xs"
             >
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50 text-purple-700 border border-purple-200/60 group-hover:scale-105 transition-transform">
+              <div className="flex items-center gap-3.5">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-purple-50 text-purple-700 border border-purple-200/70 group-hover:scale-105 transition-transform shrink-0">
                   <PenTool className="h-5 w-5" />
                 </span>
                 <div>
-                  <div className="font-semibold text-zinc-900 text-xs sm:text-sm">Band 9 Essays</div>
-                  <p className="text-[11px] text-zinc-500">Annotated models &amp; Band 6 critiques</p>
+                  <div className="font-bold text-zinc-900 text-sm sm:text-base">Band 9 Essays</div>
+                  <p className="text-xs text-zinc-500 mt-0.5">Annotated models &amp; Band 6 critiques</p>
                 </div>
               </div>
-              <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-0.5 transition-all" />
+              <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-0.5 transition-all shrink-0" />
             </Link>
 
             {/* Vocab Lab */}
             <Link
               href="/vocabulary"
-              className="card card-hover p-4 flex items-center justify-between group rounded-xl border border-zinc-200/80 bg-white shadow-2xs"
+              className="card card-hover p-4 sm:p-5 flex items-center justify-between group rounded-2xl border border-zinc-200/90 bg-white shadow-2xs"
             >
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/60 group-hover:scale-105 transition-transform">
+              <div className="flex items-center gap-3.5">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/70 group-hover:scale-105 transition-transform shrink-0">
                   <Sparkles className="h-5 w-5" />
                 </span>
                 <div>
-                  <div className="font-semibold text-zinc-900 text-xs sm:text-sm">Vocab Lab</div>
-                  <p className="text-[11px] text-zinc-500">Academic flashcards &amp; audio drill</p>
+                  <div className="font-bold text-zinc-900 text-sm sm:text-base">Vocab Lab</div>
+                  <p className="text-xs text-zinc-500 mt-0.5">Academic flashcards &amp; audio drill</p>
                 </div>
               </div>
-              <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-0.5 transition-all" />
+              <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-0.5 transition-all shrink-0" />
             </Link>
 
             {/* Speaking Studio */}
             <Link
               href="/speaking-practice"
-              className="card card-hover p-4 flex items-center justify-between group rounded-xl border border-zinc-200/80 bg-white shadow-2xs"
+              className="card card-hover p-4 sm:p-5 flex items-center justify-between group rounded-2xl border border-zinc-200/90 bg-white shadow-2xs"
             >
-              <div className="flex items-center gap-3">
-                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-700 border border-amber-200/60 group-hover:scale-105 transition-transform">
+              <div className="flex items-center gap-3.5">
+                <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-700 border border-amber-200/70 group-hover:scale-105 transition-transform shrink-0">
                   <Mic className="h-5 w-5" />
                 </span>
                 <div>
-                  <div className="font-semibold text-zinc-900 text-xs sm:text-sm">Speaking Studio</div>
-                  <p className="text-[11px] text-zinc-500">Part 2 cue card &amp; audio recorder</p>
+                  <div className="font-bold text-zinc-900 text-sm sm:text-base">Speaking Studio</div>
+                  <p className="text-xs text-zinc-500 mt-0.5">Part 2 cue card &amp; audio recorder</p>
                 </div>
               </div>
-              <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-0.5 transition-all" />
+              <ArrowRight className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900 group-hover:translate-x-0.5 transition-all shrink-0" />
             </Link>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             {[
               {
                 label: "Tests started",
@@ -179,14 +179,14 @@ function DashboardView() {
                 Icon: Clock,
               },
             ].map(({ label, value, Icon }) => (
-              <div key={label} className="card p-4 sm:p-5 rounded-xl border border-zinc-200/80 bg-white shadow-2xs">
+              <div key={label} className="card p-5 rounded-2xl border border-zinc-200/90 bg-white shadow-2xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-zinc-500 sm:text-sm">{label}</span>
+                  <span className="text-xs sm:text-sm font-semibold text-zinc-500">{label}</span>
                   <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 text-zinc-700 border border-zinc-200/60">
                     <Icon className="h-4 w-4" />
                   </span>
                 </div>
-                <div className="mt-3 text-2xl font-bold font-mono tracking-tight text-zinc-900 tabular-nums">{value}</div>
+                <div className="mt-3 text-3xl font-bold font-mono tracking-tight text-zinc-900 tabular-nums">{value}</div>
               </div>
             ))}
           </div>

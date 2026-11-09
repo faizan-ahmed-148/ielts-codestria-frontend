@@ -163,18 +163,18 @@ export function PageHeader({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-6 border-b border-zinc-200/70">
-      <div className="min-w-0 space-y-1">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between pb-6 border-b border-zinc-200/80">
+      <div className="min-w-0 space-y-1.5">
         {eyebrow && (
-          <div className="inline-flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 uppercase tracking-wider">
-            <span className="h-1.5 w-1.5 rounded-full bg-zinc-400" />
+          <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+            <span className="h-1.5 w-1.5 rounded-full bg-indigo-600" />
             <span>{eyebrow}</span>
           </div>
         )}
-        <h1 className="text-xl font-semibold tracking-tight text-zinc-900 sm:text-2xl">{title}</h1>
-        {description && <p className="max-w-2xl text-xs text-zinc-500 leading-relaxed">{description}</p>}
+        <h1 className="text-2xl font-bold tracking-tight text-zinc-900 sm:text-3xl">{title}</h1>
+        {description && <p className="max-w-2xl text-sm text-zinc-600 leading-relaxed">{description}</p>}
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2 shrink-0">{actions}</div>}
+      {actions && <div className="flex flex-wrap items-center gap-2.5 shrink-0">{actions}</div>}
     </div>
   );
 }

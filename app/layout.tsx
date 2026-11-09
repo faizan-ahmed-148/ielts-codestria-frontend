@@ -127,7 +127,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <JsonLd />
       </head>
-      <body className="min-h-full font-sans text-slate-900 bg-[#f7f8fb] selection:bg-brand-100 selection:text-brand-900">
+      <body className="min-h-full font-sans text-zinc-900 bg-[#fcfcfd] selection:bg-indigo-500/15 selection:text-indigo-700">
         <AuthProvider>
           <AppShell>{children}</AppShell>
         </AuthProvider>

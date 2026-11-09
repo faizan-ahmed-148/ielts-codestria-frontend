@@ -318,20 +318,20 @@ function TestCard({ t }: { t: Test }) {
         {/* Header row */}
         <div className="flex items-start justify-between gap-2">
           <div>
-            <div className="text-[10px] font-bold tracking-wider uppercase text-zinc-500">
+            <div className="text-[11px] font-bold tracking-wider uppercase text-zinc-500">
               Practice Paper {t.testNumber}
             </div>
-            <div className="mt-0.5 text-xs font-bold text-zinc-900">{t.title}</div>
+            <div className="mt-1 text-sm font-bold text-zinc-900">{t.title}</div>
           </div>
           {/* Status badge */}
           {t.overallBand !== null ? (
             <BandBadge band={t.overallBand} />
           ) : t.status === "IN_PROGRESS" ? (
-            <span className="shrink-0 rounded-md bg-amber-50 border border-amber-200/60 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+            <span className="shrink-0 rounded-md bg-amber-50 border border-amber-200/60 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
               In progress
             </span>
           ) : (
-            <span className="shrink-0 rounded-md bg-zinc-100 px-2 py-0.5 text-[10px] font-medium text-zinc-500">
+            <span className="shrink-0 rounded-md bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-zinc-500">
               Not started
             </span>
           )}

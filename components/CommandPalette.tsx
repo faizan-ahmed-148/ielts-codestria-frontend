@@ -188,13 +188,12 @@ export function CommandPalette() {
       {/* Trigger Button - placed anywhere */}
       <button
         onClick={() => setOpen(true)}
-        className="group flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-1.5 text-xs text-slate-500 transition hover:border-slate-300 hover:bg-slate-100"
+        className="group flex items-center gap-2 rounded-lg border border-zinc-200/80 bg-zinc-50/80 px-2.5 py-1.5 text-xs text-zinc-500 transition hover:border-zinc-300 hover:bg-white hover:text-zinc-800 cursor-pointer shadow-2xs"
         title="Quick search (Ctrl+K or Cmd+K)"
       >
-        <Search className="h-3.5 w-3.5 text-slate-400 group-hover:text-brand-600 transition" />
-        <span className="hidden sm:inline">Search tests, tools, vocab...</span>
-        <span className="sm:hidden">Search</span>
-        <kbd className="hidden rounded bg-white px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 shadow-xs border border-slate-200 sm:inline-block">
+        <Search className="h-3.5 w-3.5 text-zinc-400 group-hover:text-zinc-700 transition" />
+        <span className="hidden xl:inline">Search...</span>
+        <kbd className="hidden xl:inline-flex rounded border border-zinc-200 bg-white px-1 py-0.2 font-mono text-[10px] text-zinc-400">
           ⌘K
         </kbd>
       </button>

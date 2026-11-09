@@ -60,12 +60,11 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   const navLinks = [
-    { href: "/tests?type=ACADEMIC", label: "Academic" },
-    { href: "/tests?type=GENERAL", label: "General Training" },
+    { href: "/tests", label: "Mock Tests" },
     { href: "/model-answers", label: "Band 9 Models" },
-    { href: "/speaking-practice", label: "Speaking" },
-    { href: "/vocabulary", label: "Vocabulary" },
-    { href: "/calculator", label: "Calculator" },
+    { href: "/speaking-practice", label: "Speaking Studio" },
+    { href: "/vocabulary", label: "Vocab Lab" },
+    { href: "/calculator", label: "Band Calculator" },
   ];
 
   return (
@@ -74,31 +73,28 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
         <header
           className={`sticky top-0 z-40 transition-all duration-200 ${
             scrolled
-              ? "border-b border-zinc-200/80 bg-white/90 backdrop-blur-md shadow-2xs"
-              : "bg-transparent border-b border-transparent"
+              ? "border-b border-zinc-200/80 bg-white/95 backdrop-blur-md shadow-2xs"
+              : "bg-white/80 backdrop-blur-xs border-b border-zinc-200/60"
           }`}
         >
-          <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
-            {/* Left: Brand + Search */}
-            <div className="flex items-center gap-5">
+          <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+            {/* Left: Brand */}
+            <div className="flex items-center gap-6 shrink-0">
               <Logo />
-              <div className="hidden xl:block">
-                <CommandPalette />
-              </div>
             </div>
 
             {/* Middle: Desktop Nav */}
-            <nav className="hidden items-center gap-1 text-xs font-medium text-zinc-600 lg:flex">
+            <nav className="hidden items-center gap-1.5 text-[13px] font-medium text-zinc-600 lg:flex">
               {navLinks.map(({ href, label }) => {
                 const isActive = pathname === href.split("?")[0];
                 return (
                   <Link
                     key={href}
                     href={href}
-                    className={`rounded-md px-3 py-1.5 transition-colors duration-150 ${
+                    className={`rounded-lg px-3 py-1.5 transition-colors duration-150 ${
                       isActive
                         ? "text-zinc-900 bg-zinc-100 font-semibold"
-                        : "hover:text-zinc-900 hover:bg-zinc-100/70"
+                        : "hover:text-zinc-900 hover:bg-zinc-50"
                     }`}
                   >
                     {label}
@@ -107,39 +103,40 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
               })}
             </nav>
 
-            {/* Right: Auth CTA */}
-            <div className="flex items-center gap-2">
-              <div className="xl:hidden">
-                <CommandPalette />
-              </div>
+            {/* Right: Search + Auth CTA */}
+            <div className="flex items-center gap-2.5 shrink-0">
+              <CommandPalette />
 
               {user ? (
-                <div className="flex items-center gap-2">
-                  <Link href="/dashboard" className="btn-primary btn-sm">
+                <div className="flex items-center gap-2 shrink-0">
+                  <Link
+                    href="/dashboard"
+                    className="btn btn-primary px-3.5 py-1.5 text-xs font-semibold shadow-2xs inline-flex items-center gap-1.5"
+                  >
                     <LayoutDashboard className="h-3.5 w-3.5" />
                     <span>Dashboard</span>
                   </Link>
                   <Link
                     href="/profile"
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 hover:text-zinc-900 hover:border-zinc-300 transition"
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-600 hover:text-zinc-900 hover:border-zinc-300 transition shrink-0"
                     title="Settings"
                   >
                     <User className="h-3.5 w-3.5" />
                   </Link>
                   <button
                     onClick={() => logout()}
-                    className="text-xs text-zinc-500 hover:text-zinc-800 px-2 py-1 transition font-medium cursor-pointer"
+                    className="text-xs font-semibold text-zinc-500 hover:text-zinc-900 px-2 py-1.5 rounded-lg hover:bg-zinc-100 transition whitespace-nowrap shrink-0 cursor-pointer"
                   >
                     Log out
                   </button>
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
-                  <Link href="/login" className="btn-ghost btn-sm hidden sm:inline-flex">
+                <div className="flex items-center gap-2 shrink-0">
+                  <Link href="/login" className="btn btn-ghost px-3 py-1.5 text-xs font-semibold hidden sm:inline-flex">
                     Sign in
                   </Link>
-                  <Link href="/tests?type=ACADEMIC" className="btn-primary btn-sm">
-                    Start Free
+                  <Link href="/tests?type=ACADEMIC" className="btn btn-primary px-3.5 py-1.5 text-xs font-semibold shadow-2xs">
+                    <span>Start Free</span>
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>
@@ -149,7 +146,7 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen((o) => !o)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 lg:hidden"
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 lg:hidden shrink-0"
                 aria-label="Toggle navigation menu"
               >
                 {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}

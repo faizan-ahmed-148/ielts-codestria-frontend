@@ -185,7 +185,7 @@ export default function StudyPlanPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+    <div className="mx-auto max-w-8xl px-4 py-8 sm:px-6 sm:py-12">
       {/* Header */}
       <div className="mb-8">
         <div className="flex flex-wrap items-center gap-2 mb-2">

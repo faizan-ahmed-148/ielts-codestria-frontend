@@ -143,7 +143,7 @@ export default function VocabularyPage() {
   const cefrLevels = ["All", "B2", "C1", "C2"];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+    <div className="mx-auto max-w-8xl px-4 py-8 sm:px-6 sm:py-12">
       {/* Header */}
       <div className="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
