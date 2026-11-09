@@ -18,12 +18,14 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PageSpinner, useAuth } from "@/components/AuthProvider";
+import { AiKeyModal } from "@/components/AiKeySetup";
 import { countQuestions } from "@/components/Questions";
 import { ObjectiveRunner } from "@/components/runners/ObjectiveRunner";
 import { type SpeakingAnswer, SpeakingRunner, speakingItems } from "@/components/runners/SpeakingRunner";
 import { WritingRunner } from "@/components/runners/WritingRunner";
 import { ErrorBox, MODULE_INFO, ModuleIcon, wordCount } from "@/components/ui";
-import type { Attempt } from "@/lib/api";
+import { ApiError, type Attempt } from "@/lib/api";
+import { getAiKeyStatus } from "@/lib/ai-key";
 import type { ListeningContent, ReadingContent, SpeakingContent, WritingContent } from "@/lib/content.types";
 import { getAttemptDetails, patchAttemptAnswers, submitExamAttempt } from "@/lib/test-runner-service";
 
@@ -46,6 +48,7 @@ function ExamView() {
   const [notes, setNotes] = useState("");
   const [hideTimer, setHideTimer] = useState(false);
   const [timeWarning, setTimeWarning] = useState<string | null>(null);
+  const [aiKeyOpen, setAiKeyOpen] = useState(false);
 
   const answersRef = useRef(answers);
   answersRef.current = answers;
@@ -103,18 +106,45 @@ function ExamView() {
     return () => window.removeEventListener("beforeunload", handler);
   }, [saveState, submitting]);
 
-  const submit = useCallback(async () => {
-    setSubmitting(true);
-    setConfirm(false);
-    try {
-      window.speechSynthesis?.cancel();
-      await submitExamAttempt(id, answersRef.current);
-      router.replace(`/attempt/${id}/result`);
-    } catch (e) {
-      setError((e as Error).message);
-      setSubmitting(false);
-    }
-  }, [id, router]);
+  const submit = useCallback(
+    async (opts?: { skipKeyCheck?: boolean }) => {
+      // Writing and Speaking need the candidate's own AI key before submitting.
+      if (
+        !opts?.skipKeyCheck &&
+        attempt &&
+        (attempt.module === "WRITING" || attempt.module === "SPEAKING")
+      ) {
+        try {
+          const status = await getAiKeyStatus();
+          if (!status.configured) {
+            setAiKeyOpen(true);
+            setConfirm(false);
+            return;
+          }
+        } catch {
+          // If the status check fails, let submit surface the real error.
+        }
+      }
+
+      setSubmitting(true);
+      setConfirm(false);
+      try {
+        window.speechSynthesis?.cancel();
+        await submitExamAttempt(id, answersRef.current);
+        router.replace(`/attempt/${id}/result`);
+      } catch (e) {
+        if (e instanceof ApiError && e.code === "AI_KEY_REQUIRED") {
+          setAiKeyOpen(true);
+          setConfirm(false);
+          setSubmitting(false);
+          return;
+        }
+        setError((e as Error).message);
+        setSubmitting(false);
+      }
+    },
+    [attempt, id, router],
+  );
 
   if (error && !attempt) {
     return (
@@ -130,7 +160,7 @@ function ExamView() {
   const summary = progressSummary(attempt, answers);
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f8f9fa] transition-colors duration-150">
+    <div className="flex min-h-screen flex-col bg-surface-50 transition-colors duration-150">
       {/* Official CD-IELTS 10-min and 5-min Warning Banner */}
       {timeWarning && (
         <div className="flex items-center justify-between bg-amber-500 px-4 py-2 font-bold text-white shadow-md animate-fade-up">
@@ -145,11 +175,11 @@ function ExamView() {
       )}
 
       {/* Official Header */}
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-surface-200 bg-white/95 backdrop-blur-md">
         <div className="flex h-16 items-center gap-2 px-3 sm:gap-4 sm:px-6">
           <Link
             href={`/tests/${attempt.test.id}`}
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+            className="rounded-lg p-2 text-surface-400 hover:bg-surface-100 hover:text-surface-700"
             title="Exit test (answers autosaved)"
             aria-label="Exit test"
           >
@@ -158,10 +188,10 @@ function ExamView() {
 
           <Link
             href="/"
-            className="hidden sm:flex items-center gap-1.5 pr-3 border-r border-slate-200 hover:opacity-80 transition"
+            className="hidden sm:flex items-center gap-1.5 pr-3 border-r border-surface-200 hover:opacity-80 transition"
             title="Codestria IELTS CD Simulator (Home)"
           >
-            <span className="font-black text-xs tracking-tight text-slate-900">
+            <span className="font-black text-xs tracking-tight text-surface-900">
               Codestria<span className="text-brand-600">.</span>
             </span>
             <span className="rounded bg-brand-50 px-1 py-0.5 text-[9px] font-extrabold text-brand-700 uppercase">
@@ -172,13 +202,13 @@ function ExamView() {
           <ModuleIcon module={attempt.module} size="sm" />
 
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5 text-xs text-slate-500">
+            <div className="flex items-center gap-1.5 text-xs text-surface-500">
               <span className="truncate">{attempt.test.title}</span>
               <span>·</span>
-              <span className="font-semibold text-slate-700">{info.label}</span>
+              <span className="font-semibold text-surface-700">{info.label}</span>
               <SaveIndicator state={saveState} />
             </div>
-            <div className="text-xs font-medium text-slate-500 sm:text-sm sm:font-semibold sm:text-slate-900">
+            <div className="text-xs font-medium text-surface-500 sm:text-sm sm:font-semibold sm:text-surface-900">
               {summary.short}
             </div>
           </div>
@@ -195,7 +225,7 @@ function ExamView() {
               )}
               <button
                 onClick={() => setHideTimer((h) => !h)}
-                className="ml-1 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                className="ml-1 rounded-lg p-1.5 text-surface-400 hover:bg-surface-100 hover:text-surface-700"
                 title={hideTimer ? "Show exam timer" : "Hide exam timer"}
                 aria-label={hideTimer ? "Show exam timer" : "Hide exam timer"}
               >
@@ -214,6 +244,22 @@ function ExamView() {
           </div>
         </div>
       </header>
+
+      {error && (
+        <div className="mx-auto w-full max-w-5xl px-4 pt-4">
+          <div className="relative">
+            <ErrorBox message={error} />
+            <button
+              type="button"
+              onClick={() => setError("")}
+              className="absolute right-3 top-3 rounded p-1 text-amber-700/70 hover:bg-amber-100"
+              aria-label="Dismiss error"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Main Runner Container */}
       <main className="flex min-h-0 flex-1 flex-col">
@@ -240,21 +286,31 @@ function ExamView() {
 
       {/* Confirmation Modal */}
       {confirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-950/40 p-4 backdrop-blur-xs">
           <div className="card w-full max-w-md p-6 shadow-2xl animate-fade-up">
-            <h2 className="text-xl font-bold text-slate-900">Submit your {info.label} test?</h2>
-            <p className="mt-2 text-sm text-slate-600">{summary.long}</p>
+            <h2 className="text-xl font-bold text-surface-900">Submit your {info.label} test?</h2>
+            <p className="mt-2 text-sm text-surface-600">{summary.long}</p>
             <div className="mt-6 flex justify-end gap-3">
               <button onClick={() => setConfirm(false)} className="btn-secondary">
                 Continue test
               </button>
-              <button onClick={submit} className="btn-primary">
-                Confirm & submit
+              <button onClick={() => submit()} className="btn-primary">
+                Confirm &amp; submit
               </button>
             </div>
           </div>
         </div>
       )}
+
+      <AiKeyModal
+        open={aiKeyOpen}
+        onClose={() => setAiKeyOpen(false)}
+        onSaved={() => {
+          setAiKeyOpen(false);
+          void submit({ skipKeyCheck: true });
+        }}
+        title={`Connect an AI key to score your ${info.label} test`}
+      />
     </div>
   );
 }
@@ -301,8 +357,8 @@ function progressSummary(attempt: Attempt, answers: Record<string, unknown>) {
 function SaveIndicator({ state }: { state: "saved" | "dirty" | "saving" | "error" }) {
   const map = {
     saved: { Icon: Check, text: "Autosaved", cls: "text-emerald-600" },
-    dirty: { Icon: Loader2, text: "Saving…", cls: "text-slate-400" },
-    saving: { Icon: Loader2, text: "Saving…", cls: "text-slate-400" },
+    dirty: { Icon: Loader2, text: "Saving…", cls: "text-surface-400" },
+    saving: { Icon: Loader2, text: "Saving…", cls: "text-surface-400" },
     error: { Icon: CloudOff, text: "Offline / Stored locally", cls: "text-amber-600" },
   }[state];
   return (
@@ -356,7 +412,7 @@ function Timer({
   return (
     <div
       className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 font-mono text-sm font-bold tabular-nums transition ${
-        urgent ? "animate-pulse bg-red-100 text-red-700 ring-2 ring-red-300" : "bg-slate-100 text-slate-800"
+        urgent ? "animate-pulse bg-rose-100 text-rose-700 ring-2 ring-rose-300" : "bg-surface-100 text-surface-800"
       }`}
       title="Official Exam Clock"
     >

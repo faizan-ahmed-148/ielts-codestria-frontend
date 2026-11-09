@@ -8,8 +8,8 @@ export default function manifest(): MetadataRoute.Manifest {
       "Official Computer-Delivered CD-IELTS Simulator with authentic Cambridge Books 19 down to 12. Engineered by Codestria.",
     start_url: "/",
     display: "standalone",
-    background_color: "#f8f9fb",
-    theme_color: "#0b132b",
+    background_color: "#f7f9fc",
+    theme_color: "#4356e8",
     icons: [
       {
         src: "/codestria-app-icon.svg",

@@ -1,9 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Award, Calculator, CheckCircle2, ChevronRight, HelpCircle, Info, Sparkles, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import { BandRing } from "@/components/ui";
+import {
+  ArrowLeft,
+  Award,
+  Calculator,
+  CheckCircle2,
+  ChevronRight,
+  Info,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react";
+import { BandRing, MODULE_INFO, PageHeader } from "@/components/ui";
+import type { ModuleKind } from "@/lib/content.types";
 
 // Official IELTS raw to band conversions matching backend/src/scoring/bands.ts
 const LISTENING_TABLE = [
@@ -89,8 +99,51 @@ function calculateOverall(l: number, r: number, w: number, s: number): { average
   return { average: Math.round(avg * 100) / 100, overall };
 }
 
+type TabId = "overall" | "raw" | "writing";
+
+const TABS: { id: TabId; label: string; Icon: typeof Award }[] = [
+  { id: "overall", label: "Overall band", Icon: Award },
+  { id: "raw", label: "Raw to band", Icon: Calculator },
+  { id: "writing", label: "Writing tasks", Icon: TrendingUp },
+];
+
+const LISTENING_ROWS = [
+  { range: "39–40", b: 9.0 },
+  { range: "37–38", b: 8.5 },
+  { range: "35–36", b: 8.0 },
+  { range: "32–34", b: 7.5 },
+  { range: "30–31", b: 7.0 },
+  { range: "26–29", b: 6.5 },
+  { range: "23–25", b: 6.0 },
+  { range: "18–22", b: 5.5 },
+];
+
+const READING_ACADEMIC_ROWS = [
+  { range: "39–40", b: 9.0 },
+  { range: "37–38", b: 8.5 },
+  { range: "35–36", b: 8.0 },
+  { range: "33–34", b: 7.5 },
+  { range: "30–32", b: 7.0 },
+  { range: "27–29", b: 6.5 },
+  { range: "23–26", b: 6.0 },
+  { range: "19–22", b: 5.5 },
+];
+
+const READING_GENERAL_ROWS = [
+  { range: "40", b: 9.0 },
+  { range: "39", b: 8.5 },
+  { range: "37–38", b: 8.0 },
+  { range: "36", b: 7.5 },
+  { range: "34–35", b: 7.0 },
+  { range: "32–33", b: 6.5 },
+  { range: "30–31", b: 6.0 },
+  { range: "27–29", b: 5.5 },
+];
+
+const BAND_SCALE = [3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
+
 export default function BandCalculatorPage() {
-  const [activeTab, setActiveTab] = useState<"overall" | "raw" | "writing">("overall");
+  const [activeTab, setActiveTab] = useState<TabId>("overall");
 
   // Overall calculator state
   const [listening, setListening] = useState(7.5);
@@ -129,398 +182,424 @@ export default function BandCalculatorPage() {
     5.0: "Modest User: Has partial command of language, coping with overall meaning in most situations.",
   };
 
+  const moduleSliders: {
+    module: ModuleKind;
+    value: number;
+    setValue: (value: number) => void;
+    accent: string;
+  }[] = [
+    { module: "LISTENING", value: listening, setValue: setListening, accent: "accent-sky-600" },
+    { module: "READING", value: reading, setValue: setReading, accent: "accent-emerald-600" },
+    { module: "WRITING", value: writing, setValue: setWriting, accent: "accent-amber-600" },
+    { module: "SPEAKING", value: speaking, setValue: setSpeaking, accent: "accent-brand-600" },
+  ];
+
+  const presets = [
+    { label: "Band 6.5 · Standard uni entry", l: 6.5, r: 6.5, w: 6.0, s: 6.5 },
+    { label: "Band 7.0 · Top uni / CLB 9", l: 7.5, r: 7.0, w: 6.5, s: 7.0 },
+    { label: "Band 7.5 · Medicine & law", l: 8.0, r: 7.5, w: 7.0, s: 7.5 },
+    { label: "Band 8.0 · Elite master's", l: 8.5, r: 8.5, w: 7.5, s: 8.0 },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#f7f8fb] py-10 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl">
-        {/* Navigation Breadcrumb */}
-        <div className="mb-6 flex items-center justify-between">
-          <Link
-            href="/tests?type=ACADEMIC"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-800 transition"
+    <div className="page-container space-y-8 py-8 sm:py-10">
+      <PageHeader
+        eyebrow="Interactive diagnostics"
+        title="IELTS band score calculator"
+        description="Work out your overall band, convert Listening and Reading raw scores (0–40), and see how each module shapes your target university or immigration requirement."
+        actions={
+          <>
+            <span className="badge-brand">
+              <Sparkles className="h-3.5 w-3.5" />
+              Official rounding standard
+            </span>
+            <Link href="/tests?type=ACADEMIC" className="btn-secondary">
+              <ArrowLeft className="h-4 w-4" />
+              Cambridge books
+            </Link>
+          </>
+        }
+      />
+
+      {/* Mode switcher */}
+      <div className="flex flex-wrap gap-1.5 rounded-2xl border border-surface-200 bg-surface-100/80 p-1.5 sm:inline-flex">
+        {TABS.map(({ id, label, Icon }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setActiveTab(id)}
+            aria-pressed={activeTab === id}
+            className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold transition sm:flex-none ${
+              activeTab === id
+                ? "bg-white text-surface-900 shadow-xs ring-1 ring-surface-200"
+                : "text-surface-500 hover:bg-white/60 hover:text-surface-900"
+            }`}
           >
-            <ArrowLeft className="h-4 w-4" /> Explore Cambridge Books
-          </Link>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700 border border-brand-200">
-              <Sparkles className="h-3.5 w-3.5" /> Official IELTS Rounding Standard
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] font-medium text-slate-500">
-              by Codestria
-            </span>
+            <Icon className={`h-4 w-4 ${activeTab === id ? "text-brand-600" : "text-surface-400"}`} />
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab 1: Overall Band Calculator */}
+      {activeTab === "overall" && (
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="card space-y-6 p-5 sm:p-7 lg:col-span-2">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="font-display text-lg font-bold tracking-tight text-surface-900">Module bands</h2>
+              <span className="text-[13px] text-surface-500">Adjust the sliders or pick a preset</span>
+            </div>
+
+            {/* Module sliders */}
+            <div className="space-y-3">
+              {moduleSliders.map(({ module, value, setValue, accent }) => {
+                const { Icon, label, tile } = MODULE_INFO[module];
+                return (
+                  <div key={module} className="rounded-2xl border border-surface-200/80 bg-surface-50/60 p-4">
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${tile}`}>
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <span className="text-[15px] font-semibold text-surface-800">{label}</span>
+                      </div>
+                      <span
+                        className={`inline-flex min-w-14 items-center justify-center rounded-lg border px-2.5 py-1 font-display text-base font-bold tabular-nums ${tile}`}
+                      >
+                        {value.toFixed(1)}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="3.0"
+                      max="9.0"
+                      step="0.5"
+                      value={value}
+                      onChange={(e) => setValue(parseFloat(e.target.value))}
+                      aria-label={`${label} band`}
+                      className={`h-2 w-full cursor-pointer ${accent}`}
+                    />
+                    <div className="mt-1.5 flex justify-between font-mono text-[11px] tabular-nums text-surface-400">
+                      {BAND_SCALE.map((n) => (
+                        <span key={n}>{n.toFixed(1)}</span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Quick target presets */}
+            <div className="space-y-3 border-t border-surface-100 pt-5">
+              <span className="eyebrow">Quick target profiles</span>
+              <div className="flex flex-wrap gap-2">
+                {presets.map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => {
+                      setListening(preset.l);
+                      setReading(preset.r);
+                      setWriting(preset.w);
+                      setSpeaking(preset.s);
+                    }}
+                    className="cursor-pointer rounded-xl border border-surface-200 bg-white px-3.5 py-2 text-[13px] font-medium text-surface-700 shadow-xs transition hover:border-brand-300 hover:bg-brand-50/60 hover:text-brand-800"
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Results sidebar */}
+          <div className="space-y-6">
+            <div className="card border-brand-200/70 bg-gradient-to-b from-brand-50/80 via-white to-white p-6 text-center sm:p-7">
+              <div className="eyebrow text-brand-600">Overall IELTS band</div>
+              <div className="mt-5 flex justify-center">
+                <BandRing band={overall} size={132} label="Overall" />
+              </div>
+              <div className="mt-4 font-display text-4xl font-extrabold leading-none tabular-nums tracking-tight text-surface-900">
+                {overall.toFixed(1)}
+              </div>
+              <div className="mt-1.5 text-[13px] text-surface-500">Exact average: {average.toFixed(2)}</div>
+
+              <div className="mt-5 rounded-xl border border-surface-200/80 bg-white/80 p-4 text-left text-[13px] leading-relaxed text-surface-600">
+                <strong className="font-semibold text-surface-800">Rounding rule applied</strong>
+                <p className="mt-1">
+                  An average of {average.toFixed(2)}{" "}
+                  {average === overall ? "is exact" : `rounds to ${overall.toFixed(1)}`} under the official British
+                  Council / IDP specifications (.25 &amp; .75 rule).
+                </p>
+              </div>
+            </div>
+
+            <div className="card space-y-4 p-5 sm:p-6">
+              <div className="flex items-center gap-2.5">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-brand-200 bg-brand-50 text-brand-600">
+                  <Info className="h-4 w-4" />
+                </span>
+                <span className="font-display text-[15px] font-bold text-surface-900">CEFR level &amp; skill profile</span>
+              </div>
+              <p className="text-[14px] leading-relaxed text-surface-600">
+                {bandDescriptions[overall] ||
+                  "Demonstrates strong communicative competence across academic and professional contexts."}
+              </p>
+              <div className="flex items-center justify-between gap-3 border-t border-surface-100 pt-3 text-[13px]">
+                <span className="font-medium text-surface-500">CEFR equivalent</span>
+                <span className="font-bold text-brand-700">
+                  {overall >= 8.5
+                    ? "C2 (Mastery)"
+                    : overall >= 7.0
+                      ? "C1 (Effective Operational)"
+                      : overall >= 5.5
+                        ? "B2 (Vantage)"
+                        : "B1 (Threshold)"}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
+      )}
 
-        {/* Page Title */}
-        <div className="text-center sm:text-left mb-8">
-          <div className="eyebrow text-brand-600 mb-1">Interactive Diagnostic Tool</div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-            IELTS Band Score Calculator
-          </h1>
-          <p className="mt-2 text-base text-slate-600 max-w-2xl">
-            Calculate your overall IELTS band, convert Listening and Reading raw scores (0–40), and see how each module affects your target university or immigration requirement.
-          </p>
-        </div>
-
-        {/* Mode Switcher Tabs */}
-        <div className="flex rounded-2xl bg-slate-200/70 p-1.5 shadow-inner mb-8 max-w-xl">
-          <button
-            onClick={() => setActiveTab("overall")}
-            className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition ${
-              activeTab === "overall" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            <Award className="h-4 w-4" /> Overall Band
-          </button>
-          <button
-            onClick={() => setActiveTab("raw")}
-            className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition ${
-              activeTab === "raw" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            <Calculator className="h-4 w-4" /> Raw to Band (0–40)
-          </button>
-          <button
-            onClick={() => setActiveTab("writing")}
-            className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition ${
-              activeTab === "writing" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            <TrendingUp className="h-4 w-4" /> Writing (Task 1 & 2)
-          </button>
-        </div>
-
-        {/* Tab 1: Overall Band Calculator */}
-        {activeTab === "overall" && (
-          <div className="grid gap-8 lg:grid-cols-3">
-            <div className="card p-6 lg:col-span-2 space-y-6">
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <span>Module Bands</span>
-                <span className="text-xs font-normal text-slate-500">(Adjust sliders or click presets)</span>
-              </h2>
-
-              {/* Module Sliders */}
-              {[
-                { label: "Listening", val: listening, set: setListening, color: "text-sky-600", bg: "bg-sky-50" },
-                { label: "Reading", val: reading, set: setReading, color: "text-emerald-600", bg: "bg-emerald-50" },
-                { label: "Writing", val: writing, set: setWriting, color: "text-amber-600", bg: "bg-amber-50" },
-                { label: "Speaking", val: speaking, set: setSpeaking, color: "text-violet-600", bg: "bg-violet-50" },
-              ].map(({ label, val, set, color, bg }) => (
-                <div key={label} className="rounded-xl border border-slate-100 p-4 bg-slate-50/50">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold text-slate-800">{label}</span>
-                    <span className={`inline-flex items-center justify-center px-3 py-1 rounded-lg font-bold text-base ${bg} ${color}`}>
-                      {val.toFixed(1)}
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min="3.0"
-                    max="9.0"
-                    step="0.5"
-                    value={val}
-                    onChange={(e) => set(parseFloat(e.target.value))}
-                    className="w-full accent-brand-600 cursor-pointer"
-                  />
-                  <div className="flex justify-between text-[11px] text-slate-400 mt-1 font-mono">
-                    <span>3.0</span>
-                    <span>4.0</span>
-                    <span>5.0</span>
-                    <span>6.0</span>
-                    <span>7.0</span>
-                    <span>8.0</span>
-                    <span>9.0</span>
-                  </div>
+      {/* Tab 2: Raw Score to Band (0-40) */}
+      {activeTab === "raw" && (
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Listening section */}
+          <div className="card space-y-5 p-5 sm:p-7">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="min-w-0">
+                <h3 className="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight text-surface-900">
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-sky-200 bg-sky-50 text-sky-700">
+                    <MODULE_INFO.LISTENING.Icon className="h-4 w-4" />
+                  </span>
+                  Listening score
+                </h3>
+                <p className="mt-2 text-[13px] text-surface-500">40 questions across 4 recorded sections</p>
+              </div>
+              <div className="text-right">
+                <div className="font-display text-2xl font-extrabold leading-none tabular-nums text-sky-700">
+                  {calculatedListeningBand.toFixed(1)}
                 </div>
-              ))}
+                <div className="mt-1 text-[12px] text-surface-500">{rawListening} of 40 correct</div>
+              </div>
+            </div>
 
-              {/* Quick Target Presets */}
-              <div className="pt-2">
-                <span className="text-xs font-semibold uppercase text-slate-400 tracking-wider">Quick Target Profiles:</span>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {[
-                    { label: "Band 6.5 (Standard Uni Entry)", l: 6.5, r: 6.5, w: 6.0, s: 6.5 },
-                    { label: "Band 7.0 (Top Uni / Canada CLB 9)", l: 7.5, r: 7.0, w: 6.5, s: 7.0 },
-                    { label: "Band 7.5 (Medicine & Law)", l: 8.0, r: 7.5, w: 7.0, s: 7.5 },
-                    { label: "Band 8.0 (Elite Master's)", l: 8.5, r: 8.5, w: 7.5, s: 8.0 },
-                  ].map((preset) => (
+            <input
+              type="range"
+              min="0"
+              max="40"
+              value={rawListening}
+              onChange={(e) => setRawListening(parseInt(e.target.value, 10))}
+              aria-label="Raw Listening score"
+              className="h-2 w-full cursor-pointer accent-sky-600"
+            />
+
+            <BandTable rows={LISTENING_ROWS} activeBand={calculatedListeningBand} tone="sky" firstColumn="Correct answers" />
+          </div>
+
+          {/* Reading section */}
+          <div className="card space-y-5 p-5 sm:p-7">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="min-w-0">
+                <h3 className="flex items-center gap-2.5 font-display text-lg font-bold tracking-tight text-surface-900">
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700">
+                    <MODULE_INFO.READING.Icon className="h-4 w-4" />
+                  </span>
+                  Reading score
+                </h3>
+                <div className="mt-2 inline-flex rounded-lg border border-surface-200 bg-surface-100/80 p-0.5">
+                  {(
+                    [
+                      ["academic", "Academic"],
+                      ["general", "General Training"],
+                    ] as const
+                  ).map(([key, label]) => (
                     <button
-                      key={preset.label}
+                      key={key}
                       type="button"
-                      onClick={() => {
-                        setListening(preset.l);
-                        setReading(preset.r);
-                        setWriting(preset.w);
-                        setSpeaking(preset.s);
-                      }}
-                      className="text-xs font-medium bg-white border border-slate-200 hover:border-brand-400 px-3 py-1.5 rounded-lg text-slate-700 transition"
+                      onClick={() => setReadingTrack(key)}
+                      aria-pressed={readingTrack === key}
+                      className={`cursor-pointer rounded-md px-2.5 py-1 text-[12px] font-semibold transition ${
+                        readingTrack === key
+                          ? "bg-white text-emerald-700 shadow-xs ring-1 ring-emerald-200"
+                          : "text-surface-500 hover:text-surface-900"
+                      }`}
                     >
-                      {preset.label}
+                      {label}
                     </button>
                   ))}
                 </div>
               </div>
-            </div>
-
-            {/* Results Sidebar */}
-            <div className="space-y-6">
-              <div className="card p-6 text-center border-brand-200 bg-gradient-to-b from-brand-50/50 to-white shadow-xl shadow-brand-500/5">
-                <div className="eyebrow text-brand-600 mb-3">Overall IELTS Band Score</div>
-                <div className="flex justify-center mb-4">
-                  <BandRing band={overall} size={120} label="Overall" />
+              <div className="text-right">
+                <div className="font-display text-2xl font-extrabold leading-none tabular-nums text-emerald-700">
+                  {calculatedReadingBand.toFixed(1)}
                 </div>
-                <div className="text-3xl font-black text-slate-900">{overall.toFixed(1)}</div>
-                <div className="text-xs text-slate-500 mt-1">Exact Average: {average.toFixed(2)}</div>
-
-                <div className="mt-4 pt-4 border-t border-slate-100 text-left text-xs text-slate-600 leading-relaxed bg-white/70 p-3 rounded-xl border">
-                  <strong>IELTS Rounding rule applied:</strong>
-                  <p className="mt-1">
-                    An average of {average.toFixed(2)} {average === overall ? "is exact" : `rounds to ${overall.toFixed(1)}`} according to official British Council / IDP test specifications (.25 &amp; .75 rule).
-                  </p>
-                </div>
-              </div>
-
-              <div className="card p-5 text-sm space-y-3">
-                <div className="font-semibold text-slate-900 flex items-center gap-1.5">
-                  <Info className="h-4 w-4 text-brand-600" /> CEFR Level &amp; Skill Level
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  {bandDescriptions[overall] || "Demonstrates strong communicative competence across academic and professional contexts."}
-                </p>
-                <div className="pt-2 flex items-center justify-between text-xs border-t border-slate-100 font-medium">
-                  <span className="text-slate-500">CEFR Equivalent:</span>
-                  <span className="font-bold text-brand-700">
-                    {overall >= 8.5 ? "C2 (Mastery)" : overall >= 7.0 ? "C1 (Effective Operational)" : overall >= 5.5 ? "B2 (Vantage)" : "B1 (Threshold)"}
-                  </span>
-                </div>
+                <div className="mt-1 text-[12px] text-surface-500">{rawReading} of 40 correct</div>
               </div>
             </div>
+
+            <input
+              type="range"
+              min="0"
+              max="40"
+              value={rawReading}
+              onChange={(e) => setRawReading(parseInt(e.target.value, 10))}
+              aria-label="Raw Reading score"
+              className="h-2 w-full cursor-pointer accent-emerald-600"
+            />
+
+            <BandTable
+              rows={readingTrack === "academic" ? READING_ACADEMIC_ROWS : READING_GENERAL_ROWS}
+              activeBand={calculatedReadingBand}
+              tone="emerald"
+              firstColumn={`Correct (${readingTrack === "academic" ? "Academic" : "General"})`}
+            />
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Tab 2: Raw Score to Band (0-40) */}
-        {activeTab === "raw" && (
-          <div className="grid gap-8 lg:grid-cols-2">
-            {/* Listening Section */}
-            <div className="card p-6 space-y-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900">Listening Score (0–40)</h3>
-                  <p className="text-xs text-slate-500">40 questions across 4 recorded sections</p>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-black text-sky-600">Band {calculatedListeningBand.toFixed(1)}</div>
-                  <div className="text-xs text-slate-400">{rawListening} of 40 correct</div>
-                </div>
-              </div>
-
-              <input
-                type="range"
-                min="0"
-                max="40"
-                value={rawListening}
-                onChange={(e) => setRawListening(parseInt(e.target.value, 10))}
-                className="w-full accent-sky-600"
-              />
-
-              <div className="overflow-hidden rounded-xl border border-slate-200">
-                <table className="w-full text-xs text-left">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
-                    <tr>
-                      <th className="py-2 px-3">Correct Answers</th>
-                      <th className="py-2 px-3">Band Score</th>
-                      <th className="py-2 px-3">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 font-mono">
-                    {[
-                      { range: "39–40", b: 9.0 },
-                      { range: "37–38", b: 8.5 },
-                      { range: "35–36", b: 8.0 },
-                      { range: "32–34", b: 7.5 },
-                      { range: "30–31", b: 7.0 },
-                      { range: "26–29", b: 6.5 },
-                      { range: "23–25", b: 6.0 },
-                      { range: "18–22", b: 5.5 },
-                    ].map((row) => (
-                      <tr
-                        key={row.range}
-                        className={calculatedListeningBand === row.b ? "bg-sky-50 font-bold text-sky-900" : ""}
-                      >
-                        <td className="py-1.5 px-3">{row.range}</td>
-                        <td className="py-1.5 px-3">Band {row.b.toFixed(1)}</td>
-                        <td className="py-1.5 px-3 font-sans text-[11px]">
-                          {calculatedListeningBand === row.b ? "★ Your Score" : ""}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Reading Section */}
-            <div className="card p-6 space-y-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900">Reading Score (0–40)</h3>
-                  <div className="flex gap-2 mt-1">
-                    <button
-                      type="button"
-                      onClick={() => setReadingTrack("academic")}
-                      className={`text-xs px-2.5 py-1 rounded-md font-semibold transition ${
-                        readingTrack === "academic"
-                          ? "bg-emerald-600 text-white"
-                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                      }`}
-                    >
-                      Academic
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setReadingTrack("general")}
-                      className={`text-xs px-2.5 py-1 rounded-md font-semibold transition ${
-                        readingTrack === "general"
-                          ? "bg-emerald-600 text-white"
-                          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                      }`}
-                    >
-                      General Training
-                    </button>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-black text-emerald-600">Band {calculatedReadingBand.toFixed(1)}</div>
-                  <div className="text-xs text-slate-400">{rawReading} of 40 correct</div>
-                </div>
-              </div>
-
-              <input
-                type="range"
-                min="0"
-                max="40"
-                value={rawReading}
-                onChange={(e) => setRawReading(parseInt(e.target.value, 10))}
-                className="w-full accent-emerald-600"
-              />
-
-              <div className="overflow-hidden rounded-xl border border-slate-200">
-                <table className="w-full text-xs text-left">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
-                    <tr>
-                      <th className="py-2 px-3">Correct ({readingTrack === "academic" ? "Academic" : "General"})</th>
-                      <th className="py-2 px-3">Band Score</th>
-                      <th className="py-2 px-3">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 font-mono">
-                    {(readingTrack === "academic"
-                      ? [
-                          { range: "39–40", b: 9.0 },
-                          { range: "37–38", b: 8.5 },
-                          { range: "35–36", b: 8.0 },
-                          { range: "33–34", b: 7.5 },
-                          { range: "30–32", b: 7.0 },
-                          { range: "27–29", b: 6.5 },
-                          { range: "23–26", b: 6.0 },
-                          { range: "19–22", b: 5.5 },
-                        ]
-                      : [
-                          { range: "40", b: 9.0 },
-                          { range: "39", b: 8.5 },
-                          { range: "37–38", b: 8.0 },
-                          { range: "36", b: 7.5 },
-                          { range: "34–35", b: 7.0 },
-                          { range: "32–33", b: 6.5 },
-                          { range: "30–31", b: 6.0 },
-                          { range: "27–29", b: 5.5 },
-                        ]
-                    ).map((row) => (
-                      <tr
-                        key={row.range}
-                        className={calculatedReadingBand === row.b ? "bg-emerald-50 font-bold text-emerald-900" : ""}
-                      >
-                        <td className="py-1.5 px-3">{row.range}</td>
-                        <td className="py-1.5 px-3">Band {row.b.toFixed(1)}</td>
-                        <td className="py-1.5 px-3 font-sans text-[11px]">
-                          {calculatedReadingBand === row.b ? "★ Your Score" : ""}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Tab 3: Writing (Task 1 & Task 2 Weighting) */}
-        {activeTab === "writing" && (
-          <div className="grid gap-8 lg:grid-cols-3">
-            <div className="card p-6 lg:col-span-2 space-y-6">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900">Official Writing Weighting Breakdown</h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  Task 2 carries <strong>twice the weight</strong> (66.7%) of Task 1 (33.3%). Both tasks are scored on 4 equal criteria (Task Response, Coherence &amp; Cohesion, Lexical Resource, Grammar).
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-slate-100 p-5 bg-slate-50 space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold text-slate-800">Task 1 Band (150 words - 33% weight)</span>
-                  <span className="font-bold text-amber-700 bg-amber-50 px-3 py-1 rounded-lg">
-                    Band {task1.toFixed(1)}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="4.0"
-                  max="9.0"
-                  step="0.5"
-                  value={task1}
-                  onChange={(e) => setTask1(parseFloat(e.target.value))}
-                  className="w-full accent-amber-600"
-                />
-              </div>
-
-              <div className="rounded-xl border border-slate-100 p-5 bg-slate-50 space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold text-slate-800">Task 2 Band (250 words - 67% weight)</span>
-                  <span className="font-bold text-amber-700 bg-amber-50 px-3 py-1 rounded-lg">
-                    Band {task2.toFixed(1)}
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="4.0"
-                  max="9.0"
-                  step="0.5"
-                  value={task2}
-                  onChange={(e) => setTask2(parseFloat(e.target.value))}
-                  className="w-full accent-amber-600"
-                />
-              </div>
-
-              <div className="rounded-xl bg-amber-50/70 border border-amber-200 p-4 text-xs text-amber-900 leading-relaxed">
-                <strong>Examiner Insight:</strong> If your Task 1 is Band 6.0 and your Task 2 is Band 7.0:
-                <br />
-                Calculation: (6.0 + 7.0 × 2) / 3 = 20 / 3 = 6.66 → <strong>Rounds to Band 6.5</strong>.
-              </div>
-            </div>
-
-            <div className="card p-6 text-center border-amber-200 bg-gradient-to-b from-amber-50/40 to-white shadow-xl shadow-amber-500/5">
-              <div className="eyebrow text-amber-700 mb-2">Overall Writing Module Band</div>
-              <div className="text-4xl font-black text-slate-900 my-4">Band {writingWeighted.toFixed(1)}</div>
-              <p className="text-xs text-slate-500 mb-6">
-                Formula: (Task 1 + Task 2 × 2) ÷ 3
+      {/* Tab 3: Writing (Task 1 & Task 2 Weighting) */}
+      {activeTab === "writing" && (
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="card space-y-6 p-5 sm:p-7 lg:col-span-2">
+            <div>
+              <h3 className="font-display text-lg font-bold tracking-tight text-surface-900">
+                Official writing weighting breakdown
+              </h3>
+              <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-surface-600">
+                Task 2 carries <strong className="font-semibold text-surface-800">twice the weight</strong> (66.7%) of
+                Task 1 (33.3%). Both tasks are scored on four equal criteria: Task Response, Coherence &amp; Cohesion,
+                Lexical Resource and Grammatical Range.
               </p>
+            </div>
 
-              <Link href="/band-descriptors" className="btn-secondary w-full py-2.5 text-xs flex items-center justify-center gap-1.5">
-                View Official Writing Rubrics <ChevronRight className="h-3.5 w-3.5" />
-              </Link>
+            <div className="rounded-2xl border border-surface-200/80 bg-surface-50/60 p-5">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <span className="text-[15px] font-semibold text-surface-800">
+                  Task 1 band <span className="font-normal text-surface-500">· 150 words · 33% weight</span>
+                </span>
+                <span className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1 font-display text-sm font-bold tabular-nums text-amber-700">
+                  Band {task1.toFixed(1)}
+                </span>
+              </div>
+              <input
+                type="range"
+                min="4.0"
+                max="9.0"
+                step="0.5"
+                value={task1}
+                onChange={(e) => setTask1(parseFloat(e.target.value))}
+                aria-label="Task 1 band"
+                className="h-2 w-full cursor-pointer accent-amber-600"
+              />
+            </div>
+
+            <div className="rounded-2xl border border-surface-200/80 bg-surface-50/60 p-5">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <span className="text-[15px] font-semibold text-surface-800">
+                  Task 2 band <span className="font-normal text-surface-500">· 250 words · 67% weight</span>
+                </span>
+                <span className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-1 font-display text-sm font-bold tabular-nums text-amber-700">
+                  Band {task2.toFixed(1)}
+                </span>
+              </div>
+              <input
+                type="range"
+                min="4.0"
+                max="9.0"
+                step="0.5"
+                value={task2}
+                onChange={(e) => setTask2(parseFloat(e.target.value))}
+                aria-label="Task 2 band"
+                className="h-2 w-full cursor-pointer accent-amber-600"
+              />
+            </div>
+
+            <div className="rounded-2xl border border-amber-200/80 bg-amber-50/70 p-4 text-[13px] leading-relaxed text-amber-900">
+              <strong className="font-semibold">Examiner insight:</strong> if your Task 1 is Band 6.0 and your Task 2 is
+              Band 7.0, the calculation is (6.0 + 7.0 × 2) / 3 = 20 / 3 = 6.66 →{" "}
+              <strong className="font-semibold">rounds to Band 6.5</strong>.
             </div>
           </div>
-        )}
-      </div>
+
+          <div className="card border-amber-200/70 bg-gradient-to-b from-amber-50/70 via-white to-white p-6 text-center">
+            <div className="eyebrow text-amber-700">Overall writing module</div>
+            <div className="my-5 font-display text-5xl font-extrabold leading-none tabular-nums tracking-tight text-surface-900">
+              {writingWeighted.toFixed(1)}
+            </div>
+            <p className="text-[13px] text-surface-500">Formula: (Task 1 + Task 2 × 2) ÷ 3</p>
+
+            <Link
+              href="/band-descriptors"
+              className="btn-secondary mt-6 w-full justify-center text-[13px]"
+            >
+              View official writing rubrics
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BandTable({
+  rows,
+  activeBand,
+  tone,
+  firstColumn,
+}: {
+  rows: { range: string; b: number }[];
+  activeBand: number;
+  tone: "sky" | "emerald";
+  firstColumn: string;
+}) {
+  const activeRow = {
+    sky: "bg-sky-50/80",
+    emerald: "bg-emerald-50/80",
+  }[tone];
+  const pill = {
+    sky: "bg-sky-100 text-sky-800",
+    emerald: "bg-emerald-100 text-emerald-800",
+  }[tone];
+
+  return (
+    <div className="overflow-x-auto rounded-xl border border-surface-200/80">
+      <table className="w-full min-w-[320px] text-left">
+        <thead className="border-b border-surface-200 bg-surface-50 text-[12px] font-semibold uppercase tracking-wide text-surface-500">
+          <tr>
+            <th className="px-3.5 py-2.5 font-semibold">{firstColumn}</th>
+            <th className="px-3.5 py-2.5 font-semibold">Band score</th>
+            <th className="px-3.5 py-2.5 font-semibold">Status</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-surface-100">
+          {rows.map((row) => {
+            const isActive = activeBand === row.b;
+            return (
+              <tr key={row.range} className={`text-[13px] ${isActive ? activeRow : ""}`}>
+                <td className={`px-3.5 py-2.5 tabular-nums ${isActive ? "font-semibold text-surface-900" : "text-surface-600"}`}>
+                  {row.range}
+                </td>
+                <td className={`px-3.5 py-2.5 tabular-nums ${isActive ? "font-bold text-surface-900" : "font-medium text-surface-700"}`}>
+                  Band {row.b.toFixed(1)}
+                </td>
+                <td className="px-3.5 py-2.5">
+                  {isActive ? (
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${pill}`}>
+                      <CheckCircle2 className="h-3 w-3" />
+                      Your score
+                    </span>
+                  ) : (
+                    <span className="text-surface-300">—</span>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }

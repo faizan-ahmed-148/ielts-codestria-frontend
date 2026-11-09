@@ -5,7 +5,7 @@ const COLORS = ["#2754e0", "#f59e0b", "#10b981", "#e11d48", "#8b5cf6", "#0ea5e9"
 /** Renders the Writing Task 1 chart from its data. */
 export function ChartView({ chart }: { chart: ChartSpec }) {
   return (
-    <figure className="rounded-xl border border-slate-200 bg-white p-4">
+    <figure className="rounded-xl border border-surface-200 bg-white p-4">
       <figcaption className="mb-3 text-center text-sm font-semibold">
         {chart.title}{chart.unit ? ` (${chart.unit})` : ""}
       </figcaption>
@@ -28,14 +28,14 @@ function Table({ chart }: { chart: ChartSpec }) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-slate-300">
+          <tr className="border-b border-surface-300">
             <th className="p-2 text-left" />
             {chart.labels.map((l) => <th key={l} className="p-2 text-right font-semibold">{l}</th>)}
           </tr>
         </thead>
         <tbody>
           {chart.series.map((s) => (
-            <tr key={s.name} className="border-b border-slate-100">
+            <tr key={s.name} className="border-b border-surface-100">
               <td className="p-2 font-medium">{s.name}</td>
               {s.values.map((v, i) => <td key={i} className="p-2 text-right tabular-nums">{v.toLocaleString()}</td>)}
             </tr>

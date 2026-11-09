@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Award, BookOpen, CheckCircle2, ChevronRight, FileText, Mic, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { ArrowLeft, BookOpen, ChevronRight, FileText, Mic, Sparkles } from "lucide-react";
+import { PageHeader } from "@/components/ui";
 
 type RubricTab = "task2" | "task1" | "speaking";
 
@@ -113,135 +114,153 @@ const SPEAKING_CRITERIA: Criterion[] = [
   },
 ];
 
+const TABS: { id: RubricTab; label: string; short: string; Icon: typeof FileText }[] = [
+  { id: "task2", label: "Writing Task 2 (Essay)", short: "Task 2", Icon: FileText },
+  { id: "task1", label: "Writing Task 1 (Report/Letter)", short: "Task 1", Icon: BookOpen },
+  { id: "speaking", label: "Speaking Interview", short: "Speaking", Icon: Mic },
+];
+
+const BANDS = [5, 6, 7, 8, 9];
+
+const TAB_COPY: Record<RubricTab, string> = {
+  task2: "Four equally weighted criteria for the discursive essay, marked from 0 to 9.",
+  task1: "Task Achievement plus the three shared writing criteria, each worth 25%.",
+  speaking: "Four equally weighted criteria used across all three speaking parts.",
+};
+
 export default function BandDescriptorsPage() {
   const [activeTab, setActiveTab] = useState<RubricTab>("task2");
   const [selectedBand, setSelectedBand] = useState<number>(7);
 
   const criteria =
     activeTab === "speaking" ? SPEAKING_CRITERIA : activeTab === "task1" ? TASK1_CRITERIA : TASK2_CRITERIA;
+  const activeTabMeta = TABS.find((t) => t.id === activeTab) ?? TABS[0];
 
   return (
-    <div className="min-h-screen bg-[#f7f8fb] py-10 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl">
-        {/* Breadcrumb */}
-        <div className="mb-6 flex items-center justify-between">
-          <Link
-            href="/tests?type=ACADEMIC"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-800 transition"
-          >
-            <ArrowLeft className="h-4 w-4" /> Explore Cambridge Books
-          </Link>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700 border border-violet-200">
-              <Sparkles className="h-3.5 w-3.5" /> Official IELTS Public Rubrics
+    <div className="page-container space-y-8 py-8 sm:py-10">
+      <PageHeader
+        eyebrow="Examiner assessment criteria"
+        title="IELTS band descriptors"
+        description="See exactly how certified IELTS examiners and our AI scoring engine evaluate essays and spoken responses across the four official criteria."
+        actions={
+          <>
+            <span className="badge bg-violet-50 text-violet-700 border border-violet-200/70">
+              <Sparkles className="h-3.5 w-3.5" />
+              Public rubrics
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] font-medium text-slate-500">
-              by Codestria
-            </span>
-          </div>
-        </div>
+            <Link href="/tests?type=ACADEMIC" className="btn-secondary">
+              <ArrowLeft className="h-4 w-4" />
+              Cambridge books
+            </Link>
+          </>
+        }
+      />
 
-        {/* Header */}
-        <div className="text-center sm:text-left mb-8">
-          <div className="eyebrow text-brand-600 mb-1">Examiner Assessment Criteria</div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-            IELTS Band Descriptors Reference
-          </h1>
-          <p className="mt-2 text-base text-slate-600 max-w-2xl">
-            Understand exactly how certified IELTS examiners and our AI scoring engine evaluate your essays and spoken responses across the 4 official criteria.
-          </p>
-        </div>
-
-        {/* Tab Selection */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div className="flex rounded-2xl bg-slate-200/70 p-1.5 shadow-inner">
+      {/* Sticky controls */}
+      <div className="card sticky top-[4.5rem] z-20 flex flex-col gap-4 p-3 lg:top-4 lg:flex-row lg:items-center lg:justify-between lg:p-4">
+        <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 scroll-thin lg:pb-0">
+          {TABS.map(({ id, label, short, Icon }) => (
             <button
-              onClick={() => setActiveTab("task2")}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                activeTab === "task2" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
+              key={id}
+              type="button"
+              onClick={() => setActiveTab(id)}
+              aria-pressed={activeTab === id}
+              className={`flex shrink-0 cursor-pointer items-center gap-2 rounded-xl px-3.5 py-2.5 text-[13px] font-semibold transition ${
+                activeTab === id
+                  ? "bg-brand-600 text-white shadow-sm"
+                  : "bg-surface-100 text-surface-600 hover:bg-surface-200/80 hover:text-surface-900"
               }`}
             >
-              <FileText className="h-4 w-4" /> Writing Task 2 (Essay)
+              <Icon className={`h-4 w-4 ${activeTab === id ? "text-white/80" : "text-surface-400"}`} />
+              <span className="hidden sm:inline">{label}</span>
+              <span className="sm:hidden">{short}</span>
             </button>
-            <button
-              onClick={() => setActiveTab("task1")}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                activeTab === "task1" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <BookOpen className="h-4 w-4" /> Writing Task 1 (Report/Letter)
-            </button>
-            <button
-              onClick={() => setActiveTab("speaking")}
-              className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                activeTab === "speaking" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <Mic className="h-4 w-4" /> Speaking Interview
-            </button>
-          </div>
-
-          {/* Band Selector Buttons */}
-          <div className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
-            <span className="text-xs font-bold text-slate-400 px-2 uppercase tracking-wider">Band:</span>
-            {[5, 6, 7, 8, 9].map((b) => (
-              <button
-                key={b}
-                onClick={() => setSelectedBand(b)}
-                className={`w-9 h-8 rounded-lg text-sm font-bold transition ${
-                  selectedBand === b
-                    ? "bg-brand-600 text-white shadow-sm"
-                    : "text-slate-600 hover:bg-slate-100"
-                }`}
-              >
-                {b}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Criteria Cards */}
-        <div className="grid gap-6 md:grid-cols-2">
-          {criteria.map((c) => (
-            <div key={c.name} className="card p-6 border-slate-200/90 shadow-sm flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-bold text-slate-900 text-base">{c.name}</h3>
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-50 text-brand-700 border border-brand-200">
-                    Band {selectedBand}.0 Standard
-                  </span>
-                </div>
-                <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-100 min-h-[96px]">
-                  {c.bands[selectedBand] || c.bands[7]}
-                </p>
-              </div>
-
-              {/* Band comparison preview */}
-              <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-                <span>Next level ({selectedBand < 9 ? `Band ${selectedBand + 1}` : "Peak"}):</span>
-                <span className="font-medium text-brand-600">
-                  {selectedBand < 9
-                    ? `Requires greater flexibility & error-free accuracy`
-                    : "Native-like precision throughout"}
-                </span>
-              </div>
-            </div>
           ))}
         </div>
 
-        {/* Action Callout */}
-        <div className="mt-12 rounded-2xl bg-gradient-to-r from-brand-600 to-indigo-700 p-8 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div>
-            <span className="text-xs font-bold tracking-wider uppercase text-brand-200">Ready to test yourself?</span>
-            <h2 className="text-2xl font-bold mt-1">Get AI examiner feedback on your next test</h2>
-            <p className="text-sm text-brand-100 mt-2 max-w-xl">
-              Write an essay or take a speaking module to receive an instant, itemized breakdown across all 4 criteria just like this.
-            </p>
-          </div>
-          <Link href="/tests" className="btn-dark bg-white text-slate-900 hover:bg-slate-100 shadow-lg px-6 py-3 whitespace-nowrap">
-            Choose a Mock Test <ChevronRight className="h-4 w-4" />
-          </Link>
+        <div className="flex items-center gap-1 rounded-xl border border-surface-200 bg-white p-1">
+          <span className="px-2 text-[12px] font-bold uppercase tracking-[0.1em] text-surface-400">Band</span>
+          {BANDS.map((b) => (
+            <button
+              key={b}
+              type="button"
+              onClick={() => setSelectedBand(b)}
+              aria-pressed={selectedBand === b}
+              className={`h-8 w-9 cursor-pointer rounded-lg font-display text-sm font-bold tabular-nums transition ${
+                selectedBand === b
+                  ? "bg-brand-600 text-white shadow-sm"
+                  : "text-surface-600 hover:bg-surface-100 hover:text-surface-900"
+              }`}
+            >
+              {b}
+            </button>
+          ))}
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="max-w-2xl">
+          <div className="eyebrow text-brand-600">Band {selectedBand}.0</div>
+          <h2 className="mt-1.5 font-display text-xl font-extrabold tracking-tight text-surface-900 sm:text-2xl">
+            {activeTabMeta.label}
+          </h2>
+          <p className="mt-1.5 text-[14px] leading-relaxed text-surface-500">{TAB_COPY[activeTab]}</p>
+        </div>
+        <span className="badge-neutral">{criteria.length} criteria · 25% each</span>
+      </div>
+
+      {/* Criteria cards */}
+      <div className="grid gap-6 md:grid-cols-2">
+        {criteria.map((c, index) => (
+          <article key={c.name} className="card flex flex-col p-5 sm:p-6">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-start gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-brand-200/70 bg-brand-50 font-display text-[13px] font-bold text-brand-700">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h2 className="font-display text-[15px] font-bold leading-snug tracking-tight text-surface-900 sm:text-base">
+                  {c.name}
+                </h2>
+              </div>
+              <span className="shrink-0 rounded-full border border-brand-200/70 bg-brand-50 px-2.5 py-1 text-[11px] font-bold tabular-nums text-brand-700">
+                Band {selectedBand}.0
+              </span>
+            </div>
+
+            <p className="mt-4 flex-1 rounded-xl border border-surface-200/80 bg-surface-50/70 p-4 text-[15px] leading-relaxed text-surface-700">
+              {c.bands[selectedBand] || c.bands[7]}
+            </p>
+
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-surface-100 pt-3.5 text-[13px]">
+              <span className="text-surface-500">
+                Next level ({selectedBand < 9 ? `Band ${selectedBand + 1}` : "Peak"})
+              </span>
+              <span className="font-semibold text-brand-700">
+                {selectedBand < 9
+                  ? "Greater flexibility & error-free accuracy"
+                  : "Native-like precision throughout"}
+              </span>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      {/* CTA */}
+      <div className="flex flex-col items-start justify-between gap-6 rounded-2xl border border-brand-200/70 bg-brand-50/60 p-6 sm:p-8 lg:flex-row lg:items-center">
+        <div className="max-w-2xl">
+          <span className="eyebrow text-brand-700">Ready to test yourself?</span>
+          <h2 className="mt-2 font-display text-xl font-extrabold tracking-tight text-surface-900 sm:text-2xl">
+            Get AI examiner feedback on your next test
+          </h2>
+          <p className="mt-2 text-[15px] leading-relaxed text-surface-600">
+            Write an essay or take a speaking module to receive an instant, itemised breakdown across all four criteria
+            just like this.
+          </p>
+        </div>
+        <Link href="/tests" className="btn-primary shrink-0">
+          Choose a mock test
+          <ChevronRight className="h-4 w-4" />
+        </Link>
       </div>
     </div>
   );

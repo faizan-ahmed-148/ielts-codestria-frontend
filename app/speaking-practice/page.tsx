@@ -1,24 +1,18 @@
 "use client";
 
 import {
-  AlertCircle,
-  ArrowRight,
   BookOpen,
   CheckCircle2,
   Clock,
-  HelpCircle,
   Lightbulb,
   Mic,
-  MicOff,
-  Pause,
   Play,
   RotateCcw,
   Sparkles,
   Square,
-  Volume2,
 } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { PageHeader, ProgressBar } from "@/components/ui";
 
 interface CueCardData {
   id: string;
@@ -117,6 +111,32 @@ const SAMPLE_CUE_CARDS: CueCardData[] = [
       "The individual who left an indelible imprint on my intellectual development was my high school literature instructor, Dr. Henderson. I encountered him during my penultimate year of secondary schooling, an era when I regarded analytical reading as an arduous academic chore.\n\nDr. Henderson possessed extraordinary pedagogical acumen. Rather than dictating dogmatic interpretations, he transformed our classroom into a vibrant philosophical forum, urging us to challenge core textual premises. When my first critical essay received a modest mark, instead of discouragement, he held a private tutorial dissecting my arguments sentence by sentence.\n\nHe instilled in me the conviction that intellectual rigor and empathetic perspective are intimately intertwined. His mentorship served as a true catalyst for my academic trajectory, inspiring me to pursue higher education with relentless curiosity.",
   },
 ];
+
+const ASSESSMENT_CRITERIA = [
+  {
+    title: "Fluency & Coherence",
+    copy: "Spoke without prolonged mid-sentence hesitations or search pauses.",
+  },
+  {
+    title: "Lexical Resource",
+    copy: "Used less common collocations and idioms naturally in context.",
+  },
+  {
+    title: "Grammatical Range",
+    copy: "Combined complex subordinate clauses and conditional structures.",
+  },
+  {
+    title: "Pronunciation",
+    copy: "Clear rhythm, syllable stress, and natural sentence intonation.",
+  },
+];
+
+const STAGE_META = {
+  IDLE: { label: "Ready", badge: "badge-neutral" },
+  PREP: { label: "Preparation", badge: "badge-warning" },
+  SPEAK: { label: "Recording", badge: "badge-error" },
+  REVIEW: { label: "Review", badge: "badge-success" },
+} as const;
 
 export default function SpeakingPracticePage() {
   const [selectedCard, setSelectedCard] = useState<CueCardData>(SAMPLE_CUE_CARDS[0]);
@@ -231,315 +251,331 @@ export default function SpeakingPracticePage() {
     return `${m}:${s < 10 ? "0" : ""}${s}`;
   };
 
+  const stageMeta = STAGE_META[stage];
+  const speakPct = Math.min((speakSecondsElapsed / 120) * 100, 100);
+
   return (
-    <div className="mx-auto max-w-8xl px-4 py-8 sm:px-6 sm:py-12">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex flex-wrap items-center gap-2 mb-2">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">
-            <Mic className="h-3.5 w-3.5 text-amber-600" />
-            <span>IELTS Speaking Examiner Simulator</span>
-          </div>
-          <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] font-medium text-slate-500">
-            <Sparkles className="h-3 w-3 text-indigo-500" /> by Codestria AI
+    <div className="page-container space-y-8 py-8 sm:py-10">
+      <PageHeader
+        eyebrow="Speaking studio"
+        title="Part 2 cue card & voice studio"
+        description="Practise the one-minute preparation window and a continuous two-minute long turn, with live audio recording, authentic Cambridge topics and examiner-style feedback."
+        actions={
+          <span className="badge-brand">
+            <Sparkles className="h-3.5 w-3.5" />
+            Examiner-calibrated
           </span>
-        </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-          Speaking Part 2 Cue Card &amp; Voice Studio
-        </h1>
-        <p className="mt-2 text-base text-slate-600 max-w-3xl">
-          Master the crucial 1-minute candidate note-taking window and deliver continuous 2-minute speech with live audio recording, authentic Cambridge topics, and official 4-criterion calibration.
-        </p>
-      </div>
+        }
+      />
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-        {/* Left Column: Cue Card Selection & Candidate Task */}
-        <div className="space-y-6 lg:col-span-7">
-          {/* Cue Card Selection Pills */}
-          <div className="card p-4">
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">
-              Select Cambridge Topic
-            </label>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {SAMPLE_CUE_CARDS.map((card) => (
-                <button
-                  key={card.id}
-                  onClick={() => {
-                    setSelectedCard(card);
-                    resetSession();
-                  }}
-                  className={`rounded-xl border p-2.5 text-left text-xs transition ${
-                    selectedCard.id === card.id
-                      ? "border-amber-500 bg-amber-50/70 text-amber-900 font-bold shadow-xs"
-                      : "border-slate-200 text-slate-700 hover:bg-slate-50"
-                  }`}
-                >
-                  <div className="truncate font-semibold">{card.topic}</div>
-                  <div className="truncate text-[11px] text-slate-400 font-normal">{card.title}</div>
-                </button>
-              ))}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:gap-8">
+        {/* ── Left: cue card, scratchpad & language ─────────────────── */}
+        <div className="min-w-0 space-y-6">
+          {/* Topic selector */}
+          <section className="card p-5 sm:p-6">
+            <label className="eyebrow block">Cambridge topic</label>
+            <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+              {SAMPLE_CUE_CARDS.map((card) => {
+                const active = selectedCard.id === card.id;
+                return (
+                  <button
+                    key={card.id}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => {
+                      setSelectedCard(card);
+                      resetSession();
+                    }}
+                    className={`cursor-pointer rounded-xl border p-3 text-left transition ${
+                      active
+                        ? "border-brand-300 bg-brand-50 text-brand-900 shadow-xs"
+                        : "border-surface-200 bg-white text-surface-700 hover:border-surface-300 hover:bg-surface-50"
+                    }`}
+                  >
+                    <div className="truncate text-[13px] font-semibold">{card.topic}</div>
+                    <div
+                      className={`mt-0.5 truncate text-[11px] ${
+                        active ? "text-brand-600" : "text-surface-400"
+                      }`}
+                    >
+                      {card.title}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
-          </div>
+          </section>
 
-          {/* Authentic Cambridge Candidate Task Card */}
-          <div className="card overflow-hidden border-amber-200 bg-gradient-to-b from-amber-50/30 to-white shadow-sm">
-            <div className="border-b border-amber-100 bg-amber-500/10 px-6 py-3.5 flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
-                Candidate Task Card · Part 2 Long Turn
-              </span>
-              <span className="rounded-full bg-amber-200/60 px-2.5 py-0.5 text-[11px] font-semibold text-amber-900">
-                1 min prep · 2 min speak
-              </span>
+          {/* Candidate task card */}
+          <section className="card overflow-hidden">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-surface-100 bg-amber-50/60 px-5 py-3.5 sm:px-6">
+              <div className="flex items-center gap-2.5">
+                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+                  <Mic className="h-3.5 w-3.5" />
+                </span>
+                <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-amber-800">
+                  Candidate task card · Part 2 long turn
+                </span>
+              </div>
+              <span className="badge-warning">1 min prep · 2 min speak</span>
             </div>
 
-            <div className="p-6">
-              <h2 className="text-xl font-bold text-slate-900">{selectedCard.prompt}</h2>
-              <p className="mt-2 text-xs font-medium text-slate-500">You should say:</p>
-              <ul className="mt-3 space-y-2 text-sm text-slate-700">
+            <div className="p-5 sm:p-6">
+              <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-brand-600">
+                {selectedCard.topic}
+              </span>
+              <h2 className="mt-2 font-display text-xl font-extrabold leading-snug tracking-tight text-surface-900 sm:text-[1.4rem]">
+                {selectedCard.prompt}
+              </h2>
+
+              <p className="mt-5 text-[13px] font-semibold text-surface-500">You should say:</p>
+              <ul className="mt-2.5 space-y-2.5">
                 {selectedCard.bullets.map((b, i) => (
-                  <li key={i} className="flex items-start gap-2.5">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" />
+                  <li key={i} className="flex items-start gap-3 text-[15px] leading-relaxed text-surface-700">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-400" />
                     <span>{b}</span>
                   </li>
                 ))}
               </ul>
 
-              <div className="mt-6 rounded-xl border border-amber-100 bg-amber-50/40 p-3.5 text-xs text-amber-900">
-                <span className="font-bold">Follow-up Discussion Probe:</span> {selectedCard.followUp}
+              <div className="surface-panel mt-6 p-4">
+                <div className="flex items-start gap-2.5 text-[13.5px] leading-relaxed text-surface-600">
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+                  <p>
+                    <span className="font-semibold text-surface-900">Follow-up probe:</span>{" "}
+                    {selectedCard.followUp}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          </section>
 
-          {/* Interactive Scratchpad for 1-minute prep */}
-          <div className="card p-5">
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
-                <BookOpen className="h-3.5 w-3.5 text-amber-600" /> Candidate Pencil Scratchpad (1-Min Notes)
+          {/* Preparation scratchpad */}
+          <section className="card p-5 sm:p-6">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <label
+                htmlFor="speaking-notes"
+                className="flex items-center gap-2 text-[13px] font-bold text-surface-900"
+              >
+                <BookOpen className="h-4 w-4 text-brand-500" />
+                Preparation scratchpad
               </label>
-              <span className="text-[11px] text-slate-400">Jot keywords & collocations, not full sentences</span>
+              <span className="text-xs text-surface-400">Keywords &amp; collocations, not full sentences</span>
             </div>
             <textarea
+              id="speaking-notes"
               rows={4}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Jot key phrases here during preparation...&#10;e.g. - Glen Coe Highlands, 2 yrs ago, remote cabins&#10;- Hospitable demeanor, profound respite&#10;- Reconnect with nature"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:border-amber-500 focus:outline-none"
+              placeholder={"Jot key phrases here during preparation…\ne.g. - Glen Coe Highlands, 2 yrs ago, remote cabins\n- Hospitable demeanor, profound respite\n- Reconnect with nature"}
+              className="input mt-3 min-h-28 resize-y bg-surface-50/60 text-[15px] leading-relaxed focus:bg-white"
             />
-          </div>
+          </section>
+
+          {/* High-scoring lexis */}
+          <section className="card p-5 sm:p-6">
+            <h2 className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.12em] text-surface-500">
+              <Lightbulb className="h-4 w-4 text-amber-500" />
+              Band 8+ lexical toolkit
+            </h2>
+            <ul className="mt-4 space-y-2.5">
+              {selectedCard.vocabTips.map((tip, idx) => (
+                <li
+                  key={idx}
+                  className="rounded-xl border border-surface-200/80 bg-surface-50/70 p-3.5"
+                >
+                  <div className="text-[13.5px] font-semibold text-surface-900">
+                    &ldquo;{tip.phrase}&rdquo;
+                  </div>
+                  <div className="mt-0.5 text-[13px] leading-relaxed text-surface-500">{tip.meaning}</div>
+                </li>
+              ))}
+            </ul>
+          </section>
         </div>
 
-        {/* Right Column: Timers, Live Recording, & Band 9 Model Speech */}
-        <div className="space-y-6 lg:col-span-5">
-          {/* Exam Simulator Console Card */}
-          <div className="card p-6 shadow-sm border-slate-200">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Clock className="h-4 w-4 text-amber-600" />
-              Test Room Simulation Console
-            </h3>
+        {/* ── Right: recorder console, model answer & checklist ─────── */}
+        <div className="min-w-0 space-y-6">
+          {/* Test room console */}
+          <section className="card p-5 sm:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+                  <Clock className="h-4.5 w-4.5" />
+                </span>
+                <div>
+                  <h2 className="font-display text-[15px] font-bold leading-tight text-surface-900">
+                    Test room
+                  </h2>
+                  <p className="text-[11px] text-surface-400">Part 2 · long turn</p>
+                </div>
+              </div>
+              <span className={stageMeta.badge}>{stageMeta.label}</span>
+            </div>
 
             {/* State: IDLE */}
             {stage === "IDLE" && (
               <div className="mt-6 text-center">
-                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-amber-50 text-amber-600 border border-amber-200">
+                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-brand-200 bg-brand-50 text-brand-600">
                   <Mic className="h-8 w-8" />
                 </div>
-                <h4 className="mt-4 text-base font-bold text-slate-900">Ready to simulate?</h4>
-                <p className="mt-1 text-xs text-slate-500">
-                  You will have exactly 60 seconds to review the card and take notes, followed immediately by 2 minutes to speak.
+                <h3 className="mt-4 font-display text-lg font-bold text-surface-900">Ready when you are</h3>
+                <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-surface-500">
+                  You get 60 seconds to read the card and make notes, then two minutes to speak. Recording starts
+                  automatically.
                 </p>
-                <button
-                  onClick={startPreparation}
-                  className="mt-6 w-full btn-primary bg-amber-600 hover:bg-amber-700 shadow-amber-600/20 py-3 text-sm flex items-center justify-center gap-2"
-                >
+                <div className="mt-4 flex flex-wrap justify-center gap-2">
+                  <span className="badge-neutral">60s prep</span>
+                  <span className="badge-neutral">2 min turn</span>
+                  <span className="badge-neutral">Live audio</span>
+                </div>
+                <button onClick={startPreparation} className="btn-primary mt-6 w-full py-3">
                   <Play className="h-4 w-4" />
-                  Begin 1-Minute Preparation
+                  Begin preparation
                 </button>
               </div>
             )}
 
-            {/* State: PREPARATION (60s countdown) */}
+            {/* State: PREPARATION */}
             {stage === "PREP" && (
               <div className="mt-6 text-center animate-fade-up">
-                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">
-                  Preparation Phase
-                </span>
-                <div className="mt-4 text-5xl font-extrabold tracking-tight text-amber-600 tabular-nums">
-                  {prepSecondsLeft}s
+                <span className="badge-warning">Preparation phase</span>
+                <div className="mt-4 font-display text-5xl font-extrabold tabular-nums tracking-tight text-brand-700 sm:text-6xl">
+                  {formatTime(prepSecondsLeft)}
                 </div>
-                <p className="mt-2 text-xs text-slate-500">
-                  Jot down key points in your scratchpad. Speaking phase will launch automatically when timer reaches 0.
+                <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-surface-500">
+                  Jot key points in the scratchpad. Speaking starts automatically when the timer reaches zero.
                 </p>
-                <div className="mt-6 flex gap-3">
-                  <button
-                    onClick={startSpeakingPhase}
-                    className="flex-1 btn-primary bg-emerald-600 hover:bg-emerald-700 py-2.5 text-xs flex items-center justify-center gap-1.5"
-                  >
-                    <Play className="h-3.5 w-3.5" />
-                    Skip to Speaking Now
+                <ProgressBar value={((60 - prepSecondsLeft) / 60) * 100} className="mt-5 h-2.5" />
+                <div className="mt-5 grid grid-cols-2 gap-2.5">
+                  <button onClick={startSpeakingPhase} className="btn-primary py-2.5 text-[13px]">
+                    <Play className="h-4 w-4" />
+                    Start now
                   </button>
-                  <button
-                    onClick={resetSession}
-                    className="btn-secondary py-2.5 text-xs text-slate-500"
-                  >
+                  <button onClick={resetSession} className="btn-secondary py-2.5 text-[13px]">
+                    <RotateCcw className="h-4 w-4" />
                     Cancel
                   </button>
                 </div>
               </div>
             )}
 
-            {/* State: SPEAKING (Live 2-minute recording) */}
+            {/* State: SPEAK */}
             {stage === "SPEAK" && (
               <div className="mt-6 text-center animate-fade-up">
-                <div className="inline-flex items-center gap-2 rounded-full bg-rose-50 border border-rose-200 px-3 py-1 text-xs font-bold text-rose-700">
-                  <span className="h-2 w-2 rounded-full bg-rose-600 animate-ping" />
-                  Live Recording &amp; Timing
-                </div>
+                <span className={recording ? "badge-error" : "badge-warning"}>
+                  <span
+                    className={`h-2 w-2 rounded-full ${
+                      recording ? "animate-pulse-dot bg-rose-500" : "bg-amber-500"
+                    }`}
+                  />
+                  {recording ? "Live recording" : "Timing · mic unavailable"}
+                </span>
 
-                <div className="mt-4 text-5xl font-extrabold tracking-tight text-slate-900 tabular-nums">
+                <div className="mt-4 font-display text-5xl font-extrabold tabular-nums tracking-tight text-surface-900 sm:text-6xl">
                   {formatTime(speakSecondsElapsed)}
                 </div>
-                <div className="mt-1 text-xs text-slate-400">Target: 1:45 to 2:00 mins</div>
+                <p className="mt-1 text-[13px] text-surface-500">Target range: 1:45 – 2:00</p>
 
-                {/* Visual Progress Bar with Thresholds */}
-                <div className="mt-4 relative h-3 w-full rounded-full bg-slate-100 overflow-hidden">
-                  <div
-                    className={`h-full transition-all duration-300 ${
-                      speakSecondsElapsed < 90
-                        ? "bg-amber-500"
-                        : speakSecondsElapsed <= 120
-                        ? "bg-emerald-500"
-                        : "bg-rose-500"
-                    }`}
-                    style={{ width: `${Math.min((speakSecondsElapsed / 120) * 100, 100)}%` }}
+                <div className="relative mt-5">
+                  <ProgressBar
+                    value={speakPct}
+                    className="h-2.5"
+                    color={speakSecondsElapsed < 90 ? "bg-amber-400" : "bg-emerald-500"}
                   />
-                  {/* 1:30 marker */}
-                  <div className="absolute top-0 bottom-0 left-[75%] w-0.5 bg-slate-400" title="1:30 min threshold" />
+                  <span
+                    className="absolute -bottom-1 -top-1 left-[75%] w-px bg-surface-400/70"
+                    aria-hidden="true"
+                  />
                 </div>
-                <div className="mt-1 flex justify-between text-[10px] text-slate-400">
+                <div className="mt-2 flex justify-between text-[11px] text-surface-400">
                   <span>0:00</span>
-                  <span className="font-semibold text-slate-600">1:30 (Min Ideal)</span>
-                  <span>2:00 (Examiner Cutoff)</span>
+                  <span className="font-semibold text-surface-600">1:30 ideal</span>
+                  <span>2:00 cutoff</span>
                 </div>
 
-                <div className="mt-6">
-                  <button
-                    onClick={stopSpeakingPhase}
-                    className="w-full btn-primary bg-rose-600 hover:bg-rose-700 shadow-rose-600/20 py-3 text-sm flex items-center justify-center gap-2"
-                  >
-                    <Square className="h-4 w-4 fill-white" />
-                    Stop &amp; Review Audio
-                  </button>
-                </div>
+                <button onClick={stopSpeakingPhase} className="btn-destructive mt-6 w-full py-3">
+                  <Square className="h-4 w-4 fill-current" />
+                  Stop &amp; review
+                </button>
               </div>
             )}
 
-            {/* State: REVIEW (Audio Player & Results) */}
+            {/* State: REVIEW */}
             {stage === "REVIEW" && (
               <div className="mt-6 space-y-4 animate-fade-up">
-                <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-center">
-                  <CheckCircle2 className="h-6 w-6 text-emerald-600 mx-auto" />
-                  <div className="mt-2 text-sm font-bold text-emerald-900">
-                    Response Recorded ({formatTime(speakSecondsElapsed)})
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 p-4 text-center">
+                  <CheckCircle2 className="mx-auto h-6 w-6 text-emerald-600" />
+                  <div className="mt-2 font-display text-[15px] font-bold text-emerald-900">
+                    Response recorded · {formatTime(speakSecondsElapsed)}
                   </div>
-                  <p className="text-xs text-emerald-700 mt-1">
+                  <p className="mt-1 text-[13px] leading-relaxed text-emerald-800">
                     {speakSecondsElapsed >= 90
-                      ? "Excellent length! You comfortably sustained speech past the 1:30 threshold."
-                      : "Pacing tip: Aim to sustain speech for at least 1:30 to maximize your Fluency & Coherence band."}
+                      ? "Strong length — you sustained speech past the 1:30 threshold."
+                      : "Aim to keep speaking for at least 1:30 to lift your Fluency & Coherence."}
                   </p>
                 </div>
 
                 {audioUrl && (
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                    <label className="text-[11px] font-semibold text-slate-500 block mb-1">
-                      Listen to Your Recording:
+                  <div className="surface-panel p-3.5">
+                    <label className="mb-2 block text-[11px] font-bold uppercase tracking-[0.1em] text-surface-500">
+                      Your recording
                     </label>
-                    <audio controls src={audioUrl} className="w-full h-9" />
+                    <audio controls src={audioUrl} className="h-10 w-full" />
                   </div>
                 )}
 
-                <div className="flex gap-2">
-                  <button
-                    onClick={startPreparation}
-                    className="flex-1 btn-secondary text-xs flex items-center justify-center gap-1.5"
-                  >
-                    <RotateCcw className="h-3.5 w-3.5" />
-                    Retry Cue Card
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button onClick={startPreparation} className="btn-secondary py-2.5 text-[13px]">
+                    <RotateCcw className="h-4 w-4" />
+                    Retry
                   </button>
                   <button
                     onClick={() => setShowModel(!showModel)}
-                    className="flex-1 btn-primary bg-amber-600 hover:bg-amber-700 text-xs flex items-center justify-center gap-1.5"
+                    className="btn-primary py-2.5 text-[13px]"
                   >
-                    <Sparkles className="h-3.5 w-3.5" />
-                    {showModel ? "Hide Band 9 Model" : "View Band 9 Model"}
+                    <Sparkles className="h-4 w-4" />
+                    {showModel ? "Hide model" : "Band 9 model"}
                   </button>
                 </div>
               </div>
             )}
-          </div>
+          </section>
 
-          {/* High-Yield Band 8/9 Lexical Collocations for this card */}
-          <div className="card p-5">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-              <Lightbulb className="h-3.5 w-3.5 text-amber-600" />
-              Band 8+ High-Scoring Idiomatic Lexicon
-            </h4>
-            <div className="mt-3 space-y-2">
-              {selectedCard.vocabTips.map((tip, idx) => (
-                <div key={idx} className="rounded-xl border border-slate-100 bg-slate-50/60 p-2.5 text-xs">
-                  <div className="font-bold text-amber-900">"{tip.phrase}"</div>
-                  <div className="text-[11px] text-slate-500 mt-0.5">{tip.meaning}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Band 9 Model Response Drawer */}
+          {/* Band 9 model transcript */}
           {showModel && (
-            <div className="card p-5 border-amber-200 bg-amber-50/30 animate-fade-up">
-              <div className="flex items-center justify-between border-b border-amber-100 pb-2">
-                <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">
-                  Band 9.0 Examiner Model Transcript
+            <section className="card overflow-hidden animate-fade-up">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-surface-100 bg-brand-50/60 px-5 py-3.5">
+                <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-brand-700">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Band 9 model transcript
                 </span>
-                <span className="text-[11px] font-semibold text-amber-700">Native Fluency</span>
+                <span className="badge-brand">Native fluency</span>
               </div>
-              <p className="mt-3 text-xs leading-relaxed text-slate-700 whitespace-pre-line">
+              <p className="whitespace-pre-line p-5 text-[15px] leading-relaxed text-surface-700">
                 {selectedCard.modelTranscript}
               </p>
-            </div>
+            </section>
           )}
 
-          {/* Examiner 4-Criteria Assessment Checklist */}
-          <div className="card p-5">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
-              Official Speaking Assessment Check
-            </h4>
-            <div className="space-y-2 text-xs text-slate-700">
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                <span>
-                  <strong>Fluency &amp; Coherence:</strong> Spoke without prolonged mid-sentence hesitations or search pauses.
-                </span>
-              </div>
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                <span>
-                  <strong>Lexical Resource:</strong> Used less common collocations and idioms naturally in context.
-                </span>
-              </div>
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                <span>
-                  <strong>Grammatical Range:</strong> Combined complex subordinate clauses and conditional structures.
-                </span>
-              </div>
-              <div className="flex items-start gap-2">
-                <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                <span>
-                  <strong>Pronunciation:</strong> Clear rhythm, syllable stress, and natural sentence intonation.
-                </span>
-              </div>
-            </div>
-          </div>
+          {/* Examiner checklist */}
+          <section className="card p-5 sm:p-6">
+            <h2 className="text-[12px] font-bold uppercase tracking-[0.12em] text-surface-500">
+              Official assessment check
+            </h2>
+            <ul className="mt-4 space-y-3.5">
+              {ASSESSMENT_CRITERIA.map(({ title, copy }) => (
+                <li key={title} className="flex items-start gap-3">
+                  <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
+                    <CheckCircle2 className="h-4 w-4" />
+                  </span>
+                  <p className="text-[13px] leading-relaxed text-surface-600">
+                    <span className="font-semibold text-surface-900">{title}:</span> {copy}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </section>
         </div>
       </div>
     </div>

@@ -5,7 +5,7 @@ import { JsonLd } from "@/components/JsonLd";
 import "./globals.css";
 
 export const viewport: Viewport = {
-  themeColor: "#0b132b",
+  themeColor: "#f6f8fc",
   colorScheme: "light",
   width: "device-width",
   initialScale: 1,
@@ -125,9 +125,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className="h-full antialiased scroll-smooth">
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+        />
         <JsonLd />
       </head>
-      <body className="min-h-full font-sans text-zinc-900 bg-[#fcfcfd] selection:bg-indigo-500/15 selection:text-indigo-700">
+      <body className="min-h-full font-sans text-surface-900 bg-surface-50 selection:bg-brand-500/15 selection:text-brand-800">
         <AuthProvider>
           <AppShell>{children}</AppShell>
         </AuthProvider>

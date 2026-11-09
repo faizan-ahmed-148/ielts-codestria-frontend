@@ -37,7 +37,7 @@ export function Logo({
       >
         {/* Official Codestria Mark with Sapphire Accent */}
         <div
-          className={`relative flex shrink-0 items-center justify-center bg-zinc-950 text-white shadow-xs transition-transform duration-150 group-hover:scale-[1.03] ${iconSizes[size]}`}
+          className={`relative flex shrink-0 items-center justify-center bg-surface-950 text-white shadow-xs transition-transform duration-150 group-hover:scale-[1.03] ${iconSizes[size]}`}
           style={{
             border: dark ? "1px solid rgba(255,255,255,0.15)" : "1px solid rgba(0,0,0,0.1)",
           }}
@@ -47,15 +47,15 @@ export function Logo({
               d="M25.37 6.63A13.25 13.25 0 1 0 25.37 25.37L21.48 21.48A7.75 7.75 0 1 1 21.48 10.52Z"
               fill="#ffffff"
             />
-            <rect x="22" y="13" width="5.5" height="5.5" rx="1" fill="#4351e8" />
+            <rect x="22" y="13" width="5.5" height="5.5" rx="1" fill="#4356e8" />
           </svg>
         </div>
 
         {/* Wordmark */}
         <div className="flex items-center gap-2">
           <span
-            className={`font-bold tracking-tight text-zinc-900 ${textSizes[size]} ${
-              dark ? "text-white" : "text-zinc-900"
+            className={`font-display font-bold tracking-tight text-surface-900 ${textSizes[size]} ${
+              dark ? "text-white" : "text-surface-900"
             }`}
           >
             Codestria
@@ -63,8 +63,8 @@ export function Logo({
           <span
             className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ${
               dark
-                ? "bg-zinc-800 text-zinc-300 border border-zinc-700/60"
-                : "bg-indigo-50 text-indigo-700 border border-indigo-200/80"
+                ? "border border-white/10 bg-white/10 text-white/80"
+                : "border border-brand-200 bg-brand-50 text-brand-700"
             }`}
           >
             IELTS

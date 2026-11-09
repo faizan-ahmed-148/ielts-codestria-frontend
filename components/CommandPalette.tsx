@@ -122,7 +122,15 @@ const SEARCH_CATALOG: SearchItem[] = [
   },
 ];
 
-export function CommandPalette() {
+export function CommandPalette({
+  fullWidth = false,
+  placeholder = "Search...",
+  className = "",
+}: {
+  fullWidth?: boolean;
+  placeholder?: string;
+  className?: string;
+} = {}) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -188,12 +196,18 @@ export function CommandPalette() {
       {/* Trigger Button - placed anywhere */}
       <button
         onClick={() => setOpen(true)}
-        className="group flex items-center gap-2 rounded-lg border border-zinc-200/80 bg-zinc-50/80 px-2.5 py-1.5 text-xs text-zinc-500 transition hover:border-zinc-300 hover:bg-white hover:text-zinc-800 cursor-pointer shadow-2xs"
+        className={
+          fullWidth
+            ? `group flex w-full items-center justify-between rounded-xl border border-surface-200 bg-surface-50 px-3 py-2 text-[13px] text-surface-500 transition hover:border-surface-300 hover:bg-white hover:text-surface-800 cursor-pointer shadow-2xs ${className}`
+            : `group flex items-center gap-2 rounded-lg border border-surface-200 bg-surface-50 px-2.5 py-1.5 text-[13px] text-surface-500 transition hover:border-surface-300 hover:bg-white hover:text-surface-800 cursor-pointer shadow-2xs ${className}`
+        }
         title="Quick search (Ctrl+K or Cmd+K)"
       >
-        <Search className="h-3.5 w-3.5 text-zinc-400 group-hover:text-zinc-700 transition" />
-        <span className="hidden xl:inline">Search...</span>
-        <kbd className="hidden xl:inline-flex rounded border border-zinc-200 bg-white px-1 py-0.2 font-mono text-[10px] text-zinc-400">
+        <div className="flex items-center gap-2">
+          <Search className="h-3.5 w-3.5 text-surface-400 transition group-hover:text-surface-700" />
+          <span className={fullWidth ? "inline text-[13px] font-medium" : "hidden xl:inline"}>{placeholder}</span>
+        </div>
+        <kbd className="rounded border border-surface-200 bg-white px-1.5 py-0.5 font-mono text-[11px] text-surface-400">
           ⌘K
         </kbd>
       </button>
@@ -202,14 +216,14 @@ export function CommandPalette() {
       {open && (
         <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16 sm:pt-24">
           <div
-            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-surface-950/40 backdrop-blur-sm transition-opacity"
             onClick={() => setOpen(false)}
           />
 
-          <div className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl animate-fade-up">
+          <div className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-surface-200 bg-white shadow-2xl animate-fade-up">
             {/* Search Input */}
-            <div className="flex items-center border-b border-slate-100 px-4 py-3">
-              <Search className="h-5 w-5 text-slate-400" />
+            <div className="flex items-center border-b border-surface-100 px-4 py-3.5">
+              <Search className="h-5 w-5 text-surface-400" />
               <input
                 ref={inputRef}
                 type="text"
@@ -220,17 +234,17 @@ export function CommandPalette() {
                 }}
                 onKeyDown={handleInputKeyDown}
                 placeholder="Search practice tests, vocab, band 9 essays, tools..."
-                className="w-full bg-transparent px-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none"
+                className="w-full bg-transparent px-3 text-[15px] text-surface-800 outline-none placeholder:text-surface-400"
               />
               {query ? (
                 <button
                   onClick={() => setQuery("")}
-                  className="rounded p-1 text-slate-400 hover:text-slate-600"
+                  className="cursor-pointer rounded p-1 text-surface-400 transition hover:text-surface-700"
                 >
                   <X className="h-4 w-4" />
                 </button>
               ) : (
-                <kbd className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+                <kbd className="rounded bg-surface-100 px-2 py-0.5 text-[11px] font-semibold text-surface-500">
                   ESC
                 </kbd>
               )}
@@ -239,7 +253,7 @@ export function CommandPalette() {
             {/* Results list */}
             <div className="max-h-80 overflow-y-auto p-2 scroll-thin">
               {filteredItems.length === 0 ? (
-                <div className="p-8 text-center text-sm text-slate-400">
+                <div className="p-8 text-center text-sm text-surface-400">
                   No matching IELTS resources found for "{query}".
                 </div>
               ) : (
@@ -253,13 +267,13 @@ export function CommandPalette() {
                         onClick={() => handleSelect(item.href)}
                         onMouseEnter={() => setSelectedIndex(idx)}
                         className={`flex cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 transition ${
-                          isSelected ? "bg-brand-50/80 text-brand-900" : "text-slate-700 hover:bg-slate-50"
+                          isSelected ? "bg-brand-50 text-brand-900" : "text-surface-700 hover:bg-surface-50"
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0">
                           <div
                             className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                              isSelected ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600"
+                              isSelected ? "bg-brand-600 text-white" : "bg-surface-100 text-surface-600"
                             }`}
                           >
                             <IconComponent className="h-4 w-4" />
@@ -273,11 +287,11 @@ export function CommandPalette() {
                                 </span>
                               )}
                             </div>
-                            <p className="truncate text-xs text-slate-500">{item.description}</p>
+                            <p className="truncate text-xs text-surface-500">{item.description}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                          <span className="hidden sm:inline rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
+                        <div className="flex items-center gap-1.5 text-xs text-surface-400">
+                          <span className="hidden rounded bg-surface-100 px-1.5 py-0.5 text-[10px] font-medium text-surface-500 sm:inline">
                             {item.category}
                           </span>
                           <ChevronRight className="h-4 w-4" />
@@ -290,7 +304,7 @@ export function CommandPalette() {
             </div>
 
             {/* Footer shortcuts */}
-            <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/80 px-4 py-2 text-[11px] text-slate-500">
+            <div className="flex items-center justify-between border-t border-surface-100 bg-surface-50 px-4 py-2.5 text-[11px] text-surface-500">
               <div className="flex items-center gap-3">
                 <span>Navigate: <kbd className="font-semibold">↑</kbd> <kbd className="font-semibold">↓</kbd></span>
                 <span>Select: <kbd className="font-semibold">↵</kbd></span>

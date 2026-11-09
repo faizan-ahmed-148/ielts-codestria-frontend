@@ -4,8 +4,10 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
+    public code?: string,
   ) {
     super(message);
+    this.name = "ApiError";
   }
 }
 
@@ -20,10 +22,17 @@ export async function api<T>(path: string, options: { method?: string; body?: un
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     const msg = Array.isArray(data.message) ? data.message.join(", ") : data.message;
-    if (res.status === 401 && typeof window !== "undefined" && !path.startsWith("/auth/")) {
+    if (
+      res.status === 401 &&
+      typeof window !== "undefined" &&
+      !path.startsWith("/auth/") &&
+      // Scoring calls surface their own error to the runner.
+      !path.startsWith("/scoring/")
+    ) {
       window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
     }
-    throw new ApiError(msg ?? `Request failed (${res.status})`, res.status);
+    const code = typeof data.code === "string" ? data.code : undefined;
+    throw new ApiError(msg ?? `Request failed (${res.status})`, res.status, code);
   }
   return data as T;
 }
@@ -125,7 +134,7 @@ export interface Attempt {
   content: unknown;
   /** Only present once the module is completed. */
   result: {
-    band: number;
+    band: number | null;
     rawScore: number | null;
     totalQuestions: number | null;
     feedback: unknown;

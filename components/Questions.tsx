@@ -49,15 +49,15 @@ export function QuestionGroups({
         const shared = sharedOptions(group);
         return (
           <section key={gi}>
-            <div className="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3">
-              <h3 className="text-sm font-bold text-slate-900">
+            <div className="rounded-xl border border-surface-200 bg-surface-50 px-4 py-3">
+              <h3 className="text-sm font-bold text-surface-900">
                 Questions {first}
                 {last > first ? `–${last}` : ""}
               </h3>
-              <p className="mt-1 text-sm whitespace-pre-line text-slate-600">{group.instructions}</p>
+              <p className="mt-1 text-sm whitespace-pre-line text-surface-600">{group.instructions}</p>
             </div>
             {shared && !shared.every((o, i) => o.trim() === letter(i)) && (
-              <ul className="mt-3 grid gap-x-6 gap-y-1.5 rounded-xl border border-slate-200 bg-white p-4 text-sm sm:grid-cols-2">
+              <ul className="mt-3 grid gap-x-6 gap-y-1.5 rounded-xl border border-surface-200 bg-white p-4 text-sm sm:grid-cols-2">
                 {shared.map((o, i) => (
                   <li key={i} className="flex gap-2">
                     <span className="w-5 shrink-0 font-bold text-brand-600">{letter(i)}</span>
@@ -109,7 +109,7 @@ export function QuestionGroups({
                           className={`mt-0.5 flex h-7 items-center gap-1.5 rounded-lg px-2 text-xs font-semibold transition ${
                             isFlagged
                               ? "bg-amber-100 text-amber-800 hover:bg-amber-200"
-                              : "text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                              : "text-surface-400 hover:bg-surface-100 hover:text-surface-600"
                           }`}
                         >
                           <Flag className={`h-3.5 w-3.5 ${isFlagged ? "fill-amber-600 text-amber-600" : ""}`} />
@@ -133,7 +133,7 @@ export function QuestionGroups({
                               <Check className="h-3.5 w-3.5" /> Answer: {result.correctAnswers[0]}
                             </span>
                             {result.correctAnswers.length > 1 && (
-                              <span className="text-xs text-slate-500">
+                              <span className="text-xs text-surface-500">
                                 Also accepted: {result.correctAnswers.slice(1).join(", ")}
                               </span>
                             )}
@@ -144,20 +144,20 @@ export function QuestionGroups({
 
                     {/* In-depth Answer Key & Examiner Explanation */}
                     {result && explanation && (
-                      <div className="mt-3.5 ml-10 rounded-xl border border-slate-200 bg-white/90 p-3.5 text-xs text-slate-700 shadow-xs">
-                        <div className="flex items-center gap-1.5 font-bold text-slate-900">
+                      <div className="mt-3.5 ml-10 rounded-xl border border-surface-200 bg-white/90 p-3.5 text-xs text-surface-700 shadow-xs">
+                        <div className="flex items-center gap-1.5 font-bold text-surface-900">
                           <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
                           <span>Examiner Explanation:</span>
                           {explanation.paragraphRef && (
-                            <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px] text-slate-600">
+                            <span className="rounded bg-surface-100 px-1.5 py-0.5 font-mono text-[10px] text-surface-600">
                               {explanation.paragraphRef}
                             </span>
                           )}
                         </div>
-                        <p className="mt-1 leading-relaxed text-slate-600">{explanation.explanation}</p>
+                        <p className="mt-1 leading-relaxed text-surface-600">{explanation.explanation}</p>
                         {explanation.keyVocabulary && explanation.keyVocabulary.length > 0 && (
                           <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
-                            <span className="font-semibold text-slate-500">Key Keywords & Paraphrases:</span>
+                            <span className="font-semibold text-surface-500">Key Keywords & Paraphrases:</span>
                             {explanation.keyVocabulary.map((word, wi) => (
                               <span key={wi} className="rounded-md bg-brand-50 px-1.5 py-0.5 font-medium text-brand-700">
                                 {word}
@@ -178,6 +178,11 @@ export function QuestionGroups({
       })}
     </div>
   );
+}
+
+function cleanPrompt(text: string): string {
+  if (!text) return "";
+  return text.replace(/\s*\[c\d+_[^\]]+\]\s*/g, " ").trim();
 }
 
 function QuestionItem({
@@ -202,7 +207,7 @@ function QuestionItem({
   const num = (
     <span
       className={`mt-0.5 inline-flex h-7 min-w-7 shrink-0 items-center justify-center rounded-lg px-1.5 text-xs font-bold ${
-        value.trim() ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600"
+        value.trim() ? "bg-brand-600 text-white" : "bg-surface-100 text-surface-600"
       }`}
     >
       {number}
@@ -210,11 +215,12 @@ function QuestionItem({
   );
 
   if (q.type === "gap") {
-    const [before, after] = q.prompt.split("_____");
+    const sanitizedPrompt = cleanPrompt(q.prompt);
+    const [before, after] = sanitizedPrompt.split("_____");
     return (
       <div className="flex items-start gap-3">
         {num}
-        <div className="flex-1 text-sm leading-7 text-slate-800">
+        <div className="flex-1 text-sm leading-7 text-surface-800">
           <span>{before}</span>
           <input
             type="text"
@@ -222,7 +228,7 @@ function QuestionItem({
             disabled={disabled}
             onChange={(e) => set(e.target.value)}
             placeholder={result ? correct : "your answer"}
-            className="mx-1 inline-block h-8 w-44 rounded-lg border border-slate-300 bg-white px-2.5 text-sm font-semibold text-slate-900 shadow-xs outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-50"
+            className="mx-1 inline-block h-8 w-44 rounded-lg border border-surface-300 bg-white px-2.5 text-sm font-semibold text-surface-900 shadow-xs outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:bg-surface-50"
           />
           <span>{after}</span>
         </div>
@@ -236,7 +242,7 @@ function QuestionItem({
       <div className="flex items-start gap-3">
         {num}
         <div className="flex-1 space-y-2">
-          <p className="text-sm font-medium text-slate-800">{(q as any).prompt}</p>
+          <p className="text-sm font-medium text-surface-800">{cleanPrompt((q as any).prompt)}</p>
           <div className="flex flex-wrap gap-2">
             {choices.map((c) => {
               const active = value.toUpperCase() === c;
@@ -249,7 +255,7 @@ function QuestionItem({
                   className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition ${
                     active
                       ? "border-brand-600 bg-brand-600 text-white shadow-xs"
-                      : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                      : "border-surface-200 bg-white text-surface-700 hover:border-surface-300 hover:bg-surface-50"
                   } disabled:cursor-default`}
                 >
                   {c}
@@ -267,7 +273,7 @@ function QuestionItem({
       <div className="flex items-start gap-3">
         {num}
         <div className="flex-1 space-y-2">
-          <p className="text-sm font-medium text-slate-800">{(q as any).prompt}</p>
+          <p className="text-sm font-medium text-surface-800">{cleanPrompt((q as any).prompt)}</p>
           <div className="space-y-1.5">
             {q.options.map((opt, i) => {
               const optLetter = letter(i);
@@ -281,12 +287,12 @@ function QuestionItem({
                   className={`flex w-full items-start gap-2.5 rounded-lg border p-2.5 text-left text-xs transition ${
                     active
                       ? "border-brand-500 bg-brand-50/70 font-semibold text-brand-900 ring-1 ring-brand-500"
-                      : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                      : "border-surface-200 bg-white text-surface-700 hover:bg-surface-50"
                   } disabled:cursor-default`}
                 >
                   <span
                     className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
-                      active ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600"
+                      active ? "bg-brand-600 text-white" : "bg-surface-100 text-surface-600"
                     }`}
                   >
                     {optLetter}
@@ -306,7 +312,7 @@ function QuestionItem({
       <div className="flex items-start gap-3">
         {num}
         <div className="flex-1 space-y-2">
-          <p className="text-sm font-medium text-slate-800">{(q as any).prompt}</p>
+          <p className="text-sm font-medium text-surface-800">{cleanPrompt((q as any).prompt)}</p>
           {!hideOptions ? (
             <div className="grid gap-1.5 sm:grid-cols-2">
               {q.options.map((opt, i) => {
@@ -321,12 +327,12 @@ function QuestionItem({
                     className={`flex items-center gap-2 rounded-lg border p-2 text-left text-xs transition ${
                       active
                         ? "border-brand-500 bg-brand-50 font-semibold text-brand-900"
-                        : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                        : "border-surface-200 bg-white text-surface-700 hover:bg-surface-50"
                     }`}
                   >
                     <span
                       className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-                        active ? "bg-brand-600 text-white" : "bg-slate-100 text-slate-600"
+                        active ? "bg-brand-600 text-white" : "bg-surface-100 text-surface-600"
                       }`}
                     >
                       {optLetter}
@@ -338,12 +344,12 @@ function QuestionItem({
             </div>
           ) : (
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500">Select heading letter:</span>
+              <span className="text-xs text-surface-500">Select heading letter:</span>
               <select
                 value={value}
                 disabled={disabled}
                 onChange={(e) => set(e.target.value)}
-                className="h-8 rounded-lg border border-slate-300 bg-white px-3 text-xs font-bold text-slate-800 shadow-xs outline-none focus:border-brand-500"
+                className="h-8 rounded-lg border border-surface-300 bg-white px-3 text-xs font-bold text-surface-800 shadow-xs outline-none focus:border-brand-500"
               >
                 <option value="">Choose...</option>
                 {q.options.map((_, i) => (
@@ -364,14 +370,14 @@ function QuestionItem({
     <div className="flex items-start gap-3">
       {num}
       <div className="flex-1 space-y-2">
-        <p className="text-sm font-medium text-slate-800">{(q as any).prompt}</p>
+        <p className="text-sm font-medium text-surface-800">{cleanPrompt((q as any).prompt)}</p>
         <input
           type="text"
           value={value}
           disabled={disabled}
           onChange={(e) => set(e.target.value)}
           placeholder={result ? correct : "Type answer..."}
-          className="h-9 w-full max-w-sm rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-800 shadow-xs outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-50"
+          className="h-9 w-full max-w-sm rounded-lg border border-surface-300 bg-white px-3 text-sm font-medium text-surface-800 shadow-xs outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:bg-surface-50"
         />
       </div>
     </div>

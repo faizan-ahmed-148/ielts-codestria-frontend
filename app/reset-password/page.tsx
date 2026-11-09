@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, CheckCircle2, Eye, EyeOff, KeyRound, Loader2, ShieldCheck, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Circle, Eye, EyeOff, KeyRound, Loader2, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
@@ -87,32 +87,40 @@ function ResetPasswordForm() {
   const hasUpper = /[A-Z]/.test(password);
   const passwordsMatch = password && confirmPassword && password === confirmPassword;
 
+  const requirements = [
+    { ok: hasMinLen, label: "At least 8 characters" },
+    { ok: hasNum, label: "Contains a number (recommended)" },
+    { ok: hasUpper, label: "Contains an uppercase letter" },
+  ];
+
   if (verifying) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="flex flex-col items-center justify-center py-14 text-center">
         <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
-        <p className="mt-4 text-sm font-medium text-slate-600">Verifying your secure reset link...</p>
+        <p className="mt-4 text-[15px] font-medium text-surface-600">Verifying your secure reset link…</p>
       </div>
     );
   }
 
   if (!tokenValid && !success) {
     return (
-      <div className="text-center animate-fade-up">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600 ring-8 ring-red-50/70">
+      <div className="animate-fade-up text-center">
+        <span className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 ring-1 ring-rose-100">
           <XCircle className="h-7 w-7" />
-        </div>
-        <h1 className="mt-5 text-2xl font-bold tracking-tight text-slate-900">Invalid or Expired Link</h1>
-        <p className="mt-2 text-sm text-slate-500 max-w-sm mx-auto">
+        </span>
+        <h1 className="mt-5 font-display text-2xl font-extrabold tracking-tight text-surface-900">
+          Invalid or expired link
+        </h1>
+        <p className="mx-auto mt-2 max-w-sm text-[15px] leading-relaxed text-surface-500">
           {error || "The reset link you followed has expired or has already been used."}
         </p>
 
-        <div className="mt-8 flex flex-col gap-3">
-          <Link href="/forgot-password" className="btn-primary py-3">
-            Request a New Reset Link
+        <div className="mt-8 flex flex-col gap-2.5">
+          <Link href="/forgot-password" className="btn-primary w-full py-3">
+            Request a new reset link
           </Link>
-          <Link href="/login" className="btn-secondary py-2.5">
-            Back to Log in
+          <Link href="/login" className="btn-secondary w-full py-3">
+            Back to sign in
           </Link>
         </div>
       </div>
@@ -121,34 +129,39 @@ function ResetPasswordForm() {
 
   if (success) {
     return (
-      <div className="text-center animate-fade-up">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 ring-8 ring-emerald-50/70">
+      <div className="animate-fade-up text-center">
+        <span className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
           <CheckCircle2 className="h-7 w-7" />
-        </div>
-        <h1 className="mt-5 text-2xl font-bold tracking-tight text-slate-900">Password Reset Complete!</h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Your password has been securely updated. Redirecting you to login...
+        </span>
+        <h1 className="mt-5 font-display text-2xl font-extrabold tracking-tight text-surface-900">
+          Password reset complete
+        </h1>
+        <p className="mt-2 text-[15px] leading-relaxed text-surface-500">
+          Your password has been securely updated. Redirecting you to sign in…
         </p>
-        <div className="mt-6">
-          <Link href="/login" className="btn-primary w-full py-3">
-            Go to Log in now
-          </Link>
-        </div>
+        <Link href="/login" className="btn-primary mt-7 w-full py-3">
+          Go to sign in now
+        </Link>
       </div>
     );
   }
 
   return (
     <div className="animate-fade-up">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-600 ring-8 ring-brand-50/60">
-        <KeyRound className="h-6 w-6" />
-      </div>
-
-      <div className="mt-5 text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Create New Password</h1>
-        {targetEmail && (
-          <p className="mt-1 text-sm text-slate-500">
-            For account <span className="font-semibold text-slate-700">{targetEmail}</span>
+      <div className="flex flex-col items-center text-center">
+        <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 ring-1 ring-brand-100">
+          <KeyRound className="h-6 w-6" />
+        </span>
+        <h1 className="mt-4 font-display text-2xl font-extrabold tracking-tight text-surface-900">
+          Create a new password
+        </h1>
+        {targetEmail ? (
+          <p className="mt-2 text-[15px] leading-relaxed text-surface-500">
+            For <span className="break-all font-semibold text-surface-700">{targetEmail}</span>
+          </p>
+        ) : (
+          <p className="mt-2 text-[15px] leading-relaxed text-surface-500">
+            Choose a strong password you haven&apos;t used before.
           </p>
         )}
       </div>
@@ -159,10 +172,10 @@ function ResetPasswordForm() {
         </div>
       )}
 
-      <form onSubmit={handleReset} className="mt-6 space-y-4">
+      <form onSubmit={handleReset} className="mt-6 space-y-5">
         <div>
           <label className="label" htmlFor="password">
-            New Password
+            New password
           </label>
           <div className="relative">
             <input
@@ -180,7 +193,7 @@ function ResetPasswordForm() {
             <button
               type="button"
               onClick={() => setShowPassword((s) => !s)}
-              className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-slate-400 hover:text-slate-600"
+              className="absolute inset-y-0 right-0 flex w-11 cursor-pointer items-center justify-center text-surface-400 transition hover:text-surface-700"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -190,7 +203,7 @@ function ResetPasswordForm() {
 
         <div>
           <label className="label" htmlFor="confirmPassword">
-            Confirm New Password
+            Confirm new password
           </label>
           <input
             id="confirmPassword"
@@ -204,32 +217,35 @@ function ResetPasswordForm() {
           />
         </div>
 
-        {/* Password Strength Checklist */}
-        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3.5 text-xs text-slate-600 space-y-1.5">
-          <div className="font-semibold text-slate-700 mb-1">Password Requirements:</div>
-          <div className="flex items-center gap-2">
-            <span className={hasMinLen ? "text-emerald-600" : "text-slate-400"}>
-              {hasMinLen ? "✓" : "○"}
-            </span>
-            <span>At least 8 characters</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className={hasNum ? "text-emerald-600" : "text-slate-400"}>
-              {hasNum ? "✓" : "○"}
-            </span>
-            <span>Contains a number (recommended)</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className={hasUpper ? "text-emerald-600" : "text-slate-400"}>
-              {hasUpper ? "✓" : "○"}
-            </span>
-            <span>Contains an uppercase letter</span>
-          </div>
+        {/* Password strength checklist */}
+        <div className="rounded-xl border border-surface-200/80 bg-surface-50 p-4">
+          <p className="text-[12px] font-bold uppercase tracking-[0.1em] text-surface-500">Password requirements</p>
+          <ul className="mt-2.5 space-y-2">
+            {requirements.map((req) => (
+              <li key={req.label} className="flex items-center gap-2 text-[13px]">
+                {req.ok ? (
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                ) : (
+                  <Circle className="h-4 w-4 shrink-0 text-surface-300" />
+                )}
+                <span className={req.ok ? "text-surface-700" : "text-surface-500"}>{req.label}</span>
+              </li>
+            ))}
+          </ul>
+
           {confirmPassword && (
-            <div className="flex items-center gap-2 pt-1 border-t border-slate-200/60">
-              <span className={passwordsMatch ? "text-emerald-600" : "text-rose-500 font-bold"}>
-                {passwordsMatch ? "✓ Passwords match" : "✗ Passwords do not match"}
-              </span>
+            <div className="mt-3 flex items-center gap-2 border-t border-surface-200/70 pt-3 text-[13px] font-semibold">
+              {passwordsMatch ? (
+                <>
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                  <span className="text-emerald-700">Passwords match</span>
+                </>
+              ) : (
+                <>
+                  <XCircle className="h-4 w-4 shrink-0 text-rose-500" />
+                  <span className="text-rose-600">Passwords do not match</span>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -237,15 +253,15 @@ function ResetPasswordForm() {
         <button
           type="submit"
           disabled={busy || !hasMinLen || Boolean(confirmPassword && !passwordsMatch)}
-          className="btn-primary w-full py-3 shadow-md shadow-brand-500/20"
+          className="btn-primary w-full py-3"
         >
           {busy ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin" />
-              Resetting password...
+              Resetting password…
             </>
           ) : (
-            "Update Password"
+            "Update password"
           )}
         </button>
       </form>
@@ -255,33 +271,41 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[#f7f8fb] px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-md">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-surface-50 bg-aurora px-4 py-12 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute inset-0 bg-subtle-grid opacity-60" />
+      <div className="pointer-events-none absolute -left-24 top-16 h-72 w-72 rounded-full bg-brand-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute -right-20 bottom-10 h-64 w-64 rounded-full bg-emerald-200/30 blur-3xl" />
+
+      <div className="relative w-full max-w-md animate-fade-up">
         <div className="flex justify-center">
-          <Logo />
+          <Logo size="lg" />
         </div>
 
-        <div className="mt-8 rounded-2xl border border-slate-200/90 bg-white p-8 shadow-xl shadow-slate-200/50">
+        <div className="card mt-8 p-6 sm:p-8">
           <Suspense
             fallback={
-              <div className="flex flex-col items-center justify-center py-12">
+              <div className="flex flex-col items-center justify-center py-14">
                 <Loader2 className="h-8 w-8 animate-spin text-brand-600" />
-                <p className="mt-3 text-sm text-slate-500">Loading reset session...</p>
+                <p className="mt-4 text-[15px] text-surface-500">Loading reset session…</p>
               </div>
             }
           >
             <ResetPasswordForm />
           </Suspense>
 
-          <div className="mt-8 border-t border-slate-100 pt-6 text-center">
+          <div className="mt-8 border-t border-surface-100 pt-6 text-center">
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-brand-600 transition hover:text-brand-700"
             >
-              <ArrowLeft className="h-4 w-4" /> Back to Log in
+              <ArrowLeft className="h-4 w-4" /> Back to sign in
             </Link>
           </div>
         </div>
+
+        <p className="mt-6 text-center text-[13px] text-surface-400">
+          Secure account recovery · Codestria IELTS
+        </p>
       </div>
     </div>
   );

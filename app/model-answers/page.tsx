@@ -1,76 +1,105 @@
 "use client";
 
+import { useMemo, useState } from "react";
+import Link from "next/link";
 import {
-  AlertCircle,
   ArrowRight,
-  BookOpen,
   CheckCircle2,
+  ChevronDown,
   ChevronRight,
+  ChevronUp,
   Eye,
+  FileText,
   Filter,
-  GraduationCap,
-  Layers,
   Lightbulb,
   PenTool,
   Sparkles,
-  Trophy,
   XCircle,
 } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
-import { MODEL_ESSAYS, ModelEssay } from "@/lib/ielts-content-data";
+import { BandBadge, PageHeader } from "@/components/ui";
+import { MODEL_ESSAYS, type ModelEssay } from "@/lib/ielts-content-data";
+
+type FilterType = "ALL" | "TASK_2" | "TASK_1_ACADEMIC" | "TASK_1_GENERAL";
+
+const FILTERS: { id: FilterType; label: string }[] = [
+  { id: "ALL", label: "All tasks" },
+  { id: "TASK_2", label: "Task 2 essays" },
+  { id: "TASK_1_ACADEMIC", label: "Task 1 academic" },
+];
+
+const TASK_LABELS: Record<ModelEssay["taskType"], string> = {
+  TASK_2: "Task 2 · Essay",
+  TASK_1_ACADEMIC: "Task 1 · Academic",
+  TASK_1_GENERAL: "Task 1 · General",
+};
 
 export default function ModelAnswersPage() {
   const [selectedEssay, setSelectedEssay] = useState<ModelEssay>(MODEL_ESSAYS[0]);
-  const [filterType, setFilterType] = useState<"ALL" | "TASK_2" | "TASK_1_ACADEMIC" | "TASK_1_GENERAL">("ALL");
+  const [filterType, setFilterType] = useState<FilterType>("ALL");
   const [highlightCohesion, setHighlightCohesion] = useState(true);
   const [highlightLexis, setHighlightLexis] = useState(true);
   const [highlightGrammar, setHighlightGrammar] = useState(true);
   const [viewMode, setViewMode] = useState<"model" | "comparison">("model");
+  const [essayExpanded, setEssayExpanded] = useState(true);
 
-  const filteredEssays = MODEL_ESSAYS.filter(
-    (e) => filterType === "ALL" || e.taskType === filterType
+  const filteredEssays = MODEL_ESSAYS.filter((e) => filterType === "ALL" || e.taskType === filterType);
+
+  // Normalise the annotation palette in the stored HTML to the Calm Horizon accents.
+  const essayHtml = useMemo(
+    () =>
+      selectedEssay.essayHtml
+        .replaceAll("bg-blue-100", "bg-sky-100")
+        .replaceAll("text-blue-900", "text-sky-900")
+        .replaceAll("bg-purple-100", "bg-violet-100")
+        .replaceAll("text-purple-900", "text-violet-900"),
+    [selectedEssay],
   );
 
-  return (
-    <div className="mx-auto max-w-8xl px-4 py-8 sm:px-6 sm:py-12">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex flex-wrap items-center gap-2 mb-2">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-purple-200 bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-800">
-            <PenTool className="h-3.5 w-3.5 text-purple-600" />
-            <span>Cambridge Examiner Benchmarks</span>
-          </div>
-          <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] font-medium text-slate-500">
-            by Codestria
-          </span>
-        </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-          Band 9.0 Model Writing Essays &amp; Annotations
-        </h1>
-        <p className="mt-2 text-base text-slate-600 max-w-3xl">
-          Examine authentic Band 9 sample responses side-by-side with official examiner commentary across Task Response, Coherence &amp; Cohesion, Lexical Resource, and Grammatical Range. Compare against common Band 6 pitfalls.
-        </p>
-      </div>
+  const highlightClasses = [
+    !highlightCohesion && "[&_.bg-sky-100]:bg-transparent [&_.bg-sky-100]:text-surface-700",
+    !highlightLexis && "[&_.bg-emerald-100]:bg-transparent [&_.bg-emerald-100]:text-surface-700",
+    !highlightGrammar && "[&_.bg-violet-100]:bg-transparent [&_.bg-violet-100]:text-surface-700",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
-      {/* Task Filters */}
-      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-xs font-semibold text-slate-500 mr-1 flex items-center gap-1">
-            <Filter className="h-3 w-3" /> Filter:
+  const selectEssay = (essay: ModelEssay) => {
+    setSelectedEssay(essay);
+    setEssayExpanded(true);
+  };
+
+  return (
+    <div className="page-container space-y-8 py-8 sm:py-10">
+      <PageHeader
+        eyebrow="Cambridge examiner benchmarks"
+        title="Band 9 model answers"
+        description="Study authentic Band 9 responses with examiner commentary across Task Response, Coherence & Cohesion, Lexical Resource and Grammatical Range — then compare against common Band 6 pitfalls."
+        actions={
+          <Link href="/tests?type=ACADEMIC" className="btn-secondary">
+            <PenTool className="h-4 w-4" />
+            Start a writing test
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        }
+      />
+
+      {/* Filters + view toggle */}
+      <div className="card flex flex-col gap-4 p-3 sm:p-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 pr-1 text-[13px] font-semibold text-surface-500">
+            <Filter className="h-3.5 w-3.5" />
+            Filter
           </span>
-          {[
-            { id: "ALL", label: "All Tasks" },
-            { id: "TASK_2", label: "Task 2 Essays" },
-            { id: "TASK_1_ACADEMIC", label: "Task 1 Academic" },
-          ].map((tab) => (
+          {FILTERS.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setFilterType(tab.id as any)}
-              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+              type="button"
+              onClick={() => setFilterType(tab.id)}
+              aria-pressed={filterType === tab.id}
+              className={`cursor-pointer rounded-xl px-3.5 py-2 text-[13px] font-semibold transition ${
                 filterType === tab.id
-                  ? "bg-purple-600 text-white shadow-xs"
-                  : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                  ? "bg-brand-600 text-white shadow-sm"
+                  : "bg-surface-100 text-surface-600 hover:bg-surface-200/80 hover:text-surface-900"
               }`}
             >
               {tab.label}
@@ -78,284 +107,295 @@ export default function ModelAnswersPage() {
           ))}
         </div>
 
-        {/* View mode toggle */}
-        <div className="flex items-center gap-1 rounded-xl bg-slate-100 p-1">
-          <button
-            onClick={() => setViewMode("model")}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-              viewMode === "model"
-                ? "bg-white text-slate-900 shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            Band 9 Annotated Model
-          </button>
-          <button
-            onClick={() => setViewMode("comparison")}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
-              viewMode === "comparison"
-                ? "bg-white text-slate-900 shadow-xs"
-                : "text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            Band 9 vs Band 6 Contrast
-          </button>
+        <div className="inline-flex shrink-0 rounded-xl border border-surface-200 bg-surface-100/80 p-1">
+          {(
+            [
+              ["model", "Band 9 annotated"],
+              ["comparison", "Band 9 vs Band 6"],
+            ] as const
+          ).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setViewMode(id)}
+              aria-pressed={viewMode === id}
+              className={`cursor-pointer rounded-lg px-3 py-1.5 text-[12px] font-semibold transition sm:text-[13px] ${
+                viewMode === id
+                  ? "bg-white text-surface-900 shadow-xs ring-1 ring-surface-200"
+                  : "text-surface-500 hover:text-surface-900"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
-        {/* Left Column: Task Selector */}
-        <div className="space-y-3 lg:col-span-4">
-          <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-2">
-            Select Exam Task
-          </label>
-          {filteredEssays.map((essay) => (
-            <div
-              key={essay.id}
-              onClick={() => setSelectedEssay(essay)}
-              className={`cursor-pointer rounded-2xl border p-4 transition ${
-                selectedEssay.id === essay.id
-                  ? "border-purple-600 bg-purple-50/50 shadow-sm"
-                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/60"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="rounded-md bg-purple-100 px-2 py-0.5 text-[10px] font-bold text-purple-700">
-                  {essay.taskType.replace(/_/g, " ")}
-                </span>
-                <span className="text-xs font-extrabold text-purple-700">
-                  Band {essay.band.toFixed(1)}
-                </span>
-              </div>
-              <h3 className="mt-2 text-sm font-bold text-slate-900 leading-snug">
-                {essay.title}
-              </h3>
-              <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500">
-                <span>{essay.wordCount} words</span>
-                <span className="text-purple-600 font-semibold flex items-center gap-1">
-                  Inspect <ChevronRight className="h-3 w-3" />
-                </span>
-              </div>
-            </div>
-          ))}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
+        {/* Left column: task selector */}
+        <div className="space-y-4 lg:col-span-4">
+          <div className="space-y-3">
+            <span className="eyebrow block">Select exam task</span>
+            {filteredEssays.map((essay) => {
+              const isSelected = selectedEssay.id === essay.id;
+              return (
+                <button
+                  key={essay.id}
+                  type="button"
+                  onClick={() => selectEssay(essay)}
+                  aria-pressed={isSelected}
+                  className={`w-full cursor-pointer rounded-2xl border p-4 text-left transition ${
+                    isSelected
+                      ? "border-brand-300 bg-brand-50/60 shadow-xs ring-1 ring-brand-200"
+                      : "border-surface-200/80 bg-white shadow-xs hover:border-surface-300 hover:bg-surface-50/60"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span
+                      className={`rounded-md border px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${
+                        isSelected
+                          ? "border-brand-200 bg-white text-brand-700"
+                          : "border-surface-200 bg-surface-50 text-surface-500"
+                      }`}
+                    >
+                      {TASK_LABELS[essay.taskType]}
+                    </span>
+                    <BandBadge band={essay.band} />
+                  </div>
+                  <h3 className="mt-2.5 text-[15px] font-bold leading-snug text-surface-900">{essay.title}</h3>
+                  <div className="mt-2.5 flex items-center justify-between text-[12px] text-surface-500">
+                    <span>{essay.wordCount} words</span>
+                    <span
+                      className={`inline-flex items-center gap-1 font-semibold ${
+                        isSelected ? "text-brand-700" : "text-surface-400"
+                      }`}
+                    >
+                      Inspect
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
 
-          {/* Interactive Feature Highlighter Legend & Toggles */}
+          {/* Highlighter legend + toggles */}
           {viewMode === "model" && (
-            <div className="card p-5 mt-6 border-slate-200">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 mb-3 flex items-center gap-1.5">
-                <Eye className="h-3.5 w-3.5 text-purple-600" />
-                Linguistic Element Highlighters
+            <div className="card p-5">
+              <h4 className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-[0.1em] text-surface-500">
+                <Eye className="h-4 w-4 text-brand-500" />
+                Linguistic highlighters
               </h4>
-              <div className="space-y-2 text-xs">
-                <label className="flex items-center gap-2.5 cursor-pointer">
+              <div className="mt-4 space-y-3">
+                <label className="flex cursor-pointer items-start gap-2.5">
                   <input
                     type="checkbox"
                     checked={highlightCohesion}
                     onChange={(e) => setHighlightCohesion(e.target.checked)}
-                    className="rounded text-purple-600 focus:ring-purple-500"
+                    className="mt-0.5 h-4 w-4 cursor-pointer accent-brand-600"
                   />
-                  <span className="inline-block h-3 w-3 rounded bg-blue-100 border border-blue-300" />
-                  <span className="text-slate-700 font-medium">Cohesion &amp; Transitional Markers</span>
+                  <span className="inline-block h-3 w-3 shrink-0 rounded border border-sky-300 bg-sky-100" />
+                  <span className="text-[13px] font-medium leading-snug text-surface-700">
+                    Cohesion &amp; transitional markers
+                  </span>
                 </label>
-                <label className="flex items-center gap-2.5 cursor-pointer">
+                <label className="flex cursor-pointer items-start gap-2.5">
                   <input
                     type="checkbox"
                     checked={highlightLexis}
                     onChange={(e) => setHighlightLexis(e.target.checked)}
-                    className="rounded text-purple-600 focus:ring-purple-500"
+                    className="mt-0.5 h-4 w-4 cursor-pointer accent-brand-600"
                   />
-                  <span className="inline-block h-3 w-3 rounded bg-emerald-100 border border-emerald-300" />
-                  <span className="text-slate-700 font-medium">Band 9 Academic Collocations</span>
+                  <span className="inline-block h-3 w-3 shrink-0 rounded border border-emerald-300 bg-emerald-100" />
+                  <span className="text-[13px] font-medium leading-snug text-surface-700">
+                    Band 9 academic collocations
+                  </span>
                 </label>
-                <label className="flex items-center gap-2.5 cursor-pointer">
+                <label className="flex cursor-pointer items-start gap-2.5">
                   <input
                     type="checkbox"
                     checked={highlightGrammar}
                     onChange={(e) => setHighlightGrammar(e.target.checked)}
-                    className="rounded text-purple-600 focus:ring-purple-500"
+                    className="mt-0.5 h-4 w-4 cursor-pointer accent-brand-600"
                   />
-                  <span className="inline-block h-3 w-3 rounded bg-purple-100 border border-purple-300" />
-                  <span className="text-slate-700 font-medium">Complex Grammatical Structures</span>
+                  <span className="inline-block h-3 w-3 shrink-0 rounded border border-violet-300 bg-violet-100" />
+                  <span className="text-[13px] font-medium leading-snug text-surface-700">
+                    Complex grammatical structures
+                  </span>
                 </label>
               </div>
             </div>
           )}
         </div>
 
-        {/* Right Column: Model Essay Display & Examiner Notes */}
+        {/* Right column: essay + examiner notes */}
         <div className="space-y-6 lg:col-span-8">
-          {/* Prompt Banner */}
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-              Official IELTS Exam Prompt
+          {/* Prompt */}
+          <div className="card-muted p-5 sm:p-6">
+            <span className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.1em] text-surface-500">
+              <FileText className="h-3.5 w-3.5 text-brand-500" />
+              Official IELTS exam prompt
             </span>
-            <p className="text-sm font-semibold text-slate-800 leading-relaxed">
-              "{selectedEssay.prompt}"
+            <p className="mt-2.5 text-[15px] font-medium leading-relaxed text-surface-800">
+              &ldquo;{selectedEssay.prompt}&rdquo;
             </p>
           </div>
 
-          {/* VIEW MODE: BAND 9 ANNOTATED MODEL */}
+          {/* Model mode */}
           {viewMode === "model" && (
             <>
-              {/* Essay Paper Container */}
-              <div className="card p-8 shadow-sm">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
-                  <div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-purple-700">
-                      Band 9.0 Model Response
+              <article className="card p-5 sm:p-7">
+                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-surface-100 pb-4">
+                  <div className="min-w-0">
+                    <span className="text-[12px] font-bold uppercase tracking-[0.1em] text-brand-700">
+                      Band 9.0 model response
                     </span>
-                    <h2 className="text-lg font-extrabold text-slate-900 mt-0.5">
+                    <h2 className="mt-1 font-display text-lg font-extrabold leading-snug tracking-tight text-surface-900 sm:text-xl">
                       {selectedEssay.title}
                     </h2>
                   </div>
-                  <div className="text-right">
-                    <span className="rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-800">
-                      {selectedEssay.wordCount} Words
-                    </span>
+                  <div className="flex shrink-0 flex-wrap items-center gap-2">
+                    <span className="badge-neutral">{selectedEssay.wordCount} words</span>
+                    <BandBadge band={selectedEssay.band} />
                   </div>
                 </div>
 
-                {/* Essay text formatted with semantic spans */}
-                <div
-                  className="prose prose-slate max-w-none text-sm leading-relaxed text-slate-800 space-y-4"
-                  dangerouslySetInnerHTML={{ __html: selectedEssay.essayHtml }}
-                />
-              </div>
+                <div className={`relative ${essayExpanded ? "" : "max-h-64 overflow-hidden"}`}>
+                  <div
+                    className={`max-w-prose pt-5 text-[16px] leading-[1.85] text-surface-700 [&_p]:mb-5 [&_p:last-child]:mb-0 [&_span]:rounded [&_span]:px-1 [&_span]:font-medium ${highlightClasses}`}
+                    dangerouslySetInnerHTML={{ __html: essayHtml }}
+                  />
+                  {!essayExpanded && (
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white to-transparent" />
+                  )}
+                </div>
 
-              {/* Examiner 4-Criteria Assessment Breakdown */}
-              <div className="card p-6 shadow-sm border-purple-100 bg-gradient-to-br from-white to-purple-50/20">
-                <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-4">
-                  <Sparkles className="h-4 w-4 text-purple-600" />
-                  Official Examiner Criteria Annotations (Band 9.0)
+                <div className="mt-5 border-t border-surface-100 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setEssayExpanded((value) => !value)}
+                    className="btn-ghost btn-sm"
+                  >
+                    {essayExpanded ? (
+                      <>
+                        Show less
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      </>
+                    ) : (
+                      <>
+                        Read full answer
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </article>
+
+              {/* Examiner criteria */}
+              <section className="card p-5 sm:p-6">
+                <h3 className="flex items-center gap-2 font-display text-[15px] font-bold text-surface-900">
+                  <Sparkles className="h-4 w-4 text-brand-600" />
+                  Examiner criteria annotations
                 </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                  <div className="rounded-xl border border-slate-100 bg-white p-4">
-                    <div className="font-bold text-purple-800 uppercase tracking-wider text-[11px]">
-                      Task Achievement / Response
+                <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {(
+                    [
+                      ["Task achievement / response", "text-brand-700", selectedEssay.analysis.taskAchievementOrResponse],
+                      ["Coherence & cohesion", "text-sky-700", selectedEssay.analysis.coherenceAndCohesion],
+                      ["Lexical resource", "text-emerald-700", selectedEssay.analysis.lexicalResource],
+                      ["Grammatical range & accuracy", "text-violet-700", selectedEssay.analysis.grammaticalRangeAndAccuracy],
+                    ] as const
+                  ).map(([label, tone, body]) => (
+                    <div key={label} className="rounded-xl border border-surface-200/80 bg-surface-50/60 p-4">
+                      <div className={`text-[12px] font-bold uppercase tracking-[0.08em] ${tone}`}>{label}</div>
+                      <p className="mt-1.5 text-[14px] leading-relaxed text-surface-600">{body}</p>
                     </div>
-                    <p className="mt-1 text-slate-600 leading-relaxed">
-                      {selectedEssay.analysis.taskAchievementOrResponse}
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-slate-100 bg-white p-4">
-                    <div className="font-bold text-blue-800 uppercase tracking-wider text-[11px]">
-                      Coherence &amp; Cohesion
-                    </div>
-                    <p className="mt-1 text-slate-600 leading-relaxed">
-                      {selectedEssay.analysis.coherenceAndCohesion}
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-slate-100 bg-white p-4">
-                    <div className="font-bold text-emerald-800 uppercase tracking-wider text-[11px]">
-                      Lexical Resource
-                    </div>
-                    <p className="mt-1 text-slate-600 leading-relaxed">
-                      {selectedEssay.analysis.lexicalResource}
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border border-slate-100 bg-white p-4">
-                    <div className="font-bold text-indigo-800 uppercase tracking-wider text-[11px]">
-                      Grammatical Range &amp; Accuracy
-                    </div>
-                    <p className="mt-1 text-slate-600 leading-relaxed">
-                      {selectedEssay.analysis.grammaticalRangeAndAccuracy}
-                    </p>
-                  </div>
+                  ))}
                 </div>
-              </div>
+              </section>
 
-              {/* Key Takeaways */}
-              <div className="card p-5">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1.5">
-                  <Lightbulb className="h-3.5 w-3.5 text-amber-600" />
-                  Key Writing Band 9 Strategies
-                </h4>
-                <ul className="space-y-2 text-xs text-slate-700">
+              {/* Takeaways */}
+              <section className="card p-5 sm:p-6">
+                <h3 className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-[0.1em] text-surface-500">
+                  <Lightbulb className="h-4 w-4 text-amber-600" />
+                  Key Band 9 writing strategies
+                </h3>
+                <ul className="mt-4 space-y-3">
                   {selectedEssay.keyTakeaways.map((takeaway, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <li key={i} className="flex items-start gap-2.5 text-[14px] leading-relaxed text-surface-700">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
                       <span>{takeaway}</span>
                     </li>
                   ))}
                 </ul>
-              </div>
+              </section>
             </>
           )}
 
-          {/* VIEW MODE: COMPARISON CONTRAST (BAND 9 VS BAND 6) */}
+          {/* Comparison mode */}
           {viewMode === "comparison" && (
-            <div className="space-y-6 animate-fade-up">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Band 6 Sample */}
-                <div className="card p-6 border-amber-200 bg-amber-50/20">
-                  <div className="flex items-center justify-between border-b border-amber-200/80 pb-3 mb-4">
-                    <span className="text-xs font-bold text-amber-800 uppercase tracking-wider">
-                      Band 6.0 Sample Attempt
+            <div className="animate-fade-up space-y-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                {/* Band 6 */}
+                <article className="card border-amber-200/80 bg-amber-50/30 p-5 sm:p-6">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-amber-200/70 pb-3">
+                    <span className="text-[12px] font-bold uppercase tracking-[0.1em] text-amber-800">
+                      Band 6.0 sample attempt
                     </span>
-                    <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold text-amber-800">
-                      Band 6.0
-                    </span>
+                    <span className="badge-warning">Band 6.0</span>
                   </div>
-                  <p className="text-xs text-slate-700 leading-relaxed italic bg-white p-4 rounded-xl border border-amber-100">
-                    "{selectedEssay.comparisonBand6.essayText}"
+                  <p className="mt-4 rounded-xl border border-amber-100 bg-white p-4 text-[14px] italic leading-relaxed text-surface-700">
+                    &ldquo;{selectedEssay.comparisonBand6.essayText}&rdquo;
                   </p>
 
-                  <div className="mt-4">
-                    <h5 className="text-[11px] font-bold uppercase tracking-wider text-rose-700 mb-2 flex items-center gap-1">
+                  <div className="mt-5">
+                    <h5 className="flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.08em] text-rose-700">
                       <XCircle className="h-3.5 w-3.5" />
-                      Examiner Identified Flaws:
+                      Examiner-identified flaws
                     </h5>
-                    <ul className="space-y-1.5 text-xs text-slate-600">
+                    <ul className="mt-2.5 space-y-2">
                       {selectedEssay.comparisonBand6.flaws.map((flaw, i) => (
-                        <li key={i} className="flex items-start gap-1.5">
-                          <span className="text-rose-500 font-bold">•</span>
+                        <li key={i} className="flex items-start gap-2 text-[13px] leading-relaxed text-surface-600">
+                          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-rose-400" />
                           <span>{flaw}</span>
                         </li>
                       ))}
                     </ul>
                   </div>
-                </div>
+                </article>
 
-                {/* Band 9 Summary */}
-                <div className="card p-6 border-emerald-200 bg-emerald-50/20">
-                  <div className="flex items-center justify-between border-b border-emerald-200/80 pb-3 mb-4">
-                    <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
-                      Band 9.0 Solution
+                {/* Band 9 */}
+                <article className="card border-emerald-200/80 bg-emerald-50/30 p-5 sm:p-6">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-200/70 pb-3">
+                    <span className="text-[12px] font-bold uppercase tracking-[0.1em] text-emerald-800">
+                      Band 9.0 solution
                     </span>
-                    <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-bold text-emerald-800">
-                      Band 9.0
-                    </span>
+                    <span className="badge-success">Band 9.0</span>
                   </div>
                   <div
-                    className="text-xs text-slate-800 leading-relaxed bg-white p-4 rounded-xl border border-emerald-100 line-clamp-10"
-                    dangerouslySetInnerHTML={{ __html: selectedEssay.essayHtml }}
+                    className="mt-4 line-clamp-10 rounded-xl border border-emerald-100 bg-white p-4 text-[14px] leading-relaxed text-surface-700 [&_p]:mb-3 [&_p:last-child]:mb-0 [&_span]:rounded [&_span]:px-1 [&_span]:font-medium"
+                    dangerouslySetInnerHTML={{ __html: essayHtml }}
                   />
 
-                  <div className="mt-4">
-                    <h5 className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 mb-2 flex items-center gap-1">
+                  <div className="mt-5">
+                    <h5 className="flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.08em] text-emerald-700">
                       <CheckCircle2 className="h-3.5 w-3.5" />
-                      Why it achieved Band 9:
+                      Why it achieved Band 9
                     </h5>
-                    <ul className="space-y-1.5 text-xs text-slate-600">
-                      <li className="flex items-start gap-1.5">
-                        <span className="text-emerald-500 font-bold">•</span>
-                        <span>Zero mechanical templates; ideas dictate transitions.</span>
-                      </li>
-                      <li className="flex items-start gap-1.5">
-                        <span className="text-emerald-500 font-bold">•</span>
-                        <span>Precise academic collocations without pretentious word stuffing.</span>
-                      </li>
-                      <li className="flex items-start gap-1.5">
-                        <span className="text-emerald-500 font-bold">•</span>
-                        <span>Nuanced, balanced thesis that addresses subtle prompt nuances.</span>
-                      </li>
+                    <ul className="mt-2.5 space-y-2">
+                      {[
+                        "Zero mechanical templates; ideas dictate transitions.",
+                        "Precise academic collocations without pretentious word stuffing.",
+                        "Nuanced, balanced thesis that addresses subtle prompt nuances.",
+                      ].map((point) => (
+                        <li key={point} className="flex items-start gap-2 text-[13px] leading-relaxed text-surface-600">
+                          <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-emerald-400" />
+                          <span>{point}</span>
+                        </li>
+                      ))}
                     </ul>
                   </div>
-                </div>
+                </article>
               </div>
             </div>
           )}

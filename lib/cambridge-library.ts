@@ -203,32 +203,32 @@ E In 1979, UNESCO inscribed El Jem onto the World Heritage List, inaugurating a 
                 {
                   id: "c19_a1_r_q8",
                   type: "gap",
-                  prompt: "The monument was founded during the rule of Gordian I, whose rise occurred during the Year of the _____. [c19_a1_r_q8]",
+                  prompt: "The monument was founded during the rule of Gordian I, whose rise occurred during the Year of the _____.",
                 },
                 {
                   id: "c19_a1_r_q9",
                   type: "gap",
-                  prompt: "To transport the heavy stones, workers utilized timber rollers assisted by _____ draught teams. [c19_a1_r_q9]",
+                  prompt: "To transport the heavy stones, workers utilized timber rollers assisted by _____ draught teams.",
                 },
                 {
                   id: "c19_a1_r_q10",
                   type: "gap",
-                  prompt: "Spectators accessed their seats via exterior corridors known technically as _____. [c19_a1_r_q10]",
+                  prompt: "Spectators accessed their seats via exterior corridors known technically as _____.",
                 },
                 {
                   id: "c19_a1_r_q11",
                   type: "gap",
-                  prompt: "Civic dignitaries and senators were granted seating positions upon the _____ beside the arena perimeter. [c19_a1_r_q11]",
+                  prompt: "Civic dignitaries and senators were granted seating positions upon the _____ beside the arena perimeter.",
                 },
                 {
                   id: "c19_a1_r_q12",
                   type: "gap",
-                  prompt: "During Arab conquests, the structure was frequently utilized as a fortified _____. [c19_a1_r_q12]",
+                  prompt: "During Arab conquests, the structure was frequently utilized as a fortified _____.",
                 },
                 {
                   id: "c19_a1_r_q13",
                   type: "gap",
-                  prompt: "Modern conservators have introduced breathable _____ mortars to replace harmful cement. [c19_a1_r_q13]",
+                  prompt: "Modern conservators have introduced breathable _____ mortars to replace harmful cement.",
                 },
               ],
             },
@@ -338,22 +338,22 @@ F Ultimately, mitigating urban overheating necessitates a coherent legislative f
                 {
                   id: "c19_a1_r_q23",
                   type: "gap",
-                  prompt: "The lack of nocturnal cooling in urban centres dramatically elevates _____ mortality during heatwaves. [c19_a1_r_q23]",
+                  prompt: "The lack of nocturnal cooling in urban centres dramatically elevates _____ mortality during heatwaves.",
                 },
                 {
                   id: "c19_a1_r_q24",
                   type: "gap",
-                  prompt: "Dark asphalt displays an albedo rating that is notably low in solar _____. [c19_a1_r_q24]",
+                  prompt: "Dark asphalt displays an albedo rating that is notably low in solar _____.",
                 },
                 {
                   id: "c19_a1_r_q25",
                   type: "gap",
-                  prompt: "Vegetated substrate layers installed on rooftops are known in civil engineering as _____. [c19_a1_r_q25]",
+                  prompt: "Vegetated substrate layers installed on rooftops are known in civil engineering as _____.",
                 },
                 {
                   id: "c19_a1_r_q26",
                   type: "gap",
-                  prompt: "Singapore authorities mandate the preservation of designated _____ to promote air movement between high-rises. [c19_a1_r_q26]",
+                  prompt: "Singapore authorities mandate the preservation of designated _____ to promote air movement between high-rises.",
                 },
               ],
             },
@@ -698,52 +698,52 @@ F As optogenetics and high-resolution functional neuroimaging advance, researche
                 {
                   id: "c19_a1_l_q1",
                   type: "gap",
-                  prompt: "Name of qualification: Open Water _____ certification. [c19_a1_l_q1]",
+                  prompt: "Name of qualification: Open Water _____ certification.",
                 },
                 {
                   id: "c19_a1_l_q2",
                   type: "gap",
-                  prompt: "Pool training facility located on _____ Road. [c19_a1_l_q2]",
+                  prompt: "Pool training facility located on _____ Road.",
                 },
                 {
                   id: "c19_a1_l_q3",
                   type: "gap",
-                  prompt: "Preferred training slot: _____ morning at 8:00 AM. [c19_a1_l_q3]",
+                  prompt: "Preferred training slot: _____ morning at 8:00 AM.",
                 },
                 {
                   id: "c19_a1_l_q4",
                   type: "gap",
-                  prompt: "Doctor's clearance must confirm absence of conditions such as _____. [c19_a1_l_q4]",
+                  prompt: "Doctor's clearance must confirm absence of conditions such as _____.",
                 },
                 {
                   id: "c19_a1_l_q5",
                   type: "gap",
-                  prompt: "Trainees must bring their own mask, snorkel, and neoprene _____. [c19_a1_l_q5]",
+                  prompt: "Trainees must bring their own mask, snorkel, and neoprene _____.",
                 },
                 {
                   id: "c19_a1_l_q6",
                   type: "gap",
-                  prompt: "Discount at pro shop for registered students: _____ percent. [c19_a1_l_q6]",
+                  prompt: "Discount at pro shop for registered students: _____ percent.",
                 },
                 {
                   id: "c19_a1_l_q7",
                   type: "gap",
-                  prompt: "Total price of certification package: £_____. [c19_a1_l_q7]",
+                  prompt: "Total price of certification package: £_____.",
                 },
                 {
                   id: "c19_a1_l_q8",
                   type: "gap",
-                  prompt: "Initial reservation deposit required: £_____. [c19_a1_l_q8]",
+                  prompt: "Initial reservation deposit required: £_____.",
                 },
                 {
                   id: "c19_a1_l_q9",
                   type: "gap",
-                  prompt: "Commencement date for next Saturday cohort: October _____th. [c19_a1_l_q9]",
+                  prompt: "Commencement date for next Saturday cohort: October _____th.",
                 },
                 {
                   id: "c19_a1_l_q10",
                   type: "gap",
-                  prompt: "Candidate's surname: _____. [c19_a1_l_q10]",
+                  prompt: "Candidate's surname: _____.",
                 },
               ],
             },
@@ -876,32 +876,32 @@ F As optogenetics and high-resolution functional neuroimaging advance, researche
                 {
                   id: "c19_a1_l_q31",
                   type: "gap",
-                  prompt: "Unlike baleen whales, odontocetes generate _____ sonar systems to hunt prey. [c19_a1_l_q31]",
+                  prompt: "Unlike baleen whales, odontocetes generate _____ sonar systems to hunt prey.",
                 },
                 {
                   id: "c19_a1_l_q32",
                   type: "gap",
-                  prompt: "Acoustic pulses originate when air passes across membranes called _____. [c19_a1_l_q32]",
+                  prompt: "Acoustic pulses originate when air passes across membranes called _____.",
                 },
                 {
                   id: "c19_a1_l_q33",
                   type: "gap",
-                  prompt: "Sound frequencies produced can surpass _____ kilohertz. [c19_a1_l_q33]",
+                  prompt: "Sound frequencies produced can surpass _____ kilohertz.",
                 },
                 {
                   id: "c19_a1_l_q34",
                   type: "gap",
-                  prompt: "The fatty structure on the forehead known as the _____ focuses sound into a directional beam. [c19_a1_l_q34]",
+                  prompt: "The fatty structure on the forehead known as the _____ focuses sound into a directional beam.",
                 },
                 {
                   id: "c19_a1_l_q35",
                   type: "gap",
-                  prompt: "Returning sound echoes are received primarily via the animal's lower _____. [c19_a1_l_q35]",
+                  prompt: "Returning sound echoes are received primarily via the animal's lower _____.",
                 },
                 {
                   id: "c19_a1_l_q36",
                   type: "gap",
-                  prompt: "The jaw functions as an acoustic _____, guiding sound directly to the auditory nerve. [c19_a1_l_q36]",
+                  prompt: "The jaw functions as an acoustic _____, guiding sound directly to the auditory nerve.",
                 },
               ],
             },
@@ -1110,37 +1110,37 @@ Structures and Livestock: Small timber garden sheds not exceeding 2.4 metres by 
                 {
                   id: "c19_g1_r_q8",
                   type: "gap",
-                  prompt: "Pool lockers can be operated using a £1 coin or an electronic _____ obtained from reception. [c19_g1_r_q8]",
+                  prompt: "Pool lockers can be operated using a £1 coin or an electronic _____ obtained from reception.",
                 },
                 {
                   id: "c19_g1_r_q9",
                   type: "gap",
-                  prompt: "Court cancellations made with less than _____ hours notice will be charged a penalty fee. [c19_g1_r_q9]",
+                  prompt: "Court cancellations made with less than _____ hours notice will be charged a penalty fee.",
                 },
                 {
                   id: "c19_g1_r_q10",
                   type: "gap",
-                  prompt: "Footwear worn on wooden courts must feature non-marking _____ soles. [c19_g1_r_q10]",
+                  prompt: "Footwear worn on wooden courts must feature non-marking _____ soles.",
                 },
                 {
                   id: "c19_g1_r_q11",
                   type: "gap",
-                  prompt: "Allotment plots are distributed in accordance with a chronological _____ list. [c19_g1_r_q11]",
+                  prompt: "Allotment plots are distributed in accordance with a chronological _____ list.",
                 },
                 {
                   id: "c19_g1_r_q12",
                   type: "gap",
-                  prompt: "Official allotment inspections occur on a _____ basis across three specific months. [c19_g1_r_q12]",
+                  prompt: "Official allotment inspections occur on a _____ basis across three specific months.",
                 },
                 {
                   id: "c19_g1_r_q13",
                   type: "gap",
-                  prompt: "Tenants wishing to erect a shed must first gain permission in writing from the _____. [c19_g1_r_q13]",
+                  prompt: "Tenants wishing to erect a shed must first gain permission in writing from the _____.",
                 },
                 {
                   id: "c19_g1_r_q14",
                   type: "gap",
-                  prompt: "Tenants may keep up to six hens, but _____ are barred to prevent noise complaints. [c19_g1_r_q14]",
+                  prompt: "Tenants may keep up to six hens, but _____ are barred to prevent noise complaints.",
                 },
               ],
             },
@@ -1173,37 +1173,37 @@ Grievance Escalation: When interpersonal workplace disputes or procedural grieva
                 {
                   id: "c19_g1_r_q15",
                   type: "gap",
-                  prompt: "Staff become eligible for hybrid telework once their three-month _____ is completed. [c19_g1_r_q15]",
+                  prompt: "Staff become eligible for hybrid telework once their three-month _____ is completed.",
                 },
                 {
                   id: "c19_g1_r_q16",
                   type: "gap",
-                  prompt: "The company grants a one-time equipment stipend of up to £_____ for home office upgrades. [c19_g1_r_q16]",
+                  prompt: "The company grants a one-time equipment stipend of up to £_____ for home office upgrades.",
                 },
                 {
                   id: "c19_g1_r_q17",
                   type: "gap",
-                  prompt: "Using separate monitors and keyboards helps prevent cervical _____ caused by laptop screens. [c19_g1_r_q17]",
+                  prompt: "Using separate monitors and keyboards helps prevent cervical _____ caused by laptop screens.",
                 },
                 {
                   id: "c19_g1_r_q18",
                   type: "gap",
-                  prompt: "Annual eye exam costs are fully refunded for staff using VDU monitors for over _____ hours daily. [c19_g1_r_q18]",
+                  prompt: "Annual eye exam costs are fully refunded for staff using VDU monitors for over _____ hours daily.",
                 },
                 {
                   id: "c19_g1_r_q19",
                   type: "gap",
-                  prompt: "Formal employee appraisals are administered on a _____ basis in June and December. [c19_g1_r_q19]",
+                  prompt: "Formal employee appraisals are administered on a _____ basis in June and December.",
                 },
                 {
                   id: "c19_g1_r_q20",
                   type: "gap",
-                  prompt: "A formal written grievance must be delivered to HR within _____ working days of an incident. [c19_g1_r_q20]",
+                  prompt: "A formal written grievance must be delivered to HR within _____ working days of an incident.",
                 },
                 {
                   id: "c19_g1_r_q21",
                   type: "gap",
-                  prompt: "Employees possess the legal right to be accompanied by a trade _____ or colleague. [c19_g1_r_q21]",
+                  prompt: "Employees possess the legal right to be accompanied by a trade _____ or colleague.",
                 },
               ],
             },
@@ -1436,12 +1436,45 @@ F The fourth and current Eddystone beacon, designed by Sir James Douglass and co
 // Standard Official IELTS Band Calculation Tables
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Objective answer checking (mirrors backend/src/scoring/bands.ts)
+// ---------------------------------------------------------------------------
+
+function normalizeObjectiveAnswer(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[’']/g, "'")
+    .replace(/[^a-z0-9£$%.:' ]/g, " ")
+    .replace(/\s+/g, " ")
+    .replace(/^(a|an|the) /, "")
+    .replace(/\.$/, "")
+    .trim();
+}
+
+const OBJECTIVE_ALIASES: Record<string, string> = {
+  t: "true",
+  f: "false",
+  ng: "not given",
+  y: "yes",
+  n: "no",
+};
+
+/** True when a Reading/Listening answer matches any accepted answer. */
+export function isObjectiveAnswerCorrect(given: string | undefined, accepted: string[]): boolean {
+  if (!given || !given.trim()) return false;
+  const normalized = normalizeObjectiveAnswer(given);
+  const target = OBJECTIVE_ALIASES[normalized] ?? normalized;
+  return accepted.some((a) => normalizeObjectiveAnswer(a) === target);
+}
+
 export function calculateIELTSBand(
   rawScore: number,
   module: "LISTENING" | "READING",
   track: "ACADEMIC" | "GENERAL" = "ACADEMIC",
 ): number {
   const score = Math.max(0, Math.min(40, Math.round(rawScore)));
+
+  if (score === 0) return 0.0;
 
   if (module === "LISTENING") {
     if (score >= 39) return 9.0;
@@ -1455,7 +1488,12 @@ export function calculateIELTSBand(
     if (score >= 16) return 5.0;
     if (score >= 13) return 4.5;
     if (score >= 10) return 4.0;
-    return 3.5;
+    if (score >= 8) return 3.5;
+    if (score >= 6) return 3.0;
+    if (score >= 4) return 2.5;
+    if (score >= 3) return 2.0;
+    if (score >= 2) return 1.5;
+    return 1.0;
   }
 
   // Academic Reading
@@ -1471,7 +1509,12 @@ export function calculateIELTSBand(
     if (score >= 15) return 5.0;
     if (score >= 13) return 4.5;
     if (score >= 10) return 4.0;
-    return 3.5;
+    if (score >= 8) return 3.5;
+    if (score >= 6) return 3.0;
+    if (score >= 4) return 2.5;
+    if (score >= 3) return 2.0;
+    if (score >= 2) return 1.5;
+    return 1.0;
   }
 
   // General Training Reading (higher thresholds)
@@ -1486,7 +1529,12 @@ export function calculateIELTSBand(
   if (score >= 23) return 5.0;
   if (score >= 19) return 4.5;
   if (score >= 15) return 4.0;
-  return 3.5;
+  if (score >= 12) return 3.5;
+  if (score >= 9) return 3.0;
+  if (score >= 6) return 2.5;
+  if (score >= 4) return 2.0;
+  if (score >= 2) return 1.5;
+  return 1.0;
 }
 
 export function calculateOverallBand(bands: (number | null)[]): number | null {
@@ -1504,7 +1552,8 @@ export function calculateOverallBand(bands: (number | null)[]): number | null {
   return integer + 1.0;
 }
 
-export function getCEFRLevel(band: number): { level: string; description: string } {
+export function getCEFRLevel(band: number | null | undefined): { level: string; description: string } {
+  if (band === null || band === undefined) return { level: "–", description: "Pending AI Evaluation" };
   if (band >= 8.5) return { level: "C2", description: "Mastery / Proficient User" };
   if (band >= 7.0) return { level: "C1", description: "Effective Operational Proficiency" };
   if (band >= 5.5) return { level: "B2", description: "Vantage / Independent User" };

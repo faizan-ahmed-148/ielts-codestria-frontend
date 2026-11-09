@@ -5,6 +5,7 @@ import {
   C19_GENERAL_TEST_1,
   calculateIELTSBand,
   calculateOverallBand,
+  isObjectiveAnswerCorrect,
   type QuestionExplanation,
   type TestType,
 } from "./cambridge-library";
@@ -67,11 +68,16 @@ export async function fetchBooksList(type: TestType): Promise<BookList[]> {
         SPEAKING: { status: "NOT_STARTED", band: null, attemptId: null, completedAttemptId: null, attempts: 0 },
       };
 
-      for (const att of relevantAttempts) {
+      // Sort attempts chronologically ascending so that latest attempt overwrites earlier ones
+      const sortedAttempts = [...relevantAttempts].sort(
+        (a, b) => new Date(a.submittedAt || a.startedAt || 0).getTime() - new Date(b.submittedAt || b.startedAt || 0).getTime()
+      );
+
+      for (const att of sortedAttempts) {
         modulesState[att.module].attempts++;
-        if (att.status === "COMPLETED" && att.result?.band) {
+        if (att.status === "COMPLETED") {
           modulesState[att.module].status = "COMPLETED";
-          modulesState[att.module].band = att.result.band;
+          modulesState[att.module].band = typeof att.result?.band === "number" ? att.result.band : null;
           modulesState[att.module].completedAttemptId = att.id;
         } else if (att.status === "IN_PROGRESS" && modulesState[att.module].status !== "COMPLETED") {
           modulesState[att.module].status = "IN_PROGRESS";
@@ -122,6 +128,9 @@ export async function fetchTestOverview(testId: string): Promise<TestOverview> {
   const testNumber = parseInt(parts[2] || "1", 10) || 1;
 
   const localAttempts = Object.values(getStoredAttempts()).filter((a) => a.test.id === testId);
+  const sortedAttempts = [...localAttempts].sort(
+    (a, b) => new Date(a.submittedAt || a.startedAt || 0).getTime() - new Date(b.submittedAt || b.startedAt || 0).getTime()
+  );
 
   const modulesState: Record<
     ModuleKind,
@@ -133,11 +142,11 @@ export async function fetchTestOverview(testId: string): Promise<TestOverview> {
     SPEAKING: { status: "NOT_STARTED", band: null, attemptId: null, completedAttemptId: null, attempts: 0 },
   };
 
-  for (const att of localAttempts) {
+  for (const att of sortedAttempts) {
     modulesState[att.module].attempts++;
     if (att.status === "COMPLETED") {
       modulesState[att.module].status = "COMPLETED";
-      modulesState[att.module].band = att.result?.band ?? null;
+      modulesState[att.module].band = typeof att.result?.band === "number" ? att.result.band : null;
       modulesState[att.module].completedAttemptId = att.id;
     } else if (att.status === "IN_PROGRESS" && modulesState[att.module].status !== "COMPLETED") {
       modulesState[att.module].status = "IN_PROGRESS";
@@ -271,15 +280,12 @@ export async function patchAttemptAnswers(attemptId: string, answers: Record<str
 
 export async function submitExamAttempt(attemptId: string, currentAnswers?: Record<string, unknown>): Promise<Attempt> {
   if (!attemptId.startsWith("local-att-")) {
-    try {
-      const res = await api<Attempt>(`/attempts/${attemptId}/submit`, {
-        method: "POST",
-        body: currentAnswers ? { answers: currentAnswers } : undefined,
-      });
-      if (res) return res;
-    } catch {
-      // Fallback to local evaluation
-    }
+    // Let API failures surface (e.g. AI_KEY_REQUIRED, provider errors) instead of
+    // falling back to a fabricated local band.
+    return await api<Attempt>(`/attempts/${attemptId}/submit`, {
+      method: "POST",
+      body: currentAnswers ? { answers: currentAnswers } : undefined,
+    });
   }
 
   const stored = getStoredAttempts();
@@ -301,12 +307,8 @@ export async function submitExamAttempt(attemptId: string, currentAnswers?: Reco
 
     for (const [qid, rawCorrect] of Object.entries(key)) {
       const candidates = Array.isArray(rawCorrect) ? rawCorrect : [rawCorrect];
-      const userAns = (typeof answers[qid] === "string" ? answers[qid] : "").trim().toLowerCase();
-
-      const isMatch = candidates.some((c) => {
-        const clean = c.trim().toLowerCase();
-        return clean === userAns;
-      });
+      const userAns = typeof answers[qid] === "string" ? answers[qid] : "";
+      const isMatch = isObjectiveAnswerCorrect(userAns, candidates);
 
       if (isMatch) correctCount++;
 
@@ -314,77 +316,80 @@ export async function submitExamAttempt(attemptId: string, currentAnswers?: Reco
         number: qNum++,
         questionId: qid,
         correct: isMatch,
-        yourAnswer: answers[qid] || "",
+        yourAnswer: userAns,
         correctAnswers: candidates,
       };
     }
 
-    const band = calculateIELTSBand(correctCount, attempt.module, attempt.test.type);
+    const total = Object.keys(key).length;
+    const scaledCorrect = total === 40 ? correctCount : Math.round((correctCount / Math.max(total, 1)) * 40);
+    const band = calculateIELTSBand(scaledCorrect, attempt.module, attempt.test.type);
 
     attempt.status = "COMPLETED";
     attempt.result = {
       rawScore: correctCount,
-      totalQuestions: Object.keys(key).length,
+      totalQuestions: total,
       band,
       feedback: {
         results: Object.values(questionsResults),
       },
     };
   } else if (attempt.module === "WRITING") {
-    // Instant Band evaluation for local attempt
-    attempt.status = "COMPLETED";
-    attempt.result = {
-      band: 7.5,
-      rawScore: null,
-      totalQuestions: null,
-      feedback: {
-        task1Band: 7.5,
-        task2Band: 7.5,
-        summary: "Clear, cohesive writing with a mature academic register, accurate data reporting, and well-developed essay arguments.",
-        words: { task1: 172, task2: 288 },
-        task1: {
-          criteria: {
-            taskAchievement: { band: 7.5, comment: "Clear overview presented with well-selected main trends and accurate data comparisons." },
-            coherenceAndCohesion: { band: 8.0, comment: "Logically sequenced with fluid paragraph transitions and appropriate discourse markers." },
-            lexicalResource: { band: 7.5, comment: "Good range of data reporting vocabulary with precise phrasing and minimal repetition." },
-            grammaticalRangeAndAccuracy: { band: 7.0, comment: "Frequent error-free sentences with a wide variety of complex syntactic structures." },
-          },
-          strengths: ["Clear comparative overview highlighted early", "Accurate data citation from the graphic chart"],
-          improvements: ["Group minor categories together rather than describing each individual data point"],
-          correctedExamples: [],
+    const rawT1 = typeof answers.task1 === "string" ? answers.task1 : "";
+    const rawT2 = typeof answers.task2 === "string" ? answers.task2 : "";
+
+    // Writing bands come only from the candidate's AI provider. No local heuristics.
+    try {
+      const aiRes = await api<{ band: number; feedback: any }>("/scoring/evaluate-writing", {
+        method: "POST",
+        body: {
+          testType: attempt.test.type,
+          content: attempt.content,
+          answers: { task1: rawT1, task2: rawT2 },
         },
-        task2: {
-          criteria: {
-            taskResponse: { band: 7.5, comment: "Fully addresses all parts of the prompt with a well-defended, consistent position throughout." },
-            coherenceAndCohesion: { band: 7.5, comment: "Well-structured argument paragraphs with clear central topic sentences." },
-            lexicalResource: { band: 8.0, comment: "Sophisticated lexical collocations well-suited to academic discursive register." },
-            grammaticalRangeAndAccuracy: { band: 7.0, comment: "Good control of compound-complex grammar with natural subordination." },
-          },
-          strengths: ["Balanced critical analysis of both viewpoints", "Strong contextual examples that reinforce claims"],
-          improvements: ["Ensure the conclusion concisely synthesizes your underlying premises"],
-          correctedExamples: [],
-        },
-      },
-    };
+      });
+      if (!aiRes || typeof aiRes.band !== "number" || !aiRes.feedback) {
+        throw new Error("The AI examiner did not return a Writing band.");
+      }
+      attempt.status = "COMPLETED";
+      attempt.result = {
+        band: aiRes.band,
+        rawScore: null,
+        totalQuestions: null,
+        feedback: aiRes.feedback,
+      };
+    } catch (err) {
+      attempt.status = "FAILED";
+      attempt.error = err instanceof Error ? err.message : String(err);
+      attempt.result = null;
+    }
   } else if (attempt.module === "SPEAKING") {
-    attempt.status = "COMPLETED";
-    attempt.result = {
-      band: 7.5,
-      rawScore: null,
-      totalQuestions: null,
-      feedback: {
-        summary: "Excellent communicative competence with natural flow, extensive vocabulary, and effective discourse management.",
-        criteria: {
-          fluencyAndCoherence: { band: 8.0, comment: "Speaks at length effortlessly with natural tempo and minimal self-correction." },
-          lexicalResource: { band: 7.5, comment: "Vivid idiomatic expressions, topic-specific vocabulary, and good paraphrasing." },
-          grammaticalRangeAndAccuracy: { band: 7.0, comment: "Consistently produces complex grammatical structures with high accuracy." },
-          pronunciation: { band: 7.5, comment: "Clear rhythm, intonation, and syllable stress; completely effortless to understand." },
+    const speakingAnswers = (answers || {}) as Record<string, { transcript?: string; seconds?: number }>;
+
+    // Speaking bands come only from the candidate's AI provider. No local heuristics.
+    try {
+      const aiRes = await api<{ band: number; feedback: any }>("/scoring/evaluate-speaking", {
+        method: "POST",
+        body: {
+          content: attempt.content,
+          answers: speakingAnswers,
         },
-        strengths: ["Direct answers followed by compelling personal elaboration", "Natural conversational discourse markers"],
-        improvements: ["Incorporate more formal transitional phrases when navigating abstract Part 3 questions"],
-        betterAnswers: [],
-      },
-    };
+      });
+      if (!aiRes || typeof aiRes.band !== "number" || !aiRes.feedback) {
+        throw new Error("The AI examiner did not return a Speaking band.");
+      }
+      attempt.status = "COMPLETED";
+      attempt.result = {
+        band: aiRes.band,
+        rawScore: null,
+        totalQuestions: null,
+        feedback: aiRes.feedback,
+      };
+    } catch (err) {
+      attempt.status = "FAILED";
+      attempt.error = err instanceof Error ? err.message : String(err);
+      attempt.result = null;
+    }
   }
 
   stored[attemptId] = attempt;
@@ -413,7 +418,7 @@ export async function fetchDashboardData(): Promise<Dashboard> {
   };
 
   for (const c of completed) {
-    if (c.result?.band) {
+    if (typeof c.result?.band === "number") {
       sumBands[c.module].total += c.result.band;
       sumBands[c.module].count++;
     }

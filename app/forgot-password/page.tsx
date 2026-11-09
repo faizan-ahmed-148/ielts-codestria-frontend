@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, CheckCircle2, Mail, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Loader2, Mail, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { api } from "@/lib/api";
@@ -32,23 +32,28 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-[#f7f8fb] px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-md">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-surface-50 bg-aurora px-4 py-12 sm:px-6 lg:px-8">
+      <div className="pointer-events-none absolute inset-0 bg-subtle-grid opacity-60" />
+      <div className="pointer-events-none absolute -left-24 top-16 h-72 w-72 rounded-full bg-brand-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute -right-20 bottom-10 h-64 w-64 rounded-full bg-emerald-200/30 blur-3xl" />
+
+      <div className="relative w-full max-w-md animate-fade-up">
         <div className="flex justify-center">
-          <Logo />
+          <Logo size="lg" />
         </div>
 
-        <div className="mt-8 rounded-2xl border border-slate-200/90 bg-white p-8 shadow-xl shadow-slate-200/50">
+        <div className="card mt-8 p-6 sm:p-8">
           {!submitted ? (
-            <div className="animate-fade-up">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 text-brand-600 ring-8 ring-brand-50/60">
-                <Mail className="h-6 w-6" />
-              </div>
-
-              <div className="mt-5 text-center">
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900">Forgot your password?</h1>
-                <p className="mt-2 text-sm text-slate-500">
-                  No worries! Enter your registered email and we&apos;ll send you a secure link to reset your password.
+            <>
+              <div className="flex flex-col items-center text-center">
+                <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 ring-1 ring-brand-100">
+                  <Mail className="h-6 w-6" />
+                </span>
+                <h1 className="mt-4 font-display text-2xl font-extrabold tracking-tight text-surface-900">
+                  Forgot your password?
+                </h1>
+                <p className="mt-2 max-w-sm text-[15px] leading-relaxed text-surface-500">
+                  Enter the email linked to your account and we&apos;ll send a secure link to choose a new password.
                 </p>
               </div>
 
@@ -58,7 +63,7 @@ export default function ForgotPasswordPage() {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <div>
                   <label htmlFor="email" className="label">
                     Email address
@@ -79,66 +84,73 @@ export default function ForgotPasswordPage() {
                 <button
                   type="submit"
                   disabled={busy || !email.trim()}
-                  className="btn-primary w-full py-3 shadow-md shadow-brand-500/20"
+                  className="btn-primary w-full py-3"
                 >
                   {busy ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Sending reset link...
+                      Sending reset link…
                     </>
                   ) : (
-                    "Send Password Reset Link"
+                    "Send reset link"
                   )}
                 </button>
               </form>
 
-              <div className="mt-6 rounded-xl border border-indigo-100 bg-indigo-50/70 p-3.5 text-xs text-indigo-900">
-                <div className="flex items-center gap-1.5 font-semibold text-indigo-800">
-                  <Sparkles className="h-3.5 w-3.5" /> Powered by Mailtrap
+              <div className="mt-6 rounded-xl border border-surface-200/80 bg-surface-50 p-4">
+                <div className="flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-[0.1em] text-surface-500">
+                  <Sparkles className="h-3.5 w-3.5 text-brand-500" /> Powered by Mailtrap
                 </div>
-                <p className="mt-1 text-indigo-950/80 leading-relaxed">
-                  In local development, check your Mailtrap sandbox inbox or the backend terminal log for the verification link.
+                <p className="mt-1.5 text-[13px] leading-relaxed text-surface-500">
+                  Local development? Check your Mailtrap sandbox inbox or the backend terminal log for the verification
+                  link.
                 </p>
               </div>
-            </div>
+            </>
           ) : (
-            <div className="animate-fade-up text-center">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 ring-8 ring-emerald-50/70">
+            <div className="text-center">
+              <span className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
                 <CheckCircle2 className="h-7 w-7" />
-              </div>
+              </span>
 
-              <h2 className="mt-5 text-2xl font-bold tracking-tight text-slate-900">Check your inbox</h2>
-              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
-                We have sent password reset instructions to:
+              <h1 className="mt-5 font-display text-2xl font-extrabold tracking-tight text-surface-900">
+                Check your inbox
+              </h1>
+              <p className="mt-2 text-[15px] leading-relaxed text-surface-500">
+                We&apos;ve sent password reset instructions to
               </p>
-              <p className="mt-1 font-semibold text-slate-900">{email}</p>
+              <p className="mt-1 break-all text-[15px] font-semibold text-surface-900">{email}</p>
 
-              <div className="mt-6 rounded-xl bg-slate-50 border border-slate-200 p-4 text-xs text-slate-600 text-left space-y-2">
-                <p>• The reset link is valid for <strong>1 hour</strong>.</p>
-                <p>• If you don&apos;t see the email within a couple minutes, check your spam folder or Mailtrap inbox.</p>
+              <div className="mt-6 space-y-2 rounded-xl border border-surface-200/80 bg-surface-50 p-4 text-left text-[13px] leading-relaxed text-surface-600">
+                <p>
+                  The reset link is valid for <strong className="font-semibold text-surface-900">1 hour</strong>.
+                </p>
+                <p>If it doesn&apos;t arrive within a couple of minutes, check your spam folder or Mailtrap inbox.</p>
               </div>
 
-              <div className="mt-6 flex flex-col gap-3">
-                <button
-                  type="button"
-                  onClick={() => setSubmitted(false)}
-                  className="btn-secondary w-full py-2.5 text-sm"
-                >
-                  Try another email
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setSubmitted(false)}
+                className="btn-secondary mt-6 w-full py-3"
+              >
+                Try another email
+              </button>
             </div>
           )}
 
-          <div className="mt-8 border-t border-slate-100 pt-6 text-center">
+          <div className="mt-8 border-t border-surface-100 pt-6 text-center">
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-brand-600 transition hover:text-brand-700"
             >
-              <ArrowLeft className="h-4 w-4" /> Back to Log in
+              <ArrowLeft className="h-4 w-4" /> Back to sign in
             </Link>
           </div>
         </div>
+
+        <p className="mt-6 text-center text-[13px] text-surface-400">
+          Secure account recovery · Codestria IELTS
+        </p>
       </div>
     </div>
   );
