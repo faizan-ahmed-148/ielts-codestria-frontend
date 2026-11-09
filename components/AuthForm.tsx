@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { api, ApiError, type User } from "@/lib/api";
+import { track } from "@/lib/analytics";
 import { isStrongPassword, passwordChecks, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/lib/password";
 import { useAuth } from "./AuthProvider";
 import { Logo } from "./Logo";
@@ -41,8 +42,12 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     try {
       const body = isLogin ? { email: form.email, password: form.password } : form;
       const user = await api<User>(`/auth/${mode}`, { method: "POST", body });
+      track(isLogin ? "login" : "sign_up", { method: "password" });
       enter(user, next);
     } catch (err) {
+      track(isLogin ? "login_failed" : "sign_up_failed", {
+        reason: err instanceof ApiError ? err.status : "network",
+      });
       // A real HTTP response (wrong password, 5xx, validation error) must be
       // surfaced. A network failure is reported to the candidate instead of
       // silently creating a local session.

@@ -24,6 +24,7 @@ import { RequireAuth, useAuth } from "@/components/AuthProvider";
 import { AiKeySettings } from "@/components/AiKeySetup";
 import { ErrorBox, PageHeader } from "@/components/ui";
 import { api, type TestType, type User } from "@/lib/api";
+import { track as trackEvent } from "@/lib/analytics";
 import { isStrongPassword, passwordChecks, PASSWORD_MIN_LENGTH } from "@/lib/password";
 
 type Tab = "profile" | "security" | "ai" | "preferences" | "data";
@@ -172,6 +173,7 @@ function ProfileView() {
       );
 
       setProfileSuccess("Candidate profile updated successfully!");
+      trackEvent("profile_update", { target_band: targetBand, track });
       setTimeout(() => setProfileSuccess(""), 4000);
     } catch (err: any) {
       setProfileError(err?.message || "Failed to update profile");
@@ -205,6 +207,7 @@ function ProfileView() {
       });
 
       setPasswordSuccess("Your account password has been changed successfully!");
+      trackEvent("password_change");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -224,6 +227,7 @@ function ProfileView() {
         JSON.stringify({ ...existing, contrastTheme, fontScale, audioSpeed, timeAlerts, examDate }),
       );
       setPrefsSaved(true);
+      trackEvent("preferences_saved", { exam_date: examDate || undefined, target_band: targetBand, track });
       setTimeout(() => setPrefsSaved(false), 3000);
     } catch {}
   }
@@ -234,6 +238,7 @@ function ProfileView() {
         localStorage.removeItem("ielts_local_attempts_v2");
         setLocalAttemptsCount(0);
         setClearSuccess("Local test attempts have been reset.");
+        trackEvent("local_data_cleared");
         setTimeout(() => setClearSuccess(""), 4000);
       } catch {}
     }
@@ -264,6 +269,7 @@ function ProfileView() {
       a.download = `codestria-ielts-transcript-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
+      trackEvent("data_exported");
     } catch {}
   }
 

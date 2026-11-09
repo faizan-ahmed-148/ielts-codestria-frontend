@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { ApiError, api, type User } from "@/lib/api";
+import { track } from "@/lib/analytics";
 
 interface AuthState {
   user: User | null;
@@ -55,6 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // offline fallback
     }
+    track("logout");
     try {
       localStorage.removeItem("ielts_current_user");
     } catch {}

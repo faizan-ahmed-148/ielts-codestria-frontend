@@ -10,6 +10,7 @@ import {
   type TestType,
 } from "./cambridge-library";
 import { api, type Attempt, type BookList, type Dashboard, type QuestionResult, type TestOverview } from "./api";
+import { track } from "./analytics";
 import type { ModuleKind } from "./content.types";
 
 const LOCAL_ATTEMPTS_KEY = "ielts_local_attempts_v2";
@@ -183,6 +184,7 @@ export async function fetchTestOverview(testId: string): Promise<TestOverview> {
 }
 
 export async function createAttempt(testId: string, module: ModuleKind): Promise<{ id: string }> {
+  track("attempt_start", { test_id: testId, module });
   try {
     const res = await api<{ id: string }>("/attempts", { method: "POST", body: { testId, module } });
     if (res?.id) return res;
@@ -279,6 +281,10 @@ export async function patchAttemptAnswers(attemptId: string, answers: Record<str
 }
 
 export async function submitExamAttempt(attemptId: string, currentAnswers?: Record<string, unknown>): Promise<Attempt> {
+  track("attempt_submit", {
+    attempt_id: attemptId,
+    mode: attemptId.startsWith("local-att-") ? "local" : "server",
+  });
   if (!attemptId.startsWith("local-att-")) {
     // Let API failures surface (e.g. AI_KEY_REQUIRED, provider errors) instead of
     // falling back to a fabricated local band.
@@ -339,6 +345,7 @@ export async function submitExamAttempt(attemptId: string, currentAnswers?: Reco
     const rawT2 = typeof answers.task2 === "string" ? answers.task2 : "";
 
     // Writing bands come only from the candidate's AI provider. No local heuristics.
+    track("ai_scoring", { module: attempt.module, test_type: attempt.test.type });
     try {
       const aiRes = await api<{ band: number; feedback: any }>("/scoring/evaluate-writing", {
         method: "POST",
@@ -389,6 +396,7 @@ export async function submitExamAttempt(attemptId: string, currentAnswers?: Reco
     }
 
     // Speaking bands come only from the candidate's AI provider. No local heuristics.
+    track("ai_scoring", { module: attempt.module, test_type: attempt.test.type });
     try {
       const aiRes = await api<{ band: number; feedback: any }>("/scoring/evaluate-speaking", {
         method: "POST",

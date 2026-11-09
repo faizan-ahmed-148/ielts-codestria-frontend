@@ -25,6 +25,7 @@ import {
   Skeleton,
 } from "@/components/ui";
 import type { BookList, TestType } from "@/lib/api";
+import { track } from "@/lib/analytics";
 import { CAMBRIDGE_BOOKS } from "@/lib/cambridge-library";
 import { testPath } from "@/lib/seo";
 import { fetchBooksList } from "@/lib/test-runner-service";
@@ -58,6 +59,16 @@ function TestsView() {
       .then((data) => setBooks([...data].sort((a, b) => b.book - a.book)))
       .catch((e) => setError(e.message));
   }, [type]);
+
+  // Debounced search tracking (typing is not covered by the global click listener).
+  useEffect(() => {
+    const term = searchQuery.trim();
+    if (!term) return;
+    const timer = window.setTimeout(() => {
+      track("search_tests", { search_term: term.slice(0, 100), type });
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, [searchQuery, type]);
 
   const matches = (t: Test) => {
     const matchesFilter =

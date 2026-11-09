@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { AppShell } from "@/components/AppShell";
 import { AuthProvider } from "@/components/AuthProvider";
+import { GoogleTag } from "@/components/GoogleTag";
+import { GTM_ID } from "@/lib/analytics";
 import { JsonLd } from "@/components/JsonLd";
 import {
   DEFAULT_DESCRIPTION,
@@ -115,9 +117,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <JsonLd />
       </head>
       <body className="min-h-full font-sans text-surface-900 bg-surface-50 selection:bg-brand-500/15 selection:text-brand-800">
+        <noscript>
+          <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+            title="Google Tag Manager"
+          />
+        </noscript>
         <AuthProvider>
           <AppShell>{children}</AppShell>
         </AuthProvider>
+        <GoogleTag />
       </body>
     </html>
   );

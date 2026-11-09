@@ -26,6 +26,8 @@ export const AI_PROVIDERS = [
 
 export type AiProvider = (typeof AI_PROVIDERS)[number]["id"];
 
+import { track } from "@/lib/analytics";
+
 export interface AiKeyStatus {
   configured: boolean;
   provider: AiProvider | null;
@@ -44,9 +46,13 @@ export async function getAiKeyStatus(): Promise<AiKeyStatus> {
 
 /** Saves one provider + key; replaces any previously stored key. */
 export async function saveAiKey(provider: AiProvider, apiKey: string): Promise<AiKeyStatus> {
-  return api<AiKeyStatus>("/auth/ai-key", { method: "PUT", body: { provider, apiKey } });
+  const status = await api<AiKeyStatus>("/auth/ai-key", { method: "PUT", body: { provider, apiKey } });
+  track("ai_key_saved", { provider });
+  return status;
 }
 
 export async function removeAiKey(): Promise<AiKeyStatus> {
-  return api<AiKeyStatus>("/auth/ai-key", { method: "DELETE" });
+  const status = await api<AiKeyStatus>("/auth/ai-key", { method: "DELETE" });
+  track("ai_key_removed");
+  return status;
 }
