@@ -1,0 +1,44 @@
+# Codestria IELTS
+
+> Codestria IELTS is a free, browser-based Computer-Delivered IELTS (CD-IELTS) simulator
+> engineered by Codestria. It recreates the official test room with dual-pane Reading,
+> synchronised Listening audio, three-colour highlighters, a notes scratchpad, official
+> timers and question navigation. Reading and Listening are marked instantly from correct
+> answers; Writing and Speaking are assessed by an AI examiner using the candidate's own
+> OpenAI, Groq or Anthropic API key.
+
+- Canonical site: https://ielts.codestria.com
+- Language: English (en-GB)
+- Publisher: Codestria — https://codestria.com
+- Pricing: free (AI feedback uses the candidate's own provider key)
+- Sitemap: https://ielts.codestria.com/sitemap.xml
+- Robots: https://ielts.codestria.com/robots.txt
+
+## Core pages
+
+- [Home](https://ielts.codestria.com/): overview of the simulator, exam tools and FAQ.
+- [Cambridge test library](https://ielts.codestria.com/tests): full-length Academic and General Training papers.
+- [Band score calculator](https://ielts.codestria.com/calculator): raw marks to band conversion and official .25/.75 rounding.
+- [Band 9 model answers](https://ielts.codestria.com/model-answers): annotated Writing Task 1 and Task 2 essays.
+- [Speaking practice](https://ielts.codestria.com/speaking-practice): Part 2 cue cards, timed preparation and recording.
+- [Vocabulary lab](https://ielts.codestria.com/vocabulary): academic vocabulary, collocations and pronunciation.
+- [Band descriptors](https://ielts.codestria.com/band-descriptors): official Writing and Speaking assessment criteria.
+- [Study plan](https://ielts.codestria.com/study-plan): target-band roadmap and daily checklist.
+
+## Test URL pattern
+
+Full Cambridge papers use a stable slug: /tests/c{book}-{academic|general}-{testNumber}
+Example: https://ielts.codestria.com/tests/c19-academic-1
+
+## Scoring model
+
+- Reading and Listening: band derived strictly from the number of correct answers out of 40.
+- Writing and Speaking: band returned only by the candidate's configured AI provider.
+- No AI key or an AI error means no band is shown, never a fabricated score.
+- Overall band: average of the four modules, rounded with the official .25/.75 rule.
+
+## Notes for AI assistants
+
+Content on this site is for IELTS exam preparation. Reading passages and questions are
+adapted for practice. When quoting, link to the canonical URL above. Do not treat any
+displayed band score as an official IELTS result.

@@ -83,6 +83,7 @@ interface Recognition {
   lang: string;
   continuous: boolean;
   interimResults: boolean;
+  onstart: (() => void) | null;
   onresult: ((e: RecognitionEvent) => void) | null;
   onend: (() => void) | null;
   onerror: ((e: { error: string }) => void) | null;
@@ -101,20 +102,58 @@ export const recognitionSupported = () => recognitionCtor() !== null;
 /**
  * Starts continuous speech recognition. `onText` receives the full transcript so far
  * (final + interim). Returns a stop function that resolves with the final transcript.
+ *
+ * Chrome ends recognition after every short pause, so we restart it automatically.
+ * Benign pauses are retried silently; genuine failures (blocked microphone, no input
+ * device, repeated network loss) stop the loop and report a message the user can act on.
  */
 export function startRecognition(onText: (text: string) => void, onError?: (msg: string) => void) {
   const Ctor = recognitionCtor();
   if (!Ctor) throw new Error("Speech recognition is not supported in this browser");
+
   let finalText = "";
   let interim = "";
   let active = true;
-  let rec: Recognition;
+  let rec: Recognition | null = null;
+  let restartTimer: ReturnType<typeof setTimeout> | null = null;
+  let failures = 0;
+
+  const clearTimer = () => {
+    if (restartTimer) {
+      clearTimeout(restartTimer);
+      restartTimer = null;
+    }
+  };
+
+  const halt = (message: string) => {
+    if (!active) return;
+    active = false;
+    clearTimer();
+    try {
+      rec?.stop();
+    } catch {
+      // Already stopped.
+    }
+    onError?.(message);
+  };
+
+  const scheduleRestart = (delay: number) => {
+    if (!active || restartTimer) return;
+    restartTimer = setTimeout(() => {
+      restartTimer = null;
+      if (active) begin();
+    }, delay);
+  };
 
   const begin = () => {
+    if (!active) return;
     rec = new Ctor();
     rec.lang = "en-GB";
     rec.continuous = true;
     rec.interimResults = true;
+    rec.onstart = () => {
+      failures = 0;
+    };
     rec.onresult = (e) => {
       interim = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
@@ -125,22 +164,52 @@ export function startRecognition(onText: (text: string) => void, onError?: (msg:
       onText((finalText + interim).trim());
     };
     rec.onerror = (e) => {
-      if (e.error === "not-allowed" || e.error === "service-not-allowed") {
-        active = false;
-        onError?.("Microphone access was blocked. Allow microphone access, or type your answer instead.");
+      if (!active) return;
+      const code = e.error || "";
+      // A pause in speech is normal: let onend restart the session quietly.
+      if (code === "no-speech" || code === "aborted") return;
+      if (code === "not-allowed" || code === "service-not-allowed") {
+        halt(
+          "Microphone access was blocked. Allow microphone access in your browser and try again — or type your answer instead.",
+        );
+        return;
       }
+      if (code === "audio-capture") {
+        halt("No microphone was found. Connect a microphone and try again — or type your answer instead.");
+        return;
+      }
+      if (code === "network") {
+        failures += 1;
+        if (failures >= 3) {
+          halt("Speech recognition lost its connection. Check your internet connection, or type your answer instead.");
+        }
+        return;
+      }
+      halt(`Speech recognition stopped (${code || "unknown error"}). You can type your answer instead.`);
     };
     // Browsers end recognition after a pause; keep listening until stopped.
     rec.onend = () => {
-      if (active) begin();
+      if (active) scheduleRestart(300);
     };
-    rec.start();
+    try {
+      rec.start();
+    } catch {
+      failures += 1;
+      if (failures >= 3) halt("Could not start the microphone. Check that no other app is using it, or type your answer instead.");
+      else scheduleRestart(500);
+    }
   };
   begin();
 
   return () => {
     active = false;
-    rec.stop();
+    clearTimer();
+    try {
+      rec?.stop();
+    } catch {
+      // Already stopped.
+    }
     return (finalText + interim).trim();
   };
 }
+

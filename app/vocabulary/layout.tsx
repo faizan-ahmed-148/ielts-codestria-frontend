@@ -1,30 +1,47 @@
 import type { Metadata } from "next";
-import { BreadcrumbsJsonLd } from "@/components/JsonLd";
+import { BreadcrumbsJsonLd, LearningResourceJsonLd } from "@/components/JsonLd";
+import { absoluteUrl, pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+const KEYWORDS = [
+  "IELTS vocabulary",
+  "academic word list",
+  "AWL IELTS",
+  "IELTS collocations",
+  "band 8 vocabulary",
+  "IELTS lexical resource",
+  "IELTS topic vocabulary",
+  "English academic vocabulary",
+];
+
+export const metadata: Metadata = pageMetadata({
   title: "Band 8+ Academic Vocabulary Lab & Topic Collocations",
   description:
-    "Master high-scoring IELTS Lexical Resource vocabulary items across frequent Cambridge topics (Environment, Technology, Education, Society) with native UK audio pronunciation, collocations, and CEFR indicators.",
-  alternates: {
-    canonical: "https://ielts.codestria.com/vocabulary",
-  },
-  openGraph: {
-    title: "Band 8+ Academic Vocabulary Lab | Codestria IELTS",
-    description:
-      "Interactive IELTS vocabulary flashcard deck and practice quiz with audio pronunciation and high-yield collocations.",
-    url: "https://ielts.codestria.com/vocabulary",
-  },
-};
+    "Master high-scoring IELTS vocabulary across frequent Cambridge topics such as environment, technology, education and society, with pronunciation, collocations and CEFR indicators.",
+  path: "/vocabulary",
+  keywords: KEYWORDS,
+});
 
 export default function VocabularyLayout({ children }: { children: React.ReactNode }) {
+  const url = absoluteUrl("/vocabulary");
   const breadcrumbs = [
-    { name: "Home", url: "https://ielts.codestria.com" },
-    { name: "Academic Vocabulary Lab", url: "https://ielts.codestria.com/vocabulary" },
+    { name: "Home", url: absoluteUrl("/") },
+    { name: "Academic Vocabulary Lab", url },
   ];
 
   return (
     <>
       <BreadcrumbsJsonLd items={breadcrumbs} />
+      <LearningResourceJsonLd
+        name="IELTS Academic Vocabulary Lab"
+        description="Interactive IELTS vocabulary flashcards with pronunciation, collocations and CEFR levels for high-scoring Lexical Resource."
+        url={url}
+        teaches={[
+          "Academic Word List vocabulary",
+          "Topic-specific collocations",
+          "Pronunciation",
+          "Lexical Resource for IELTS Writing and Speaking",
+        ]}
+      />
       {children}
     </>
   );

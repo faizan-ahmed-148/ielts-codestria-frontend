@@ -151,6 +151,23 @@ export default function ForgotPasswordPage() {
         <p className="mt-6 text-center text-[13px] text-surface-400">
           Secure account recovery · Codestria IELTS
         </p>
+        <p className="mt-2 text-center text-[13px] text-surface-400">
+          Powered by{" "}
+          <a
+            href="https://codestria.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-surface-500 underline-offset-2 transition hover:text-surface-800 hover:underline"
+          >
+            codestria.com
+          </a>
+        </p>
+        <p className="mt-1 text-center text-xs text-surface-400">
+          If you face any issue, contact{" "}
+          <a href="mailto:mail.codestria@gmail.com" className="font-semibold hover:text-surface-700">
+            mail.codestria@gmail.com
+          </a>
+        </p>
       </div>
     </div>
   );

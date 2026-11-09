@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { isStrongPassword, passwordChecks, PASSWORD_MIN_LENGTH } from "@/lib/password";
 import { Logo } from "@/components/Logo";
 import { ErrorBox } from "@/components/ui";
 
@@ -53,8 +54,8 @@ function ResetPasswordForm() {
     e.preventDefault();
     setError("");
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters long.");
+    if (!isStrongPassword(password)) {
+      setError("Your new password does not meet all the requirements listed below.");
       return;
     }
 
@@ -82,16 +83,9 @@ function ResetPasswordForm() {
   }
 
   // Password requirements calculation
-  const hasMinLen = password.length >= 8;
-  const hasNum = /\d/.test(password);
-  const hasUpper = /[A-Z]/.test(password);
+  const requirements = passwordChecks(password);
+  const passwordStrong = isStrongPassword(password);
   const passwordsMatch = password && confirmPassword && password === confirmPassword;
-
-  const requirements = [
-    { ok: hasMinLen, label: "At least 8 characters" },
-    { ok: hasNum, label: "Contains a number (recommended)" },
-    { ok: hasUpper, label: "Contains an uppercase letter" },
-  ];
 
   if (verifying) {
     return (
@@ -182,9 +176,9 @@ function ResetPasswordForm() {
               id="password"
               type={showPassword ? "text" : "password"}
               required
-              minLength={8}
+              minLength={PASSWORD_MIN_LENGTH}
               className="input pr-11"
-              placeholder="At least 8 characters"
+              placeholder={`At least ${PASSWORD_MIN_LENGTH} characters`}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="new-password"
@@ -252,7 +246,7 @@ function ResetPasswordForm() {
 
         <button
           type="submit"
-          disabled={busy || !hasMinLen || Boolean(confirmPassword && !passwordsMatch)}
+          disabled={busy || !passwordStrong || Boolean(confirmPassword && !passwordsMatch)}
           className="btn-primary w-full py-3"
         >
           {busy ? (
@@ -305,6 +299,23 @@ export default function ResetPasswordPage() {
 
         <p className="mt-6 text-center text-[13px] text-surface-400">
           Secure account recovery · Codestria IELTS
+        </p>
+        <p className="mt-2 text-center text-[13px] text-surface-400">
+          Powered by{" "}
+          <a
+            href="https://codestria.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-surface-500 underline-offset-2 transition hover:text-surface-800 hover:underline"
+          >
+            codestria.com
+          </a>
+        </p>
+        <p className="mt-1 text-center text-xs text-surface-400">
+          If you face any issue, contact{" "}
+          <a href="mailto:mail.codestria@gmail.com" className="font-semibold hover:text-surface-700">
+            mail.codestria@gmail.com
+          </a>
         </p>
       </div>
     </div>

@@ -11,6 +11,7 @@ import {
   GraduationCap,
   LayoutDashboard,
   LogOut,
+  Mail,
   Menu,
   Mic,
   PenTool,
@@ -25,6 +26,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useAuth } from "./AuthProvider";
 import { CommandPalette } from "./CommandPalette";
 import { Logo } from "./Logo";
+import { testPath } from "@/lib/seo";
 
 const AUTH_PAGES = ["/login", "/register", "/forgot-password", "/reset-password"];
 
@@ -224,10 +226,16 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
               <div>
                 <h3 className="text-xs font-bold uppercase tracking-[0.12em] text-surface-900">Cambridge Books</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-surface-500">
-                  {["19 Academic", "19 General", "18 Academic", "17 Academic", "16 & 15 Papers"].map((v) => (
-                    <li key={v}>
-                      <Link href="/tests?type=ACADEMIC" className="transition hover:text-surface-900">
-                        IELTS {v}
+                  {[
+                    { label: "19 Academic", href: testPath({ book: 19, type: "ACADEMIC", testNumber: 1 }) },
+                    { label: "19 General Training", href: testPath({ book: 19, type: "GENERAL", testNumber: 1 }) },
+                    { label: "18 Academic", href: testPath({ book: 18, type: "ACADEMIC", testNumber: 1 }) },
+                    { label: "17 Academic", href: testPath({ book: 17, type: "ACADEMIC", testNumber: 1 }) },
+                    { label: "All papers", href: "/tests" },
+                  ].map(({ label, href }) => (
+                    <li key={href}>
+                      <Link href={href} className="transition hover:text-surface-900">
+                        IELTS {label}
                       </Link>
                     </li>
                   ))}
@@ -268,6 +276,14 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
                     </a>
                   </li>
                   <li>
+                    <a
+                      href="mailto:mail.codestria@gmail.com"
+                      className="inline-flex items-center gap-1 transition hover:text-surface-900"
+                    >
+                      Contact &amp; feedback
+                    </a>
+                  </li>
+                  <li>
                     <Link href="/band-descriptors" className="transition hover:text-surface-900">
                       Scoring rubric
                     </Link>
@@ -279,8 +295,29 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
               </div>
             </div>
 
-            <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-surface-100 pt-7 text-xs text-surface-400 sm:flex-row">
-              <p>© {new Date().getFullYear()} Codestria Studio. All rights reserved.</p>
+            <div className="mt-10 rounded-xl border border-surface-200 bg-surface-50 px-4 py-3 text-center text-xs leading-relaxed text-surface-500">
+              If you face any issue or want to improve anything, contact{" "}
+              <a
+                href="mailto:mail.codestria@gmail.com"
+                className="font-semibold text-brand-600 underline-offset-2 transition hover:text-brand-700 hover:underline"
+              >
+                mail.codestria@gmail.com
+              </a>
+              .
+            </div>
+
+            <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-surface-100 pt-7 text-xs text-surface-400 sm:flex-row">
+              <p>
+                © {new Date().getFullYear()} Codestria Studio. All rights reserved. · Powered by{" "}
+                <a
+                  href="https://codestria.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-surface-500 underline-offset-2 transition hover:text-surface-800 hover:underline"
+                >
+                  codestria.com
+                </a>
+              </p>
               <p className="max-w-md text-center sm:text-right">
                 IELTS® is a registered trademark of Cambridge University Press &amp; Assessment, British Council and
                 IDP. This is an independent simulation product.
@@ -369,6 +406,28 @@ function Sidebar() {
         <Suspense>
           <SidebarNav />
         </Suspense>
+      </div>
+
+      {/* Help & branding */}
+      <div className="border-t border-surface-100 px-4 py-3">
+        <a
+          href="mailto:mail.codestria@gmail.com"
+          className="flex items-center gap-2 text-[12px] font-semibold text-surface-600 transition hover:text-brand-700"
+        >
+          <Mail className="h-3.5 w-3.5" />
+          Help &amp; feedback
+        </a>
+        <p className="mt-1.5 text-[11px] text-surface-400">
+          Powered by{" "}
+          <a
+            href="https://codestria.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold underline-offset-2 transition hover:text-surface-700 hover:underline"
+          >
+            codestria.com
+          </a>
+        </p>
       </div>
 
       {/* User Session Footer Bar */}

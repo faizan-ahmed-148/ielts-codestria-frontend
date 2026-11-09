@@ -8,6 +8,7 @@ import {
   Calendar,
   Check,
   CheckCircle2,
+  ChevronDown,
   ChevronRight,
   Clock,
   ExternalLink,
@@ -31,6 +32,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BandRing, SectionHeading } from "@/components/ui";
+import { FaqJsonLd } from "@/components/JsonLd";
 import {
   CAMBRIDGE_BOOKS,
   calculateIELTSBand,
@@ -43,6 +45,29 @@ const HIGHLIGHTS: Record<string, string> = {
   green: "bg-emerald-200/80 text-emerald-950",
   pink: "bg-pink-200/80 text-pink-950",
 };
+
+const HOME_FAQ = [
+  {
+    question: "How does the Codestria IELTS simulator work?",
+    answer:
+      "Codestria IELTS recreates the computer-delivered IELTS test room with dual-pane Reading, synchronised Listening audio, three-colour highlighters, a notes scratchpad, official time alerts and question navigation. Reading and Listening are marked instantly from your correct answers; Writing and Speaking are scored by the AI examiner using your own provider key.",
+  },
+  {
+    question: "Are the Cambridge IELTS practice tests free?",
+    answer:
+      "Yes. Every full-length Academic and General Training paper in the library is free to sit, including the 40-question Reading and Listening modules with instant band scores. AI feedback for Writing and Speaking uses your own OpenAI, Groq or Anthropic API key, so you control the cost.",
+  },
+  {
+    question: "How is the overall IELTS band score calculated?",
+    answer:
+      "The overall band is the average of Listening, Reading, Writing and Speaking. An average ending in .25 rounds up to the next half band (6.25 becomes 6.5), and an average ending in .75 rounds up to the next whole band (6.75 becomes 7.0).",
+  },
+  {
+    question: "Do I need an AI key for Writing and Speaking?",
+    answer:
+      "Reading and Listening never need a key. For Writing and Speaking, add your own OpenAI, Groq or Anthropic key under Profile → AI Scoring. Bands come only from the model's assessment, and if the model returns an error you see the error instead of a made-up band.",
+  },
+];
 
 export default function Home() {
   /* Hero simulator */
@@ -877,6 +902,39 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── FAQ ──────────────────────────────────────────────────────────── */}
+      <section id="faq" className="section-pad border-b border-surface-200 bg-white">
+        <div className="page-container max-w-3xl">
+          <SectionHeading
+            align="center"
+            eyebrow={
+              <>
+                <BookOpen className="h-4 w-4" />
+                Answers before you start
+              </>
+            }
+            title="Frequently asked questions"
+            description="What Codestria IELTS is, what it costs, and how your band score is produced."
+          />
+
+          <div className="mt-10 space-y-3">
+            {HOME_FAQ.map((item) => (
+              <details
+                key={item.question}
+                className="card group p-5 transition hover:border-brand-200 sm:p-6"
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-[15px] font-bold text-surface-900 sm:text-base">
+                  <span>{item.question}</span>
+                  <ChevronDown className="h-4.5 w-4.5 shrink-0 text-surface-400 transition group-open:rotate-180" />
+                </summary>
+                <p className="mt-3 text-sm leading-relaxed text-surface-600">{item.answer}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+        <FaqJsonLd faqs={HOME_FAQ} />
+      </section>
+
       {/* ── CODESTRIA ────────────────────────────────────────────────────── */}
       <section className="bg-white py-14">
         <div className="page-container">
@@ -885,7 +943,7 @@ export default function Home() {
               <div className="flex flex-wrap items-center gap-2.5">
                 <Image
                   src="/codestria-logo.png"
-                  alt="Codestria"
+                  alt="Codestria — software and AI studio logo"
                   width={130}
                   height={38}
                   className="h-7 w-auto object-contain"

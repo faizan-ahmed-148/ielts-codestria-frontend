@@ -26,6 +26,7 @@ import {
 } from "@/components/ui";
 import type { BookList, TestType } from "@/lib/api";
 import { CAMBRIDGE_BOOKS } from "@/lib/cambridge-library";
+import { testPath } from "@/lib/seo";
 import { fetchBooksList } from "@/lib/test-runner-service";
 
 export default function TestsPage() {
@@ -316,7 +317,7 @@ function TestsView() {
 
                   <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     {tests.map((t) => (
-                      <TestCard key={t.id} t={t} />
+                      <TestCard key={t.id} t={t} book={n} type={type} />
                     ))}
                   </div>
                 </section>
@@ -329,7 +330,7 @@ function TestsView() {
   );
 }
 
-function TestCard({ t }: { t: Test }) {
+function TestCard({ t, book, type }: { t: Test; book: number; type: TestType }) {
   const cta =
     t.status === "COMPLETED"
       ? "Review results"
@@ -338,7 +339,7 @@ function TestCard({ t }: { t: Test }) {
         : "Start test";
 
   return (
-    <Link href={`/tests/${t.id}`} className="card-hover group flex flex-col justify-between p-5">
+    <Link href={testPath({ book, type, testNumber: t.testNumber })} className="card-hover group flex flex-col justify-between p-5">
       <div>
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">

@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -6,20 +7,24 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: [
-          "/attempt/",
-          "/api/",
-          "/forgot-password",
-          "/reset-password",
-        ],
+        // Only truly private or non-content routes are blocked. Pages that
+        // should stay out of the index (login, dashboard, profile, attempt
+        // results) are individually marked noindex so crawlers can read the
+        // directive instead of being locked out.
+        disallow: ["/api/", "/attempt/"],
       },
       {
         userAgent: "Googlebot",
         allow: "/",
-        disallow: ["/attempt/", "/api/"],
+        disallow: ["/api/", "/attempt/"],
+      },
+      {
+        userAgent: "Bingbot",
+        allow: "/",
+        disallow: ["/api/", "/attempt/"],
       },
     ],
-    sitemap: "https://ielts.codestria.com/sitemap.xml",
-    host: "https://ielts.codestria.com",
+    sitemap: `${SITE_URL}/sitemap.xml`,
+    host: "ielts.codestria.com",
   };
 }

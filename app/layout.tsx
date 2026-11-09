@@ -2,6 +2,19 @@ import type { Metadata, Viewport } from "next";
 import { AppShell } from "@/components/AppShell";
 import { AuthProvider } from "@/components/AuthProvider";
 import { JsonLd } from "@/components/JsonLd";
+import {
+  DEFAULT_DESCRIPTION,
+  DEFAULT_KEYWORDS,
+  DEFAULT_TITLE,
+  OG_IMAGE,
+  OG_IMAGE_ALT,
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_WIDTH,
+  PUBLISHER_URL,
+  SITE_NAME,
+  SITE_TWITTER,
+  SITE_URL,
+} from "@/lib/seo";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -13,100 +26,63 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ielts.codestria.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Codestria IELTS · Official Computer-Delivered CD-IELTS Simulator",
-    template: "%s | Codestria IELTS",
+    default: DEFAULT_TITLE,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    "Official-standard Computer-Delivered IELTS simulator. Practice authentic Cambridge IELTS Books 19 down to 12 (Academic & General Training) with 3-color text highlighters, scratchpad, audio player, instant Band 9 scoring, and detailed examiner answer rationales. Engineered by Codestria.",
-  applicationName: "Codestria IELTS",
-  authors: [{ name: "Codestria", url: "https://codestria.com" }],
-  generator: "Next.js",
-  keywords: [
-    "IELTS",
-    "IELTS Academic",
-    "IELTS General Training",
-    "Cambridge IELTS 19",
-    "Cambridge IELTS 18",
-    "Cambridge IELTS Books",
-    "CD-IELTS Simulation",
-    "Computer Delivered IELTS",
-    "British Council IELTS Mock Test",
-    "IDP IELTS Practice Test",
-    "IELTS Reading Highlighters",
-    "IELTS Band 9 Essays",
-    "IELTS Speaking Cue Cards",
-    "IELTS Band Score Calculator",
-    "IELTS Test Report Form TRF",
-    "CEFR C1 C2 English",
-    "Codestria",
-    "Codestria IELTS",
-    "Online IELTS Practice Free",
-    "IELTS Academic Reading Passages",
-    "IELTS Listening Transcripts",
-  ],
+  description: DEFAULT_DESCRIPTION,
+  applicationName: SITE_NAME,
+  authors: [{ name: "Codestria", url: PUBLISHER_URL }],
   creator: "Codestria",
-  publisher: "Codestria (https://codestria.com)",
+  publisher: `Codestria (${PUBLISHER_URL})`,
+  generator: "Next.js",
   category: "Education",
+  keywords: DEFAULT_KEYWORDS,
+  referrer: "origin-when-cross-origin",
+  formatDetection: { email: false, address: false, telephone: false },
   alternates: {
-    canonical: "https://ielts.codestria.com",
-    languages: {
-      "en-GB": "https://ielts.codestria.com",
-      "en-US": "https://ielts.codestria.com",
-    },
+    canonical: SITE_URL,
   },
   openGraph: {
-    title: "Codestria IELTS · Official Computer-Delivered CD-IELTS Simulator",
-    description:
-      "Practice authentic Cambridge IELTS Academic & General Training mock tests (Books 19 down to 12) with real exam highlighters, timed audio, instant Band 9 marking, and examiner rationales. Engineered by Codestria.",
-    url: "https://ielts.codestria.com",
-    siteName: "Codestria IELTS",
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    url: SITE_URL,
+    siteName: SITE_NAME,
     images: [
       {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Codestria IELTS Official CD-Simulator",
-        type: "image/png",
-      },
-      {
-        url: "/codestria-logo-with-name-dark-1600x600.png",
-        width: 1600,
-        height: 600,
-        alt: "Codestria Software & AI Studio",
+        url: OG_IMAGE,
+        width: OG_IMAGE_WIDTH,
+        height: OG_IMAGE_HEIGHT,
+        alt: OG_IMAGE_ALT,
         type: "image/png",
       },
     ],
     locale: "en_GB",
+    alternateLocale: ["en_US"],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Codestria IELTS · Official Computer-Delivered CD-IELTS Simulator",
-    description:
-      "Full Cambridge IELTS examination papers (Books 19 down to 12) under genuine British Council & IDP CD-IELTS test conditions. Instant Band 9 scoring.",
-    site: "@codestria",
-    creator: "@codestria",
-    images: ["/og-image.png"],
+    title: DEFAULT_TITLE,
+    description: DEFAULT_DESCRIPTION,
+    site: SITE_TWITTER,
+    creator: SITE_TWITTER,
+    images: [{ url: OG_IMAGE, alt: OG_IMAGE_ALT }],
+  },
+  appleWebApp: {
+    capable: true,
+    title: SITE_NAME,
+    statusBarStyle: "default",
   },
   icons: {
     icon: [
       { url: "/codestria-app-icon.svg", type: "image/svg+xml" },
       { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
     ],
     shortcut: "/icon.svg",
-    apple: [
-      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-    ],
-    other: [
-      {
-        rel: "apple-touch-icon-precomposed",
-        url: "/apple-touch-icon.png",
-      },
-    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    other: [{ rel: "apple-touch-icon-precomposed", url: "/apple-touch-icon.png" }],
   },
   robots: {
     index: true,
@@ -119,11 +95,15 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  other: {
+    "msapplication-TileColor": "#4356e8",
+    "msapplication-config": "none",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="h-full antialiased scroll-smooth">
+    <html lang="en-GB" className="h-full antialiased scroll-smooth">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -131,6 +111,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
         />
+        <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-friendly site summary" />
         <JsonLd />
       </head>
       <body className="min-h-full font-sans text-surface-900 bg-surface-50 selection:bg-brand-500/15 selection:text-brand-800">

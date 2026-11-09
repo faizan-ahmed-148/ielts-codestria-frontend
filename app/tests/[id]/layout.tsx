@@ -1,5 +1,15 @@
 import type { Metadata } from "next";
-import { BreadcrumbsJsonLd } from "@/components/JsonLd";
+import { BreadcrumbsJsonLd, QuizJsonLd } from "@/components/JsonLd";
+import { absoluteUrl, pageMetadata, parseTestSlug } from "@/lib/seo";
+
+function identity(id: string) {
+  const parsed = parseTestSlug(id);
+  if (!parsed) return null;
+  return {
+    ...parsed,
+    typeLabel: parsed.type === "GENERAL" ? "General Training" : "Academic",
+  };
+}
 
 export async function generateMetadata({
   params,
@@ -7,28 +17,31 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const parts = id.split("-");
-  const book = parts[0]?.startsWith("c") ? parseInt(parts[0].slice(1), 10) || 19 : 19;
-  const isGeneral = id.includes("general");
-  const typeLabel = isGeneral ? "General Training" : "Academic";
-  const testNumber = parseInt(parts[2] || "1", 10) || 1;
+  const test = identity(id);
 
-  const title = `Cambridge ${book} · ${typeLabel} Test ${testNumber} (Full CD-IELTS Exam)`;
-  const description = `Practice full Cambridge ${book} ${typeLabel} Test ${testNumber} under official British Council and IDP Computer-Delivered examination conditions. Instant Band 9 scoring and complete answer rationales.`;
+  if (!test) {
+    return pageMetadata({
+      title: "Cambridge IELTS Practice Test",
+      description:
+        "Practise a full Cambridge IELTS paper with computer-delivered Reading and Listening modules, Writing tasks and Speaking cue cards.",
+      path: `/tests/${id}`,
+      keywords: ["Cambridge IELTS practice test", "IELTS mock test"],
+      noindex: true,
+    });
+  }
 
-  return {
-    title,
-    description,
-    alternates: {
-      canonical: `https://ielts.codestria.com/tests/${id}`,
-    },
-    openGraph: {
-      title: `${title} | Codestria IELTS`,
-      description,
-      url: `https://ielts.codestria.com/tests/${id}`,
-      type: "website",
-    },
-  };
+  return pageMetadata({
+    title: `Cambridge ${test.book} · ${test.typeLabel} Test ${test.testNumber} (Full CD-IELTS Exam)`,
+    description: `Sit full Cambridge ${test.book} ${test.typeLabel} Test ${test.testNumber} under official British Council and IDP computer-delivered conditions, with instant Reading and Listening band scoring and examiner answer rationales.`,
+    path: `/tests/${id}`,
+    keywords: [
+      `Cambridge IELTS ${test.book}`,
+      `Cambridge ${test.book} ${test.typeLabel}`,
+      `IELTS ${test.typeLabel} Test ${test.testNumber}`,
+      "full IELTS mock test",
+      "computer delivered IELTS",
+    ],
+  });
 }
 
 export default async function TestDetailLayout({
@@ -39,25 +52,48 @@ export default async function TestDetailLayout({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const parts = id.split("-");
-  const book = parts[0]?.startsWith("c") ? parseInt(parts[0].slice(1), 10) || 19 : 19;
-  const isGeneral = id.includes("general");
-  const typeLabel = isGeneral ? "General Training" : "Academic";
-  const testNumber = parseInt(parts[2] || "1", 10) || 1;
+  const test = identity(id);
+  const url = absoluteUrl(`/tests/${id}`);
+
+  if (!test) {
+    return (
+      <>
+        <BreadcrumbsJsonLd
+          items={[
+            { name: "Home", url: absoluteUrl("/") },
+            { name: "Cambridge Tests Library", url: absoluteUrl("/tests") },
+            { name: "Practice Test", url },
+          ]}
+        />
+        {children}
+      </>
+    );
+  }
 
   const breadcrumbs = [
-    { name: "Home", url: "https://ielts.codestria.com" },
+    { name: "Home", url: absoluteUrl("/") },
     {
-      name: `${typeLabel} Tests`,
-      url: `https://ielts.codestria.com/tests?type=${isGeneral ? "GENERAL" : "ACADEMIC"}`,
+      name: `${test.typeLabel} Tests`,
+      url: absoluteUrl(`/tests?type=${test.type}`),
     },
-    { name: `Cambridge ${book}`, url: `https://ielts.codestria.com/tests` },
-    { name: `Test ${testNumber}`, url: `https://ielts.codestria.com/tests/${id}` },
+    { name: `Cambridge ${test.book}`, url: absoluteUrl("/tests") },
+    { name: `Test ${test.testNumber}`, url },
   ];
 
   return (
     <>
       <BreadcrumbsJsonLd items={breadcrumbs} />
+      <QuizJsonLd
+        name={`Cambridge ${test.book} ${test.typeLabel} Test ${test.testNumber}`}
+        description={`Full Cambridge IELTS ${test.typeLabel} paper with Reading, Listening, Writing and Speaking modules.`}
+        url={url}
+        about={[
+          "IELTS Reading",
+          "IELTS Listening",
+          "IELTS Writing",
+          "IELTS Speaking",
+        ]}
+      />
       {children}
     </>
   );

@@ -25,6 +25,7 @@ import { type SpeakingAnswer, SpeakingRunner, speakingItems } from "@/components
 import { WritingRunner } from "@/components/runners/WritingRunner";
 import { ErrorBox, MODULE_INFO, ModuleIcon, wordCount } from "@/components/ui";
 import { ApiError, type Attempt } from "@/lib/api";
+import { testPath } from "@/lib/seo";
 import { getAiKeyStatus } from "@/lib/ai-key";
 import type { ListeningContent, ReadingContent, SpeakingContent, WritingContent } from "@/lib/content.types";
 import { getAttemptDetails, patchAttemptAnswers, submitExamAttempt } from "@/lib/test-runner-service";
@@ -108,6 +109,22 @@ function ExamView() {
 
   const submit = useCallback(
     async (opts?: { skipKeyCheck?: boolean }) => {
+      // A Speaking band needs the whole test: block submitting a partial test
+      // instead of letting the AI score one answer as if it were the exam.
+      if (attempt?.module === "SPEAKING") {
+        const items = speakingItems(attempt.content as SpeakingContent);
+        const recorded = items.filter((i) =>
+          (answersRef.current[i.key] as SpeakingAnswer | undefined)?.transcript?.trim(),
+        ).length;
+        if (recorded < items.length) {
+          setError(
+            `You have answered ${recorded} of ${items.length} speaking prompts. Answer every prompt to receive a band — use the Question navigator to find the prompts you have not recorded. Your answers are saved.`,
+          );
+          setConfirm(false);
+          return;
+        }
+      }
+
       // Writing and Speaking need the candidate's own AI key before submitting.
       if (
         !opts?.skipKeyCheck &&
@@ -178,7 +195,7 @@ function ExamView() {
       <header className="sticky top-0 z-40 border-b border-surface-200 bg-white/95 backdrop-blur-md">
         <div className="flex h-16 items-center gap-2 px-3 sm:gap-4 sm:px-6">
           <Link
-            href={`/tests/${attempt.test.id}`}
+            href={testPath(attempt.test)}
             className="rounded-lg p-2 text-surface-400 hover:bg-surface-100 hover:text-surface-700"
             title="Exit test (answers autosaved)"
             aria-label="Exit test"
@@ -290,11 +307,24 @@ function ExamView() {
           <div className="card w-full max-w-md p-6 shadow-2xl animate-fade-up">
             <h2 className="text-xl font-bold text-surface-900">Submit your {info.label} test?</h2>
             <p className="mt-2 text-sm text-surface-600">{summary.long}</p>
+            {attempt.module === "SPEAKING" && !summary.complete && (
+              <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-sm leading-relaxed text-amber-800">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>
+                  A Speaking band is only awarded for a complete test. Use the{" "}
+                  <strong>Question navigator</strong> to record the prompts you have not answered yet.
+                </span>
+              </div>
+            )}
             <div className="mt-6 flex justify-end gap-3">
               <button onClick={() => setConfirm(false)} className="btn-secondary">
                 Continue test
               </button>
-              <button onClick={() => submit()} className="btn-primary">
+              <button
+                onClick={() => submit()}
+                disabled={attempt.module === "SPEAKING" && !summary.complete}
+                className="btn-primary"
+              >
                 Confirm &amp; submit
               </button>
             </div>

@@ -366,6 +366,28 @@ export async function submitExamAttempt(attemptId: string, currentAnswers?: Reco
   } else if (attempt.module === "SPEAKING") {
     const speakingAnswers = (answers || {}) as Record<string, { transcript?: string; seconds?: number }>;
 
+    // A Speaking band needs the whole test: block partial submissions instead of
+    // letting the AI score one answer as if it were the exam.
+    const speakingContent = attempt.content as
+      | {
+          part1?: { questions?: unknown[] }[];
+          part2?: unknown;
+          part3?: { questions?: unknown[] };
+        }
+      | null;
+    const promptKeys: string[] = [];
+    speakingContent?.part1?.forEach((topic, ti) =>
+      (topic.questions ?? []).forEach((_, qi) => promptKeys.push(`p1-${ti}-${qi}`)),
+    );
+    if (speakingContent?.part2) promptKeys.push("p2");
+    speakingContent?.part3?.questions?.forEach((_, qi) => promptKeys.push(`p3-${qi}`));
+    const answered = promptKeys.filter((key) => (speakingAnswers[key]?.transcript ?? "").trim()).length;
+    if (promptKeys.length && answered < promptKeys.length) {
+      throw new Error(
+        `You answered ${answered} of ${promptKeys.length} speaking prompts. A Speaking band is only awarded after every prompt has an answer — your answers are saved, so finish the missing prompts and submit again.`,
+      );
+    }
+
     // Speaking bands come only from the candidate's AI provider. No local heuristics.
     try {
       const aiRes = await api<{ band: number; feedback: any }>("/scoring/evaluate-speaking", {

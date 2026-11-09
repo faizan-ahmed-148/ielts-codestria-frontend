@@ -1,170 +1,179 @@
+/* ------------------------------------------------------------------ */
+/*  JSON-LD structured data (schema.org)                              */
+/*  One small, reusable component per schema type.                    */
+/* ------------------------------------------------------------------ */
+
+const SITE = "https://ielts.codestria.com";
+const ORG_ID = `${SITE}/#organization`;
+const WEBSITE_ID = `${SITE}/#website`;
+
+/** Serialises JSON-LD safely inside a <script> tag. */
+function safeJson(data: unknown): string {
+  return JSON.stringify(data).replace(/</g, "\\u003c");
+}
+
+function JsonLdScript({ data }: { data: unknown }) {
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: safeJson(data) }}
+    />
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Site-wide graph                                                   */
+/* ------------------------------------------------------------------ */
+
 export function JsonLd() {
   const structuredData = {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "WebSite",
-        "@id": "https://ielts.codestria.com/#website",
-        "url": "https://ielts.codestria.com",
-        "name": "Codestria IELTS",
-        "alternateName": "Codestria IELTS Simulator",
-        "description":
-          "Official-Standard Computer-Delivered CD-IELTS Simulation Platform with Cambridge Books 19 down to 12. Instant Band 9 scoring and examiner rationales.",
-        "publisher": {
-          "@id": "https://ielts.codestria.com/#organization",
-        },
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": {
-            "@type": "EntryPoint",
-            "urlTemplate": "https://ielts.codestria.com/tests?q={search_term_string}",
-          },
-          "query-input": "required name=search_term_string",
-        },
-        "inLanguage": "en-GB",
+        "@id": WEBSITE_ID,
+        url: SITE,
+        name: "Codestria IELTS",
+        alternateName: "Codestria IELTS Simulator",
+        description:
+          "Official-standard Computer-Delivered CD-IELTS simulation platform with Cambridge Academic and General Training papers, instant objective marking and AI examiner feedback.",
+        publisher: { "@id": ORG_ID },
+        inLanguage: "en-GB",
       },
       {
         "@type": "EducationalOrganization",
-        "@id": "https://ielts.codestria.com/#organization",
-        "name": "Codestria IELTS",
-        "url": "https://ielts.codestria.com",
-        "logo": {
+        "@id": ORG_ID,
+        name: "Codestria IELTS",
+        url: SITE,
+        logo: {
           "@type": "ImageObject",
-          "url": "https://ielts.codestria.com/codestria-logo.png",
-          "contentUrl": "https://ielts.codestria.com/codestria-logo.png",
-          "width": "1069",
-          "height": "339",
+          url: `${SITE}/codestria-logo.png`,
+          contentUrl: `${SITE}/codestria-logo.png`,
+          width: 1069,
+          height: 339,
         },
-        "image": "https://ielts.codestria.com/codestria-logo-with-name-dark-1600x600.png",
-        "description":
-          "Leading Computer-Delivered CD-IELTS simulator and preparation lab. Engineered by Codestria software and AI studio.",
-        "parentOrganization": {
+        image: `${SITE}/codestria-logo-with-name-dark-1600x600.png`,
+        description:
+          "Computer-Delivered CD-IELTS simulator and preparation lab engineered by the Codestria software and AI studio.",
+        parentOrganization: {
           "@type": "Organization",
-          "name": "Codestria",
-          "url": "https://codestria.com",
-          "sameAs": ["https://codestria.com/"],
+          name: "Codestria",
+          url: "https://codestria.com",
         },
-        "sameAs": ["https://codestria.com/"],
+        email: "mail.codestria@gmail.com",
+        contactPoint: {
+          "@type": "ContactPoint",
+          contactType: "customer support",
+          email: "mail.codestria@gmail.com",
+          availableLanguage: ["English"],
+        },
+        sameAs: ["https://codestria.com/"],
+      },
+      {
+        "@type": "WebApplication",
+        "@id": `${SITE}/#application`,
+        name: "Codestria IELTS Simulator",
+        url: SITE,
+        applicationCategory: "EducationalApplication",
+        applicationSubCategory: "IELTS exam simulation",
+        operatingSystem: "Web browser",
+        browserRequirements: "Requires JavaScript and a modern browser",
+        inLanguage: "en-GB",
+        isAccessibleForFree: true,
+        offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
+        provider: { "@id": ORG_ID },
+        featureList: [
+          "Cambridge Academic and General Training mock tests",
+          "Computer-delivered Reading and Listening interface",
+          "Three-colour text highlighters and scratchpad",
+          "Instant Reading and Listening band scoring",
+          "AI examiner feedback for Writing and Speaking",
+          "Band score calculator and study roadmap",
+        ],
       },
       {
         "@type": "ItemList",
-        "@id": "https://ielts.codestria.com/#sitelinks",
-        "name": "Codestria IELTS Core Sitelinks",
-        "itemListElement": [
+        "@id": `${SITE}/#sitelinks`,
+        name: "Codestria IELTS Core Sitelinks",
+        itemListElement: [
           {
             "@type": "SiteNavigationElement",
-            "position": 1,
-            "name": "Academic Mock Tests",
-            "description": "Authentic Cambridge Academic IELTS full tests (Books 19 down to 12)",
-            "url": "https://ielts.codestria.com/tests?type=ACADEMIC",
+            position: 1,
+            name: "Academic Mock Tests",
+            description: "Authentic Cambridge Academic IELTS full tests",
+            url: `${SITE}/tests?type=ACADEMIC`,
           },
           {
             "@type": "SiteNavigationElement",
-            "position": 2,
-            "name": "General Training Tests",
-            "description": "Cambridge General Training mock tests with workplace texts and letters",
-            "url": "https://ielts.codestria.com/tests?type=GENERAL",
+            position: 2,
+            name: "General Training Tests",
+            description: "Cambridge General Training mock tests with workplace texts and letters",
+            url: `${SITE}/tests?type=GENERAL`,
           },
           {
             "@type": "SiteNavigationElement",
-            "position": 3,
-            "name": "IELTS Band Score Calculator",
-            "description": "Official Cambridge rounding calculator (.25 and .75 boundaries) and raw mark converter",
-            "url": "https://ielts.codestria.com/calculator",
+            position: 3,
+            name: "IELTS Band Score Calculator",
+            description: "Official Cambridge rounding calculator and raw mark converter",
+            url: `${SITE}/calculator`,
           },
           {
             "@type": "SiteNavigationElement",
-            "position": 4,
-            "name": "Band 9 Model Essays",
-            "description": "Cambridge examiner annotated model essays and Band 6 comparisons",
-            "url": "https://ielts.codestria.com/model-answers",
+            position: 4,
+            name: "Band 9 Model Essays",
+            description: "Cambridge examiner annotated model essays and Band 6 comparisons",
+            url: `${SITE}/model-answers`,
           },
           {
             "@type": "SiteNavigationElement",
-            "position": 5,
-            "name": "Speaking Practice Studio",
-            "description": "Part 2 cue card simulator with 1-min prep and live voice recording",
-            "url": "https://ielts.codestria.com/speaking-practice",
+            position: 5,
+            name: "Speaking Practice Studio",
+            description: "Part 2 cue card simulator with preparation timer and recording",
+            url: `${SITE}/speaking-practice`,
           },
           {
             "@type": "SiteNavigationElement",
-            "position": 6,
-            "name": "Academic Vocabulary Lab",
-            "description": "High-yield Academic Word List (AWL) collocations and native audio drills",
-            "url": "https://ielts.codestria.com/vocabulary",
+            position: 6,
+            name: "Academic Vocabulary Lab",
+            description: "High-yield Academic Word List collocations and pronunciation drills",
+            url: `${SITE}/vocabulary`,
           },
           {
             "@type": "SiteNavigationElement",
-            "position": 7,
-            "name": "Official Band Descriptors",
-            "description": "Public examiner assessment rubrics for Writing Task 1, 2 and Speaking",
-            "url": "https://ielts.codestria.com/band-descriptors",
+            position: 7,
+            name: "Official Band Descriptors",
+            description: "Public examiner assessment rubrics for Writing and Speaking",
+            url: `${SITE}/band-descriptors`,
           },
           {
             "@type": "SiteNavigationElement",
-            "position": 8,
-            "name": "Study Roadmap & Plan",
-            "description": "Personalized IELTS milestone schedule and daily checklist",
-            "url": "https://ielts.codestria.com/study-plan",
+            position: 8,
+            name: "Study Roadmap & Plan",
+            description: "Personalised IELTS milestone schedule and daily checklist",
+            url: `${SITE}/study-plan`,
           },
         ],
       },
       {
         "@type": "LearningResource",
-        "@id": "https://ielts.codestria.com/#learning-resource",
-        "name": "Cambridge IELTS Computer-Delivered Simulation Course",
-        "description":
-          "Authentic Cambridge Academic and General Training examination practice (Books 19 down to 12) featuring 3-color text highlighters, candidate notes scratchpad, timed audio tracks, and automated Band 9 examiner assessment.",
-        "educationalLevel": ["B2", "C1", "C2"],
-        "inLanguage": "en-GB",
-        "isAccessibleForFree": true,
-        "provider": {
-          "@id": "https://ielts.codestria.com/#organization",
-        },
-      },
-      {
-        "@type": "FAQPage",
-        "@id": "https://ielts.codestria.com/#faq",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "How does the Codestria Computer-Delivered IELTS simulator work?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text":
-                "The Codestria IELTS platform replicates authentic British Council and IDP Computer-Delivered test conditions with 3-color text highlighters (Yellow, Mint, Lavender), candidate notes scratchpad, draggable split-pane passage viewer, official 10-minute and 5-minute alerts, and timed audio playback.",
-            },
-          },
-          {
-            "@type": "Question",
-            "name": "Are Cambridge IELTS Books 12 to 19 free to practice?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text":
-                "Yes. Codestria IELTS provides free, full-length Academic and General Training examination papers from Cambridge Books 19 down to 12, including 40-question Reading and Listening modules with instant marking.",
-            },
-          },
-          {
-            "@type": "Question",
-            "name": "How is the IELTS overall band score calculated?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text":
-                "The overall band score is the average of Listening, Reading, Writing, and Speaking scores. If the average ends in .25, it rounds up to the next half band (e.g., 6.25 becomes 6.5); if it ends in .75, it rounds up to the next whole band (e.g., 6.75 becomes 7.0).",
-            },
-          },
-        ],
+        "@id": `${SITE}/#learning-resource`,
+        name: "Cambridge IELTS Computer-Delivered Simulation Course",
+        description:
+          "Authentic Cambridge Academic and General Training examination practice featuring three-colour text highlighters, candidate notes scratchpad, timed audio tracks and automated examiner assessment.",
+        educationalLevel: ["B2", "C1", "C2"],
+        inLanguage: "en-GB",
+        isAccessibleForFree: true,
+        provider: { "@id": ORG_ID },
       },
     ],
   };
 
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-    />
-  );
+  return <JsonLdScript data={structuredData} />;
 }
+
+/* ------------------------------------------------------------------ */
+/*  Breadcrumbs                                                       */
+/* ------------------------------------------------------------------ */
 
 export function BreadcrumbsJsonLd({
   items,
@@ -174,18 +183,206 @@ export function BreadcrumbsJsonLd({
   const breadcrumbData = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    "itemListElement": items.map((item, index) => ({
+    itemListElement: items.map((item, index) => ({
       "@type": "ListItem",
-      "position": index + 1,
-      "name": item.name,
-      "item": item.url,
+      position: index + 1,
+      name: item.name,
+      item: item.url,
     })),
   };
 
+  return <JsonLdScript data={breadcrumbData} />;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Page-level schemas                                                */
+/* ------------------------------------------------------------------ */
+
+export function WebApplicationJsonLd({
+  name,
+  description,
+  url,
+  keywords,
+}: {
+  name: string;
+  description: string;
+  url: string;
+  keywords?: string[];
+}) {
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }}
+    <JsonLdScript
+      data={{
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "@id": `${url}#application`,
+        name,
+        description,
+        url,
+        applicationCategory: "EducationalApplication",
+        operatingSystem: "Web browser",
+        browserRequirements: "Requires JavaScript and a modern browser",
+        inLanguage: "en-GB",
+        isAccessibleForFree: true,
+        offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
+        provider: { "@type": "Organization", name: "Codestria", url: "https://codestria.com" },
+        ...(keywords?.length ? { keywords: keywords.join(", ") } : {}),
+      }}
+    />
+  );
+}
+
+export function LearningResourceJsonLd({
+  name,
+  description,
+  url,
+  educationalLevel = ["B2", "C1", "C2"],
+  teaches,
+}: {
+  name: string;
+  description: string;
+  url: string;
+  educationalLevel?: string[];
+  teaches?: string[];
+}) {
+  return (
+    <JsonLdScript
+      data={{
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        "@id": `${url}#learning-resource`,
+        name,
+        description,
+        url,
+        educationalLevel,
+        inLanguage: "en-GB",
+        isAccessibleForFree: true,
+        learningResourceType: "Exam preparation",
+        ...(teaches?.length ? { teaches } : {}),
+        provider: { "@type": "Organization", name: "Codestria", url: "https://codestria.com" },
+      }}
+    />
+  );
+}
+
+export function HowToJsonLd({
+  name,
+  description,
+  url,
+  steps,
+}: {
+  name: string;
+  description: string;
+  url: string;
+  steps: { name: string; text: string }[];
+}) {
+  return (
+    <JsonLdScript
+      data={{
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "@id": `${url}#how-to`,
+        name,
+        description,
+        url,
+        inLanguage: "en-GB",
+        totalTime: "PT5M",
+        step: steps.map((step, index) => ({
+          "@type": "HowToStep",
+          position: index + 1,
+          name: step.name,
+          text: step.text,
+          url: `${url}#step-${index + 1}`,
+        })),
+      }}
+    />
+  );
+}
+
+export function QuizJsonLd({
+  name,
+  description,
+  url,
+  educationalLevel = ["B2", "C1", "C2"],
+  about,
+}: {
+  name: string;
+  description: string;
+  url: string;
+  educationalLevel?: string[];
+  about?: string[];
+}) {
+  return (
+    <JsonLdScript
+      data={{
+        "@context": "https://schema.org",
+        "@type": "Quiz",
+        "@id": `${url}#quiz`,
+        name,
+        description,
+        url,
+        educationalLevel,
+        inLanguage: "en-GB",
+        isAccessibleForFree: true,
+        ...(about?.length ? { about: about.map((item) => ({ "@type": "Thing", name: item })) } : {}),
+        provider: { "@type": "Organization", name: "Codestria", url: "https://codestria.com" },
+      }}
+    />
+  );
+}
+
+export function CollectionPageJsonLd({
+  name,
+  description,
+  url,
+  items,
+}: {
+  name: string;
+  description: string;
+  url: string;
+  items: { name: string; url: string }[];
+}) {
+  return (
+    <JsonLdScript
+      data={{
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "@id": `${url}#collection`,
+        name,
+        description,
+        url,
+        inLanguage: "en-GB",
+        isPartOf: { "@type": "WebSite", name: "Codestria IELTS", url: SITE },
+        mainEntity: {
+          "@type": "ItemList",
+          numberOfItems: items.length,
+          itemListElement: items.map((item, index) => ({
+            "@type": "ListItem",
+            position: index + 1,
+            name: item.name,
+            url: item.url,
+          })),
+        },
+      }}
+    />
+  );
+}
+
+export function FaqJsonLd({
+  faqs,
+}: {
+  faqs: { question: string; answer: string }[];
+}) {
+  return (
+    <JsonLdScript
+      data={{
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faqs.map((faq) => ({
+          "@type": "Question",
+          name: faq.question,
+          acceptedAnswer: { "@type": "Answer", text: faq.answer },
+        })),
+      }}
     />
   );
 }

@@ -1,13 +1,16 @@
 "use client";
 
-import { CheckCircle2, Clock, Eye, EyeOff, Loader2, Shield, Sparkles, Trophy, Zap } from "lucide-react";
+import { CheckCircle2, Circle, Clock, Eye, EyeOff, Loader2, Mail, Shield, Sparkles, Trophy, Zap } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { api, ApiError, type User } from "@/lib/api";
+import { isStrongPassword, passwordChecks, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from "@/lib/password";
 import { useAuth } from "./AuthProvider";
 import { Logo } from "./Logo";
 import { BandRing, ErrorBox } from "./ui";
+
+const CONTACT_EMAIL = "mail.codestria@gmail.com";
 
 export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
@@ -20,6 +23,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const isLogin = mode === "login";
+  const passwordRequirements = passwordChecks(form.password);
+  const passwordStrong = isStrongPassword(form.password);
 
   function enter(user: User, destination?: string | null) {
     try {
@@ -27,14 +32,6 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     } catch {}
     setUser(user);
     router.push(destination?.startsWith("/") ? destination : "/dashboard");
-  }
-
-  function loginAsGuest() {
-    enter({
-      id: "demo-candidate-01",
-      name: "Codestria Candidate",
-      email: "candidate@codestria.com",
-    });
   }
 
   async function submit(e: React.FormEvent) {
@@ -47,20 +44,16 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       enter(user, next);
     } catch (err) {
       // A real HTTP response (wrong password, 5xx, validation error) must be
-      // surfaced. Only a genuine network failure falls back to a local session.
+      // surfaced. A network failure is reported to the candidate instead of
+      // silently creating a local session.
       if (err instanceof ApiError) {
         setError(err.message);
-        setBusy(false);
-        return;
+      } else {
+        setError(
+          "We couldn't reach the server. Check your connection and try again, or email mail.codestria@gmail.com if the problem continues.",
+        );
       }
-      enter(
-        {
-          id: `local-user-${Date.now()}`,
-          name: form.name || (form.email ? form.email.split("@")[0] : "Codestria Candidate"),
-          email: form.email || "candidate@codestria.com",
-        },
-        next,
-      );
+      setBusy(false);
     }
   }
 
@@ -146,9 +139,10 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     required
-                    minLength={isLogin ? undefined : 8}
+                    minLength={isLogin ? undefined : PASSWORD_MIN_LENGTH}
+                    maxLength={isLogin ? undefined : PASSWORD_MAX_LENGTH}
                     className="input pr-11"
-                    placeholder={isLogin ? "Your password" : "At least 8 characters"}
+                    placeholder={isLogin ? "Your password" : `At least ${PASSWORD_MIN_LENGTH} characters`}
                     value={form.password}
                     onChange={set("password")}
                     autoComplete={isLogin ? "current-password" : "new-password"}
@@ -162,27 +156,36 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
                     {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                   </button>
                 </div>
+
+                {!isLogin && (
+                  <div className="mt-3 rounded-xl border border-surface-200 bg-surface-50 p-3.5">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-surface-500">
+                      Your password must include
+                    </p>
+                    <ul className="mt-2 space-y-1.5">
+                      {passwordRequirements.map((requirement) => (
+                        <li key={requirement.id} className="flex items-center gap-2 text-[13px]">
+                          {requirement.ok ? (
+                            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                          ) : (
+                            <Circle className="h-4 w-4 shrink-0 text-surface-300" />
+                          )}
+                          <span className={requirement.ok ? "text-surface-700" : "text-surface-500"}>
+                            {requirement.label}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
 
-              <button className="btn-primary w-full py-3.5 text-[15px]" disabled={busy}>
+              <button
+                className="btn-primary w-full py-3.5 text-[15px]"
+                disabled={busy || (!isLogin && !passwordStrong)}
+              >
                 {busy && <Loader2 className="h-4 w-4 animate-spin" />}
                 {isLogin ? "Sign in" : "Create free account"}
-              </button>
-
-              <div className="relative py-1">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-surface-200" />
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="bg-white px-3 text-xs font-medium uppercase tracking-wide text-surface-400">
-                    or explore first
-                  </span>
-                </div>
-              </div>
-
-              <button type="button" onClick={loginAsGuest} className="btn-secondary w-full py-3">
-                <Sparkles className="h-4 w-4 text-brand-500" />
-                Continue as guest
               </button>
             </div>
 
@@ -196,7 +199,36 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
               </Link>
             </p>
 
-            <div className="mt-8 flex items-center justify-center gap-4 text-xs text-surface-400">
+            <div className="mt-6 rounded-xl border border-surface-200 bg-surface-50 p-4 text-center">
+              <p className="flex items-center justify-center gap-2 text-[13px] font-bold text-surface-800">
+                <Mail className="h-4 w-4 text-brand-600" />
+                Need help or have a suggestion?
+              </p>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-surface-500">
+                If you face any issue or want to improve anything, contact us at{" "}
+                <a
+                  href={`mailto:${CONTACT_EMAIL}`}
+                  className="font-semibold text-brand-600 underline-offset-2 transition hover:text-brand-700 hover:underline"
+                >
+                  {CONTACT_EMAIL}
+                </a>
+                .
+              </p>
+            </div>
+
+            <p className="mt-5 text-center text-xs text-surface-400">
+              Powered by{" "}
+              <a
+                href="https://codestria.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-surface-500 underline-offset-2 transition hover:text-surface-800 hover:underline"
+              >
+                codestria.com
+              </a>
+            </p>
+
+            <div className="mt-6 flex items-center justify-center gap-4 text-xs text-surface-400">
               <span className="flex items-center gap-1.5"><Shield className="h-3.5 w-3.5" /> Secure</span>
               <span className="h-3 w-px bg-surface-200" />
               <span className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5" /> Instant access</span>

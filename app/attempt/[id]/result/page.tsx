@@ -9,7 +9,7 @@ import { ChartView } from "@/components/ChartView";
 import { Logo } from "@/components/Logo";
 import { countQuestions, QuestionGroups } from "@/components/Questions";
 import { type SpeakingAnswer, speakingItems } from "@/components/runners/SpeakingRunner";
-import { BandRing, bandTone, ErrorBox, MODULE_INFO, MODULE_ORDER, ModuleIcon } from "@/components/ui";
+import { BandRing, bandTone, ErrorBox, MODULE_INFO, MODULE_ORDER, ModuleIcon, wordCount } from "@/components/ui";
 import {
   api,
   type Attempt,
@@ -19,7 +19,8 @@ import {
   type TestOverview,
   type WritingFeedback,
 } from "@/lib/api";
-import { getAttemptDetails, fetchTestOverview } from "@/lib/test-runner-service";
+import { createAttempt, getAttemptDetails, fetchTestOverview } from "@/lib/test-runner-service";
+import { testPath } from "@/lib/seo";
 import { getCEFRLevel } from "@/lib/cambridge-library";
 import type { ListeningContent, ReadingContent, SpeakingContent, WritingContent } from "@/lib/content.types";
 
@@ -34,31 +35,68 @@ function ResultView() {
   const [overview, setOverview] = useState<TestOverview | null>(null);
   const [error, setError] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
+  const [retrying, setRetrying] = useState(false);
+  const [retaking, setRetaking] = useState(false);
+  const [scoringStalled, setScoringStalled] = useState(false);
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>;
+    let cancelled = false;
     const load = async () => {
       try {
         const a = await getAttemptDetails(id);
+        if (cancelled) return;
         if (a.status === "IN_PROGRESS") return router.replace(`/attempt/${id}`);
         setAttempt(a);
+        setError("");
         if (a.status === "SCORING") timer = setTimeout(load, 3000);
         else setOverview(await fetchTestOverview(a.test.id));
       } catch (e) {
-        setError((e as Error).message);
+        if (!cancelled) setError((e as Error).message);
       }
     };
     load();
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [id, router, reloadKey]);
 
+  // If scoring never resolves, stop pretending everything is fine: after 90
+  // seconds offer a manual re-check instead of an endless spinner.
+  useEffect(() => {
+    if (attempt?.status !== "SCORING") {
+      setScoringStalled(false);
+      return;
+    }
+    const t = setTimeout(() => setScoringStalled(true), 90_000);
+    return () => clearTimeout(t);
+  }, [attempt?.status, attempt?.submittedAt]);
+
   async function retry() {
+    if (retrying) return;
     setError("");
+    setRetrying(true);
     try {
       await api(`/attempts/${id}/retry-scoring`, { method: "POST" });
       setReloadKey((k) => k + 1);
     } catch (e) {
       setError((e as Error).message);
+    } finally {
+      setRetrying(false);
+    }
+  }
+
+  async function retake() {
+    if (retaking || !attempt) return;
+    setError("");
+    setRetaking(true);
+    try {
+      const { id: attemptId } = await createAttempt(attempt.test.id, attempt.module);
+      router.push(`/attempt/${attemptId}`);
+    } catch (e) {
+      setError((e as Error).message);
+      setRetaking(false);
     }
   }
 
@@ -68,7 +106,7 @@ function ResultView() {
 
   return (
     <div className="page-container space-y-7 py-8 sm:py-10">
-      <Link href={`/tests/${attempt.test.id}`} className="inline-flex items-center gap-1.5 text-sm font-medium text-surface-500 hover:text-surface-900">
+      <Link href={testPath(attempt.test)} className="inline-flex items-center gap-1.5 text-sm font-medium text-surface-500 hover:text-surface-900">
         <ArrowLeft className="h-4 w-4" /> Back to {attempt.test.title}
       </Link>
 
@@ -80,6 +118,24 @@ function ResultView() {
           </div>
           <h1 className="font-display text-2xl font-extrabold tracking-tight text-surface-900">The AI examiner is scoring your {info.label}</h1>
           <p className="max-w-md text-sm text-surface-500">This usually takes under a minute. You can leave this page; your result is saved and will be waiting for you.</p>
+          {scoringStalled ? (
+            <div className="mt-2 w-full max-w-md space-y-3 rounded-2xl border border-amber-200 bg-amber-50/70 p-4 text-left">
+              <p className="flex items-start gap-2 text-sm leading-relaxed text-amber-800">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                This is taking longer than usual. Your answers are saved — nothing is lost. Re-check in a moment, or leave and come back later.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => setReloadKey((k) => k + 1)} className="btn-secondary btn-sm">
+                  <RotateCcw className="h-3.5 w-3.5" /> Check again
+                </button>
+                <Link href="/profile#ai" className="btn-secondary btn-sm inline-flex items-center gap-1.5">
+                  <KeyRound className="h-3.5 w-3.5" /> Check AI key
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-surface-400">You can safely close this tab.</p>
+          )}
         </div>
       )}
 
@@ -99,8 +155,9 @@ function ResultView() {
               <KeyRound className="h-4 w-4" /> Configure AI key
             </Link>
             {!id.startsWith("local-att-") && (
-              <button onClick={retry} className="btn-secondary inline-flex items-center gap-2">
-                <RotateCcw className="h-4 w-4" /> Retry AI scoring
+              <button onClick={retry} disabled={retrying} className="btn-secondary inline-flex items-center gap-2">
+                {retrying ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+                {retrying ? "Retrying…" : "Retry AI scoring"}
               </button>
             )}
           </div>
@@ -137,6 +194,20 @@ function ResultView() {
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
+                    onClick={retake}
+                    disabled={retaking}
+                    className="btn-primary text-xs px-3 py-2 inline-flex items-center gap-1.5"
+                    title="Start a fresh attempt of this module"
+                  >
+                    {retaking ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <RotateCcw className="h-3.5 w-3.5" />
+                    )}
+                    <span>{retaking ? "Starting…" : "Retake"}</span>
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => window.print()}
                     className="btn-secondary text-xs px-3 py-2 inline-flex items-center gap-1.5"
                     title="Print or Save PDF report"
@@ -168,7 +239,7 @@ function ResultView() {
                   {overview.overallBand !== null ? (
                     <><Trophy className="h-4 w-4 text-amber-500" /> <span className="text-surface-500">Overall</span> <span className="text-lg font-bold">{overview.overallBand.toFixed(1)}</span></>
                   ) : (
-                    <Link href={`/tests/${attempt.test.id}`} className="flex items-center gap-1.5 font-medium text-surface-600 hover:text-brand-700">
+                    <Link href={testPath(attempt.test)} className="flex items-center gap-1.5 font-medium text-surface-600 hover:text-brand-700">
                       <Lock className="h-4 w-4" /> Overall band unlocks after {overview.remaining.map((m) => MODULE_INFO[m].label).join(", ")} <ChevronRight className="h-4 w-4" />
                     </Link>
                   )}
@@ -276,7 +347,8 @@ function ObjectiveReview({ attempt }: { attempt: Attempt }) {
   const content = attempt.content as ReadingContent | ListeningContent;
   const isReading = "passages" in content;
   const sections = isReading ? content.passages : content.parts;
-  const results = (attempt.result!.feedback as { results: QuestionResult[] }).results;
+  const feedback = attempt.result?.feedback as { results?: QuestionResult[] } | undefined;
+  const results: QuestionResult[] = Array.isArray(feedback?.results) ? feedback.results : [];
   const byId = Object.fromEntries(results.map((r) => [r.questionId, r]));
   const [active, setActive] = useState(0);
   const [onlyWrong, setOnlyWrong] = useState(false);
@@ -402,10 +474,18 @@ const CRITERIA_LABELS: Record<string, string> = {
   pronunciation: "Pronunciation",
 };
 
-function CriteriaGrid({ criteria }: { criteria: Record<string, Criterion> }) {
+function CriteriaGrid({ criteria }: { criteria?: Record<string, Criterion> }) {
+  const entries = Object.entries(criteria ?? {});
+  if (!entries.length) {
+    return (
+      <p className="rounded-2xl border border-surface-200 bg-surface-50/70 p-4 text-sm text-surface-500">
+        The examiner did not return a criterion-by-criterion breakdown for this response.
+      </p>
+    );
+  }
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      {Object.entries(criteria).map(([key, c]) => {
+      {entries.map(([key, c]) => {
         const hasBand = typeof c?.band === "number";
         return (
           <div key={key} className="rounded-2xl border border-surface-200 bg-white p-5">
@@ -420,7 +500,7 @@ function CriteriaGrid({ criteria }: { criteria: Record<string, Criterion> }) {
                 <div className="h-full rounded-full" style={{ width: `${(c.band / 9) * 100}%`, background: bandTone(c.band).stroke }} />
               )}
             </div>
-            <p className="mt-3 text-sm leading-relaxed text-surface-600">{c.comment}</p>
+            <p className="mt-3 text-sm leading-relaxed text-surface-600">{c?.comment ?? "—"}</p>
           </div>
         );
       })}
@@ -428,39 +508,51 @@ function CriteriaGrid({ criteria }: { criteria: Record<string, Criterion> }) {
   );
 }
 
-function Lists({ strengths, improvements }: { strengths: string[]; improvements: string[] }) {
+function Lists({ strengths = [], improvements = [] }: { strengths?: string[]; improvements?: string[] }) {
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-5">
         <h4 className="flex items-center gap-2 font-semibold text-emerald-800"><ThumbsUp className="h-4 w-4" /> What you did well</h4>
-        <ul className="mt-3 space-y-2 text-sm text-emerald-950/80">{strengths.map((s, i) => <li key={i} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />{s}</li>)}</ul>
+        {strengths.length ? (
+          <ul className="mt-3 space-y-2 text-sm text-emerald-950/80">{strengths.map((s, i) => <li key={i} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />{s}</li>)}</ul>
+        ) : (
+          <p className="mt-3 text-sm text-emerald-950/60">No strengths were listed for this response.</p>
+        )}
       </div>
       <div className="rounded-2xl border border-amber-100 bg-amber-50/60 p-5">
         <h4 className="flex items-center gap-2 font-semibold text-amber-800"><TrendingUp className="h-4 w-4" /> How to improve</h4>
-        <ul className="mt-3 space-y-2 text-sm text-amber-950/80">{improvements.map((s, i) => <li key={i} className="flex gap-2"><ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />{s}</li>)}</ul>
+        {improvements.length ? (
+          <ul className="mt-3 space-y-2 text-sm text-amber-950/80">{improvements.map((s, i) => <li key={i} className="flex gap-2"><ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />{s}</li>)}</ul>
+        ) : (
+          <p className="mt-3 text-sm text-amber-950/60">No improvement points were listed for this response.</p>
+        )}
       </div>
     </div>
   );
 }
 
-function Summary({ text }: { text: string }) {
+function Summary({ text }: { text?: string }) {
   return (
     <section className="card flex gap-4 p-6">
       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600"><Brain className="h-5 w-5" /></span>
       <div>
         <h2 className="font-semibold">Examiner's summary</h2>
-        <p className="mt-1 leading-relaxed text-surface-600">{text}</p>
+        <p className="mt-1 leading-relaxed text-surface-600">{text || "No summary was returned for this attempt."}</p>
       </div>
     </section>
   );
 }
 
 function WritingReview({ attempt }: { attempt: Attempt }) {
-  const fb = attempt.result!.feedback as WritingFeedback;
+  const fb = (attempt.result?.feedback ?? {}) as Partial<WritingFeedback>;
   const content = attempt.content as WritingContent;
   const answers = attempt.answers as { task1?: string; task2?: string };
   const [tab, setTab] = useState<"task1" | "task2">("task1");
   const t = tab;
+  const task = fb[t] ?? { criteria: {}, strengths: [], improvements: [], correctedExamples: [] };
+  const band = t === "task1" ? fb.task1Band : fb.task2Band;
+  const hasBand = typeof band === "number";
+  const written = wordCount(answers[t]) || fb.words?.[t] || 0;
   return (
     <div className="space-y-6">
       <Summary text={fb.summary} />
@@ -482,14 +574,19 @@ function WritingReview({ attempt }: { attempt: Attempt }) {
           <span className="ml-auto hidden self-center text-xs text-surface-400 sm:block">Task 2 counts twice as much as Task 1</span>
         </div>
         <div className="space-y-6 p-6">
-          <p className="text-sm text-surface-500">{fb.words[t]} words written (minimum {content[t].minWords})</p>
-          <CriteriaGrid criteria={fb[t].criteria} />
-          <Lists strengths={fb[t].strengths} improvements={fb[t].improvements} />
-          {fb[t].correctedExamples.length > 0 && (
+          {!hasBand && (
+            <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              This task has no AI band{typeof fb.task1Band !== "number" || typeof fb.task2Band !== "number" ? " (one task was empty or too short to score)" : ""}. The feedback below is what the examiner returned.
+            </p>
+          )}
+          <p className="text-sm text-surface-500">{written} words written (minimum {content[t].minWords})</p>
+          <CriteriaGrid criteria={task.criteria} />
+          <Lists strengths={task.strengths} improvements={task.improvements} />
+          {(task.correctedExamples?.length ?? 0) > 0 && (
             <div>
               <h4 className="font-semibold">Sentence corrections</h4>
               <ul className="mt-3 space-y-3">
-                {fb[t].correctedExamples.map((c, i) => (
+                {(task.correctedExamples ?? []).map((c, i) => (
                   <li key={i} className="rounded-2xl border border-surface-200 p-4 text-sm">
                     <div className="text-rose-600 line-through decoration-rose-300">{c.original}</div>
                     <div className="mt-1.5 font-medium text-emerald-700">{c.improved}</div>
@@ -514,9 +611,11 @@ function WritingReview({ attempt }: { attempt: Attempt }) {
 }
 
 function SpeakingReview({ attempt }: { attempt: Attempt }) {
-  const fb = attempt.result!.feedback as SpeakingFeedback;
-  const answers = attempt.answers as Record<string, SpeakingAnswer>;
-  const items = speakingItems(attempt.content as SpeakingContent);
+  const fb = (attempt.result?.feedback ?? {}) as Partial<SpeakingFeedback>;
+  const answers = (attempt.answers ?? {}) as Record<string, SpeakingAnswer>;
+  const content = attempt.content as SpeakingContent | null;
+  const items = content ? speakingItems(content) : [];
+  const betterAnswers = fb.betterAnswers ?? [];
   return (
     <div className="space-y-6">
       <Summary text={fb.summary} />
@@ -525,11 +624,11 @@ function SpeakingReview({ attempt }: { attempt: Attempt }) {
         <Lists strengths={fb.strengths} improvements={fb.improvements} />
         <p className="text-xs text-surface-500">Scored from a transcript of your speech, so the Pronunciation band is an estimate.</p>
       </section>
-      {fb.betterAnswers.length > 0 && (
+      {betterAnswers.length > 0 && (
         <section className="card p-6">
           <h2 className="flex items-center gap-2 font-display text-lg font-bold text-surface-900"><Sparkles className="h-5 w-5 text-violet-600" /> Band 8 sample answers</h2>
           <ul className="mt-4 space-y-3">
-            {fb.betterAnswers.map((b, i) => (
+            {betterAnswers.map((b, i) => (
               <li key={i} className="rounded-2xl border border-violet-100 bg-violet-50/60 p-5 text-sm">
                 <div className="font-semibold text-surface-900">{b.question}</div>
                 <p className="mt-2 leading-relaxed text-surface-700">{b.suggestion}</p>
@@ -538,7 +637,7 @@ function SpeakingReview({ attempt }: { attempt: Attempt }) {
           </ul>
         </section>
       )}
-      <details className="card group p-6">
+      <details className="card group p-6" open>
         <summary className="flex cursor-pointer list-none items-center gap-2 font-semibold"><ChevronRight className="h-4 w-4 transition group-open:rotate-90" /> Your transcripts</summary>
         <ol className="mt-4 space-y-4 text-sm">
           {items.map((it) => (

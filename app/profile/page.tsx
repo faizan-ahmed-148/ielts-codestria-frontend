@@ -24,6 +24,7 @@ import { RequireAuth, useAuth } from "@/components/AuthProvider";
 import { AiKeySettings } from "@/components/AiKeySetup";
 import { ErrorBox, PageHeader } from "@/components/ui";
 import { api, type TestType, type User } from "@/lib/api";
+import { isStrongPassword, passwordChecks, PASSWORD_MIN_LENGTH } from "@/lib/password";
 
 type Tab = "profile" | "security" | "ai" | "preferences" | "data";
 
@@ -91,6 +92,8 @@ function ProfileView() {
   const [passwordSaving, setPasswordSaving] = useState(false);
   const [passwordSuccess, setPasswordSuccess] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const newPasswordChecks = passwordChecks(newPassword);
+  const newPasswordStrong = isStrongPassword(newPassword);
 
   // Exam room preferences (localStorage)
   const [contrastTheme, setContrastTheme] = useState<"standard" | "yellow" | "inverted" | "cream">("standard");
@@ -183,8 +186,8 @@ function ProfileView() {
     setPasswordSuccess("");
     setPasswordError("");
 
-    if (newPassword.length < 8) {
-      setPasswordError("New password must be at least 8 characters long.");
+    if (!isStrongPassword(newPassword)) {
+      setPasswordError("Your new password does not meet all the requirements listed below.");
       setPasswordSaving(false);
       return;
     }
@@ -196,17 +199,10 @@ function ProfileView() {
     }
 
     try {
-      try {
-        await api("/auth/change-password", {
-          method: "POST",
-          body: { currentPassword, newPassword },
-        });
-      } catch (err: any) {
-        const msg = err?.message || "";
-        if (msg.includes("Current password does not match")) {
-          throw err;
-        }
-      }
+      await api("/auth/change-password", {
+        method: "POST",
+        body: { currentPassword, newPassword },
+      });
 
       setPasswordSuccess("Your account password has been changed successfully!");
       setCurrentPassword("");
@@ -474,7 +470,7 @@ function ProfileView() {
           <form onSubmit={handleChangePassword} className="card space-y-6 p-6 sm:p-8">
             <SectionHead
               title="Update account password"
-              description="Protect your account with a strong password of at least eight characters."
+              description={`Protect your account with a strong password: ${PASSWORD_MIN_LENGTH}+ characters, including uppercase, lowercase, number and special character.`}
             />
 
             <div className="space-y-4">
@@ -512,11 +508,11 @@ function ProfileView() {
                     id="newPassword"
                     type={showNew ? "text" : "password"}
                     required
-                    minLength={8}
+                    minLength={PASSWORD_MIN_LENGTH}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     className="input pr-11"
-                    placeholder="At least 8 characters"
+                    placeholder={`At least ${PASSWORD_MIN_LENGTH} characters`}
                   />
                   <button
                     type="button"
@@ -526,6 +522,26 @@ function ProfileView() {
                   >
                     {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
+                </div>
+
+                <div className="mt-3 rounded-xl border border-surface-200 bg-surface-50 p-3.5">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-surface-500">
+                    Your new password must include
+                  </p>
+                  <ul className="mt-2 space-y-1.5">
+                    {newPasswordChecks.map((requirement) => (
+                      <li key={requirement.id} className="flex items-center gap-2 text-[13px]">
+                        {requirement.ok ? (
+                          <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" />
+                        ) : (
+                          <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-surface-300" />
+                        )}
+                        <span className={requirement.ok ? "text-surface-700" : "text-surface-500"}>
+                          {requirement.label}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
 
@@ -537,7 +553,7 @@ function ProfileView() {
                   id="confirmPassword"
                   type="password"
                   required
-                  minLength={8}
+                  minLength={PASSWORD_MIN_LENGTH}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="input"
@@ -556,7 +572,11 @@ function ProfileView() {
             </div>
 
             <div className="flex items-center justify-end border-t border-surface-100 pt-5">
-              <button type="submit" disabled={passwordSaving} className="btn-primary cursor-pointer px-6 py-3">
+              <button
+                type="submit"
+                disabled={passwordSaving || !newPasswordStrong}
+                className="btn-primary cursor-pointer px-6 py-3"
+              >
                 {passwordSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
                 <span>Update password</span>
               </button>

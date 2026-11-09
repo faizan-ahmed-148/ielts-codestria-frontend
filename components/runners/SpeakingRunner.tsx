@@ -5,12 +5,14 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Keyboard,
   Mic,
+  RotateCcw,
   Square,
   Timer as TimerIcon,
   Volume2,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { wordCount } from "@/components/ui";
 import type { SpeakingContent } from "@/lib/content.types";
 import { recognitionSupported, speak, startRecognition } from "@/lib/speech";
@@ -62,7 +64,7 @@ export function SpeakingRunner({
   answers: Answers;
   setAnswer: (key: string, value: SpeakingAnswer) => void;
 }) {
-  const items = speakingItems(content);
+  const items = useMemo(() => speakingItems(content), [content]);
   const [index, setIndex] = useState(() =>
     Math.max(0, items.findIndex((i) => !answers[i.key]?.transcript)),
   );
@@ -72,11 +74,17 @@ export function SpeakingRunner({
   const [recording, setRecording] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [prep, setPrep] = useState<number | null>(null);
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState<Record<string, string>>({});
   const [micError, setMicError] = useState("");
+  // Detection must happen after mount: the server render has no `window`, and
+  // rendering the microphone UI on the server would break hydration.
+  const [canRecord, setCanRecord] = useState(false);
   const stopRef = useRef<(() => string) | null>(null);
   const baseRef = useRef({ transcript: "", seconds: 0 });
-  const canRecord = recognitionSupported();
+
+  useEffect(() => {
+    setCanRecord(recognitionSupported());
+  }, []);
 
   // Stop everything when moving to another question or leaving the page.
   useEffect(
@@ -93,25 +101,30 @@ export function SpeakingRunner({
     return () => clearInterval(t);
   }, [recording]);
 
+  // Part 2 is a timed long turn: stop automatically at two minutes.
   useEffect(() => {
     if (recording && item.part === 2 && elapsed >= PART2_MAX) stop();
   });
 
   useEffect(() => {
     if (prep === null) return;
-    if (prep <= 0) {
-      setPrep(null);
-      start();
-      return;
-    }
-    const t = setTimeout(() => setPrep((p) => (p ?? 1) - 1), 1000);
+    const t = setTimeout(() => {
+      if (prep <= 1) {
+        setPrep(null);
+        start();
+      } else {
+        setPrep(prep - 1);
+      }
+    }, 1000);
     return () => clearTimeout(t);
   });
 
-  function start() {
+  function start(fresh = false) {
+    if (recording) return;
     setMicError("");
+    setPrep(null);
     window.speechSynthesis?.cancel();
-    baseRef.current = { ...answer };
+    baseRef.current = fresh ? { transcript: "", seconds: 0 } : { ...answer };
     setElapsed(0);
     try {
       stopRef.current = startRecognition(
@@ -128,6 +141,7 @@ export function SpeakingRunner({
       setRecording(true);
     } catch (e) {
       setMicError((e as Error).message);
+      setRecording(false);
     }
   }
 
@@ -141,24 +155,40 @@ export function SpeakingRunner({
     });
   }
 
+  /** Throw away the current answer and record it again from scratch. */
+  function restart() {
+    if (recording) stop();
+    setAnswer(item.key, { transcript: "", seconds: 0 });
+    baseRef.current = { transcript: "", seconds: 0 };
+    setElapsed(0);
+    setMicError("");
+    window.setTimeout(() => start(true), 0);
+  }
+
   const go = (i: number) => {
+    if (i < 0 || i >= items.length) return;
     if (recording) stop();
     setPrep(null);
+    setMicError("");
     setIndex(i);
   };
 
   const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
   const answeredCount = items.filter((i) => answers[i.key]?.transcript?.trim()).length;
+  const setNote = (value: string) => setNotes((n) => ({ ...n, [item.key]: value }));
+  const note = notes[item.key] ?? "";
+  const words = wordCount(answer.transcript);
 
   return (
     <div className="page-container grid w-full flex-1 items-start gap-6 py-7 sm:py-9 lg:grid-cols-[1fr_320px]">
       <div className="min-w-0 space-y-4">
         {!canRecord && (
           <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-relaxed text-amber-800">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <Keyboard className="mt-0.5 h-4 w-4 shrink-0" />
             <span>
-              Your browser doesn&apos;t support speech-to-text. Use Chrome or Edge to answer by
-              speaking, or type your answers below.
+              <strong className="font-semibold">Typed answer mode.</strong> Speech-to-text is not
+              available in this browser. Use Chrome or Edge to answer by speaking, or type each
+              answer in the box below — your transcript is what gets scored.
             </span>
           </div>
         )}
@@ -168,7 +198,13 @@ export function SpeakingRunner({
             <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-brand-600">
               {PART_LABELS[item.part]}
             </span>
-            <span className="text-xs font-medium text-surface-500">
+            <span className="flex items-center gap-2 text-xs font-medium text-surface-500">
+              {recording && (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2 py-0.5 font-semibold text-rose-600">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-rose-500" />
+                  Recording
+                </span>
+              )}
               Question {index + 1} of {items.length}
             </span>
           </div>
@@ -188,8 +224,9 @@ export function SpeakingRunner({
                       (item.bullets ? ". You should say: " + item.bullets.join(". ") : ""),
                   )
                 }
+                disabled={recording}
                 className="btn-secondary btn-sm shrink-0"
-                title="Hear the examiner ask the question"
+                title={recording ? "Stop recording to replay the question" : "Hear the examiner ask the question"}
               >
                 <Volume2 className="h-4 w-4" />
                 <span className="hidden sm:inline">Listen</span>
@@ -213,16 +250,17 @@ export function SpeakingRunner({
               </div>
             )}
 
-            {item.part === 2 && prep !== null && (
-              <div className="mt-5 space-y-2">
-                <div className="flex items-center gap-2 text-sm font-semibold text-amber-700">
-                  <TimerIcon className="h-4 w-4" /> Preparation time: {prep}s
-                </div>
+            {item.part === 2 && (
+              <div className="mt-5">
+                <label className="label" htmlFor={`notes-${item.key}`}>
+                  Your notes <span className="font-normal text-surface-400">(not marked)</span>
+                </label>
                 <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Your notes (these aren't marked)"
-                  className="input h-28 leading-relaxed"
+                  id={`notes-${item.key}`}
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Jot down a few keywords to organise your long turn…"
+                  className="input h-24 leading-relaxed"
                 />
               </div>
             )}
@@ -243,24 +281,41 @@ export function SpeakingRunner({
                     {mmss(elapsed)}
                     {item.part === 2 ? ` / ${mmss(PART2_MAX)}` : ""}
                   </div>
-                  <div className="text-sm text-surface-500">
-                    Listening… press stop when you finish your answer.
+                  <div className="text-sm text-surface-500" aria-live="polite">
+                    Listening… speak at a natural pace, then press stop when you finish.
                   </div>
+                  {words > 0 && (
+                    <div className="text-xs font-medium text-surface-400">
+                      {words} {words === 1 ? "word" : "words"} captured
+                    </div>
+                  )}
                 </>
-              ) : canRecord && prep === null ? (
+              ) : canRecord && prep !== null ? (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="flex items-center gap-2 text-base font-bold text-amber-700">
+                    <TimerIcon className="h-5 w-5" /> Preparation time: {prep}s
+                  </div>
+                  <p className="max-w-sm text-center text-sm text-surface-500">
+                    Make notes above. Recording starts automatically when the minute is up.
+                  </p>
+                  <button onClick={() => start()} className="btn-secondary">
+                    Skip &amp; speak now
+                  </button>
+                </div>
+              ) : canRecord ? (
                 item.part === 2 && !answer.transcript ? (
                   <div className="flex flex-wrap justify-center gap-3">
                     <button onClick={() => setPrep(PART2_PREP)} className="btn-primary btn-lg">
                       <TimerIcon className="h-5 w-5" /> Start 1-minute preparation
                     </button>
-                    <button onClick={start} className="btn-secondary btn-lg">
+                    <button onClick={() => start()} className="btn-secondary btn-lg">
                       Skip &amp; speak now
                     </button>
                   </div>
                 ) : (
                   <>
                     <button
-                      onClick={start}
+                      onClick={() => start()}
                       className="flex h-20 w-20 cursor-pointer items-center justify-center rounded-full bg-brand-600 text-white shadow-lg shadow-brand-600/30 transition hover:scale-105 hover:bg-brand-700"
                       aria-label="Start speaking"
                     >
@@ -269,10 +324,41 @@ export function SpeakingRunner({
                     <div className="text-sm font-medium text-surface-600">
                       {answer.transcript ? "Tap to add to your answer" : "Tap to start speaking"}
                     </div>
+                    {answer.transcript && (
+                      <button
+                        onClick={restart}
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-surface-500 hover:text-surface-800"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" /> Clear and record again
+                      </button>
+                    )}
                   </>
                 )
-              ) : null}
-              {micError && <div className="text-sm text-rose-600">{micError}</div>}
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-center">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-brand-600 shadow-sm">
+                    <Keyboard className="h-6 w-6" />
+                  </span>
+                  <div className="text-sm font-semibold text-surface-700">Type your answer below</div>
+                  <p className="max-w-sm text-xs leading-relaxed text-surface-500">
+                    Write what you would say out loud. Aim for the same length — around 2–3
+                    sentences for Part 1 and 3, and a full 1–2 minutes for Part 2.
+                  </p>
+                </div>
+              )}
+
+              {micError && (
+                <div
+                  role="alert"
+                  className="flex max-w-md items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-sm leading-relaxed text-rose-700"
+                >
+                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>
+                    {micError}{" "}
+                    <span className="text-rose-600/80">You can still type your answer below.</span>
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="mt-7">
@@ -281,7 +367,7 @@ export function SpeakingRunner({
                   Your answer
                 </label>
                 <span className="text-xs text-surface-500">
-                  {wordCount(answer.transcript)} words · {answer.seconds}s spoken
+                  {words} {words === 1 ? "word" : "words"} · {answer.seconds}s spoken
                 </span>
               </div>
               <textarea
@@ -301,6 +387,11 @@ export function SpeakingRunner({
                 }
                 className="input mt-1.5 h-36 leading-relaxed"
               />
+              <p className="mt-2 text-xs text-surface-400">
+                {recording
+                  ? "The text updates live. Press stop before editing your answer."
+                  : "You can edit this transcript before submitting — fixing recognition mistakes helps the examiner score you fairly."}
+              </p>
             </div>
           </div>
         </div>

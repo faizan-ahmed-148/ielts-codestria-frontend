@@ -35,6 +35,7 @@ import {
   StatusPill,
 } from "@/components/ui";
 import { type Dashboard } from "@/lib/api";
+import { testPath } from "@/lib/seo";
 import { fetchDashboardData } from "@/lib/test-runner-service";
 
 export default function DashboardPage() {
@@ -311,7 +312,7 @@ function ContinueCard({ data }: { data: Dashboard }) {
   const href =
     nextProgress?.status === "IN_PROGRESS"
       ? `/attempt/${nextProgress.attemptId}`
-      : `/tests/${current.test.id}`;
+      : testPath(current.test);
 
   return (
     <section className="relative overflow-hidden rounded-3xl border border-brand-200/70 bg-gradient-to-br from-white via-brand-50 to-white p-6 shadow-[0_24px_60px_-42px_rgba(67,86,232,0.5)] sm:p-8">
