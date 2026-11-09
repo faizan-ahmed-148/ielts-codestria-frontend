@@ -417,7 +417,25 @@ function ObjectiveReview({ attempt }: { attempt: Attempt }) {
               answers={Object.fromEntries(results.map((r) => [r.questionId, r.yourAnswer]))}
               results={byId}
               explanations={(attempt as any).explanations}
-              renderExtra={(q, r) => (r && !r.correct ? <Explain attemptId={attempt.id} questionId={q.id} /> : null)}
+              renderExtra={(q, r) =>
+                r && !r.correct ? (
+                  <Explain
+                    attemptId={attempt.id}
+                    questionId={q.id}
+                    questionPrompt={q.prompt}
+                    options={"options" in q ? (q.options as string[]) : undefined}
+                    yourAnswer={r.yourAnswer}
+                    correctAnswer={r.correctAnswers?.[0] || (attempt as any).explanations?.[q.id]?.correctAnswer || ""}
+                    builtinExplanation={(attempt as any).explanations?.[q.id]}
+                    module={attempt.module as "READING" | "LISTENING"}
+                    sourceText={
+                      isReading
+                        ? (section as ReadingContent["passages"][number]).body
+                        : (section as ListeningContent["parts"][number]).transcript.map((t) => `${t.speaker}: ${t.text}`).join("\n")
+                    }
+                  />
+                ) : null
+              }
             />
           ) : (
             <div className="flex flex-col items-center py-16 text-center">
@@ -431,21 +449,102 @@ function ObjectiveReview({ attempt }: { attempt: Attempt }) {
   );
 }
 
-function Explain({ attemptId, questionId }: { attemptId: string; questionId: string }) {
+function Explain({
+  attemptId,
+  questionId,
+  questionPrompt,
+  options,
+  yourAnswer,
+  correctAnswer,
+  builtinExplanation,
+  module,
+  sourceText,
+}: {
+  attemptId: string;
+  questionId: string;
+  questionPrompt?: string;
+  options?: string[];
+  yourAnswer?: string;
+  correctAnswer?: string;
+  builtinExplanation?: {
+    explanation?: string;
+    paragraphRef?: string;
+    keyVocabulary?: string[];
+    correctAnswer?: string;
+  };
+  module?: "READING" | "LISTENING";
+  sourceText?: string;
+}) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
   const ask = async () => {
     setBusy(true);
     setError("");
-    try {
-      const { explanation } = await api<{ explanation: string }>(`/attempts/${attemptId}/explain`, { method: "POST", body: { questionId } });
-      setText(explanation);
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setBusy(false);
+
+    // 1. If it's a server attempt, try the attempt-specific explanation endpoint
+    if (!attemptId.startsWith("local-att-")) {
+      try {
+        const { explanation } = await api<{ explanation: string }>(`/attempts/${attemptId}/explain`, {
+          method: "POST",
+          body: { questionId },
+        });
+        if (explanation) {
+          setText(explanation);
+          setBusy(false);
+          return;
+        }
+      } catch {
+        // Fall through to generic explain or local rationale
+      }
     }
+
+    // 2. Try the general AI scoring explanation endpoint if source text is available
+    if (sourceText && questionPrompt) {
+      try {
+        const res = await api<{ explanation: string }>("/scoring/explain", {
+          method: "POST",
+          body: {
+            module: module ?? "READING",
+            source: sourceText.slice(0, 8000),
+            question: questionPrompt,
+            options,
+            yourAnswer: yourAnswer || "",
+            correctAnswer: correctAnswer || builtinExplanation?.correctAnswer || "",
+          },
+        });
+        if (res?.explanation) {
+          setText(res.explanation);
+          setBusy(false);
+          return;
+        }
+      } catch {
+        // Fall through to builtin Cambridge explanation
+      }
+    }
+
+    // 3. Graceful fallback: synthesize instant structured AI tutor explanation from Cambridge examiner notes
+    const studentAns = yourAnswer ? `"${yourAnswer}"` : "(Not answered)";
+    const targetCorrect = correctAnswer || builtinExplanation?.correctAnswer || "the designated answer";
+
+    if (builtinExplanation?.explanation) {
+      let breakdown = `• Your Answer: ${studentAns}\n• Correct Answer: ${targetCorrect}\n\n`;
+      if (builtinExplanation.paragraphRef) {
+        breakdown += `📍 ${builtinExplanation.paragraphRef}:\n`;
+      }
+      breakdown += `${builtinExplanation.explanation}\n\n`;
+      if (builtinExplanation.keyVocabulary && builtinExplanation.keyVocabulary.length > 0) {
+        breakdown += `🔍 Key Keywords & Paraphrases:\n${builtinExplanation.keyVocabulary.map((w) => `• ${w}`).join("\n")}`;
+      }
+      setText(breakdown);
+    } else {
+      setText(
+        `• Your Answer: ${studentAns}\n• Correct Answer: ${targetCorrect}\n\nThe test passage confirms that the correct answer is "${targetCorrect}". Review the corresponding section of the passage to verify the paraphrased phrasing.`
+      );
+    }
+
+    setBusy(false);
   };
   return (
     <div className="mt-3 ml-10">
