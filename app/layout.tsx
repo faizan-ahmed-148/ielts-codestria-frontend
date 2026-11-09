@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { AppShell } from "@/components/AppShell";
 import { AuthProvider } from "@/components/AuthProvider";
 import { GoogleTag } from "@/components/GoogleTag";
-import { GTM_ID } from "@/lib/analytics";
 import { JsonLd } from "@/components/JsonLd";
 import {
   DEFAULT_DESCRIPTION,
@@ -97,6 +97,10 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  // Google Search Console HTML-tag verification (set NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION).
+  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+    : undefined,
   other: {
     "msapplication-TileColor": "#4356e8",
     "msapplication-config": "none",
@@ -117,19 +121,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <JsonLd />
       </head>
       <body className="min-h-full font-sans text-surface-900 bg-surface-50 selection:bg-brand-500/15 selection:text-brand-800">
-        <noscript>
-          <iframe
-            src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
-            height="0"
-            width="0"
-            style={{ display: "none", visibility: "hidden" }}
-            title="Google Tag Manager"
-          />
-        </noscript>
         <AuthProvider>
           <AppShell>{children}</AppShell>
         </AuthProvider>
-        <GoogleTag />
+        <Suspense fallback={null}>
+          <GoogleTag />
+        </Suspense>
       </body>
     </html>
   );

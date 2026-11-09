@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { ApiError, api, type User } from "@/lib/api";
-import { track } from "@/lib/analytics";
+import { identify, track } from "@/lib/analytics";
 
 interface AuthState {
   user: User | null;
@@ -49,6 +49,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  // Attach the signed-in candidate to every subsequent event. Only the
+  // internal user id and study preferences are sent — never email or name.
+  useEffect(() => {
+    identify(
+      user ? { id: user.id, track: user.track, targetBand: user.targetBand } : null,
+    );
+  }, [user]);
 
   const logout = useCallback(async () => {
     try {
