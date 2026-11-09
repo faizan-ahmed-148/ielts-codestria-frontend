@@ -91,6 +91,42 @@ export function parseTestSlug(value: string): TestIdentity | null {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Test catalogue                                                    */
+/* ------------------------------------------------------------------ */
+
+/**
+ * The finite set of Cambridge papers the site actually offers. Cambridge
+ * publishes four papers per book, and the library currently lists books
+ * 11-19. Anything outside this set must never be indexed or put in the
+ * sitemap — otherwise /tests/c19-academic-99 (or c999-...) becomes an
+ * infinite, crawlable URL space of empty pages.
+ *
+ * Update both lists when a new book is added to the library.
+ */
+export const CATALOGUE_BOOKS = [19, 18, 17, 16, 15, 14, 13, 12, 11] as const;
+export const CATALOGUE_TEST_NUMBERS = [4, 3, 2, 1] as const;
+
+export function isCataloguedTest(test: TestIdentity): boolean {
+  return (
+    (CATALOGUE_BOOKS as readonly number[]).includes(test.book) &&
+    (CATALOGUE_TEST_NUMBERS as readonly number[]).includes(test.testNumber)
+  );
+}
+
+/** Every sitemap-eligible Cambridge paper, Academic then General. */
+export function catalogueTests(): TestIdentity[] {
+  const tests: TestIdentity[] = [];
+  for (const book of CATALOGUE_BOOKS) {
+    for (const type of ["ACADEMIC", "GENERAL"] as const) {
+      for (const testNumber of CATALOGUE_TEST_NUMBERS) {
+        tests.push({ book, type, testNumber });
+      }
+    }
+  }
+  return tests;
+}
+
+/* ------------------------------------------------------------------ */
 /*  Metadata factory                                                  */
 /* ------------------------------------------------------------------ */
 

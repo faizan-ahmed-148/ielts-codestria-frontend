@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { BreadcrumbsJsonLd, QuizJsonLd } from "@/components/JsonLd";
-import { absoluteUrl, pageMetadata, parseTestSlug } from "@/lib/seo";
+import { absoluteUrl, isCataloguedTest, pageMetadata, parseTestSlug } from "@/lib/seo";
 
 function identity(id: string) {
   const parsed = parseTestSlug(id);
-  if (!parsed) return null;
+  // Slugs outside the finite catalogue (e.g. c19-academic-99) are not real
+  // papers: serve them but keep them out of the index.
+  if (!parsed || !isCataloguedTest(parsed)) return null;
   return {
     ...parsed,
     typeLabel: parsed.type === "GENERAL" ? "General Training" : "Academic",

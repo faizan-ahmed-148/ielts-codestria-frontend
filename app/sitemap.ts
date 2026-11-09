@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { SITE_URL, testSlug, type TestIdentity } from "@/lib/seo";
+import { SITE_URL, catalogueTests, isCataloguedTest, testSlug, type TestIdentity } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -72,7 +72,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: page.priority,
   }));
 
-  const tests = await fetchPublishedTests();
+  // Union of the built-in catalogue (books 11-19, tests 1-4, both tracks) and
+  // whatever the backend reports as published. The catalogue guarantees every
+  // page linked from /tests is listed even when the API is cold or unreachable.
+  const published = await fetchPublishedTests();
+  const tests = [...catalogueTests(), ...published]
+    .filter(isCataloguedTest)
+    .sort((a, b) => b.book - a.book || a.type.localeCompare(b.type) || a.testNumber - b.testNumber);
+
   const seen = new Set<string>();
   const testEntries: MetadataRoute.Sitemap = [];
 
