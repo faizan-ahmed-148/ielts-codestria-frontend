@@ -24,6 +24,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/components/AuthProvider";
 import { countQuestions, QuestionGroups } from "@/components/Questions";
 import type { ListeningContent, ListeningPart, ReadingContent } from "@/lib/content.types";
 import { speakLines, ttsSupported } from "@/lib/speech";
@@ -53,6 +54,30 @@ export function ObjectiveRunner({
   const [splitRatio, setSplitRatio] = useState<"equal" | "passage-focus" | "questions-focus">("equal");
   const [contrastTheme, setContrastTheme] = useState<"standard" | "yellow-black" | "dark" | "cream">("standard");
   const [showThemeMenu, setShowThemeMenu] = useState(false);
+
+  // Apply the candidate's saved exam-room presets once the session is known.
+  const { user } = useAuth();
+  const prefsApplied = useRef(false);
+  useEffect(() => {
+    const prefs = user?.preferences;
+    if (!prefs || prefsApplied.current) return;
+    prefsApplied.current = true;
+    if (prefs.contrastTheme) {
+      setContrastTheme(
+        ({
+          standard: "standard",
+          yellow: "yellow-black",
+          inverted: "dark",
+          cream: "cream",
+        } as const)[prefs.contrastTheme],
+      );
+    }
+    if (prefs.fontScale) {
+      setFontSize(
+        ({ standard: "normal", medium: "large", large: "xlarge" } as const)[prefs.fontScale],
+      );
+    }
+  }, [user]);
 
   // Floating highlight toolbar
   const [selectionBox, setSelectionBox] = useState<{ x: number; y: number; text: string } | null>(null);
@@ -534,7 +559,10 @@ function ListeningPlayer({ part, partNumber }: { part: ListeningPart; partNumber
   const storageKey = `played-${part.title}`;
   const [state, setState] = useState<"idle" | "playing" | "done">("idle");
   const [line, setLine] = useState(0);
-  const [playbackSpeed, setPlaybackSpeed] = useState<1 | 0.8 | 1.2>(1);
+  const { user } = useAuth();
+  const preferredSpeed = user?.preferences?.audioSpeed;
+  const initialSpeed: 1 | 0.8 | 1.2 = preferredSpeed === 0.8 ? 0.8 : preferredSpeed === 1.2 ? 1.2 : 1;
+  const [playbackSpeed, setPlaybackSpeed] = useState<1 | 0.8 | 1.2>(initialSpeed);
   const [showTranscript, setShowTranscript] = useState(false);
   const stopRef = useRef<(() => void) | null>(null);
 
@@ -551,7 +579,11 @@ function ListeningPlayer({ part, partNumber }: { part: ListeningPart; partNumber
     try {
       sessionStorage.setItem(storageKey, "1");
     } catch {}
-    stopRef.current = speakLines(part.transcript, { onLine: setLine, onEnd: () => setState("done") });
+    stopRef.current = speakLines(part.transcript, {
+      rate: playbackSpeed,
+      onLine: setLine,
+      onEnd: () => setState("done"),
+    });
   };
 
   const stop = () => {

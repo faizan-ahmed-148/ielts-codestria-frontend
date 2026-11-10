@@ -28,7 +28,7 @@ import { ApiError, type Attempt } from "@/lib/api";
 import { testPath } from "@/lib/seo";
 import { getAiKeyStatus } from "@/lib/ai-key";
 import type { ListeningContent, ReadingContent, SpeakingContent, WritingContent } from "@/lib/content.types";
-import { getAttemptDetails, patchAttemptAnswers, submitExamAttempt } from "@/lib/test-runner-service";
+import { getAttemptDetails, saveAttempt, submitExamAttempt } from "@/lib/test-runner-service";
 
 const AUTOSAVE_MS = 2000;
 
@@ -39,6 +39,7 @@ export default function AttemptPage() {
 function ExamView() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { user } = useAuth();
   const [attempt, setAttempt] = useState<Attempt | null>(null);
   const [answers, setAnswers] = useState<Record<string, unknown>>({});
   const [error, setError] = useState("");
@@ -53,19 +54,16 @@ function ExamView() {
 
   const answersRef = useRef(answers);
   answersRef.current = answers;
+  const notesRef = useRef(notes);
+  notesRef.current = notes;
+  const startedAtRef = useRef(0);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedNotes = localStorage.getItem(`ielts_notes_${id}`);
-      if (savedNotes) setNotes(savedNotes);
-    }
-  }, [id]);
+  const elapsedSeconds = () =>
+    startedAtRef.current ? Math.round((Date.now() - startedAtRef.current) / 1000) : undefined;
 
   const updateNotes = (val: string) => {
     setNotes(val);
-    if (typeof window !== "undefined") {
-      localStorage.setItem(`ielts_notes_${id}`, val);
-    }
+    setSaveState("dirty");
   };
 
   useEffect(() => {
@@ -74,6 +72,8 @@ function ExamView() {
         if (a.status !== "IN_PROGRESS") return router.replace(`/attempt/${id}/result`);
         setAttempt(a);
         setAnswers(a.answers ?? {});
+        if (a.notes) setNotes(a.notes);
+        startedAtRef.current = new Date(a.startedAt).getTime();
       })
       .catch((e) => setError(e.message));
   }, [id, router]);
@@ -89,14 +89,18 @@ function ExamView() {
     const t = setTimeout(async () => {
       setSaveState("saving");
       try {
-        await patchAttemptAnswers(id, answersRef.current);
+        await saveAttempt(id, {
+          answers: answersRef.current,
+          notes: notesRef.current,
+          timeSpentSeconds: elapsedSeconds(),
+        });
         setSaveState((s) => (s === "saving" ? "saved" : s));
       } catch {
         setSaveState("error");
       }
     }, AUTOSAVE_MS);
     return () => clearTimeout(t);
-  }, [answers, saveState, id]);
+  }, [answers, notes, saveState, id]);
 
   // Warn before leaving with unsaved work
   useEffect(() => {
@@ -147,7 +151,10 @@ function ExamView() {
       setConfirm(false);
       try {
         window.speechSynthesis?.cancel();
-        await submitExamAttempt(id, answersRef.current);
+        await submitExamAttempt(id, answersRef.current, {
+          notes: notesRef.current,
+          timeSpentSeconds: elapsedSeconds(),
+        });
         router.replace(`/attempt/${id}/result`);
       } catch (e) {
         if (e instanceof ApiError && e.code === "AI_KEY_REQUIRED") {
@@ -237,7 +244,11 @@ function ExamView() {
                 <Timer
                   deadline={attempt.deadline}
                   onExpire={submit}
-                  onWarning={(msg) => setTimeWarning(msg)}
+                  onWarning={(msg) => {
+                    // The candidate can switch the 10/5-minute banners off in
+                    // profile → exam room preferences.
+                    if (user?.preferences?.timeAlerts !== false) setTimeWarning(msg);
+                  }}
                 />
               )}
               <button

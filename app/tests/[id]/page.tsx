@@ -23,6 +23,7 @@ import {
   Skeleton,
 } from "@/components/ui";
 import type { TestOverview } from "@/lib/api";
+import { analyticsSessionId } from "@/lib/analytics";
 import type { ModuleKind } from "@/lib/content.types";
 import { createAttempt, fetchTestOverview } from "@/lib/test-runner-service";
 
@@ -46,7 +47,15 @@ function TestView() {
   async function start(module: ModuleKind) {
     setStarting(module);
     try {
-      const { id: attemptId } = await createAttempt(id, module);
+      const { id: attemptId } = await createAttempt(id, module, {
+        sessionId: analyticsSessionId(),
+        clientMeta: {
+          viewport: typeof window !== "undefined" ? `${window.innerWidth}x${window.innerHeight}` : undefined,
+          locale: typeof navigator !== "undefined" ? navigator.language : undefined,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          userAgent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 250) : undefined,
+        },
+      });
       router.push(`/attempt/${attemptId}`);
     } catch (e) {
       setError((e as Error).message);

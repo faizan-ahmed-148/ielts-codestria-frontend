@@ -27,7 +27,7 @@ import {
 import { AdBanner } from "@/components/AdBanner";
 import type { BookList, TestType } from "@/lib/api";
 import { track } from "@/lib/analytics";
-import { CAMBRIDGE_BOOKS } from "@/lib/cambridge-library";
+import { fetchBookCatalogue, type CambridgeBook } from "@/lib/catalog";
 import { testPath } from "@/lib/seo";
 import { fetchBooksList } from "@/lib/test-runner-service";
 
@@ -47,6 +47,7 @@ function TestsView() {
   const router = useRouter();
   const type: TestType = params.get("type") === "GENERAL" ? "GENERAL" : "ACADEMIC";
   const [books, setBooks] = useState<BookList[] | null>(null);
+  const [bookMeta, setBookMeta] = useState<Record<number, CambridgeBook>>({});
   const [error, setError] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
   const [book, setBook] = useState<number | null>(null);
@@ -59,6 +60,22 @@ function TestsView() {
     fetchBooksList(type)
       .then((data) => setBooks([...data].sort((a, b) => b.book - a.book)))
       .catch((e) => setError(e.message));
+  }, [type]);
+
+  // Shelf metadata (description, badge, accent) lives in MySQL.
+  useEffect(() => {
+    let active = true;
+    fetchBookCatalogue(type)
+      .then((list) => {
+        if (!active) return;
+        setBookMeta(Object.fromEntries(list.map((meta) => [meta.volume, meta])));
+      })
+      .catch(() => {
+        // The test list still renders without shelf metadata.
+      });
+    return () => {
+      active = false;
+    };
   }, [type]);
 
   // Debounced search tracking (typing is not covered by the global click listener).
@@ -287,7 +304,7 @@ function TestsView() {
           {/* Book sections */}
           <div className="space-y-9">
             {shown.map(({ book: n, tests }, index) => {
-              const meta = CAMBRIDGE_BOOKS.find((m) => m.volume === n);
+              const meta = bookMeta[n];
               const completedCount = tests.filter((t) => t.status === "COMPLETED").length;
 
               return (

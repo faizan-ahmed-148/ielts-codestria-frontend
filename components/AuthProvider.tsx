@@ -54,7 +54,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // internal user id and study preferences are sent — never email or name.
   useEffect(() => {
     identify(
-      user ? { id: user.id, track: user.track, targetBand: user.targetBand } : null,
+      user
+        ? { id: user.id, track: user.track ?? undefined, targetBand: user.targetBand ?? undefined }
+        : null,
     );
   }, [user]);
 

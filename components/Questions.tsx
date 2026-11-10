@@ -1,9 +1,8 @@
 "use client";
 
 import { Check, Flag, HelpCircle, Lightbulb, X } from "lucide-react";
-import type { Question, QuestionGroup } from "@/lib/content.types";
+import type { Question, QuestionExplanation, QuestionGroup } from "@/lib/content.types";
 import type { QuestionResult } from "@/lib/api";
-import type { QuestionExplanation } from "@/lib/cambridge-library";
 
 const letter = (i: number) => String.fromCharCode(65 + i);
 const CHOICES = { tfng: ["TRUE", "FALSE", "NOT GIVEN"], ynng: ["YES", "NO", "NOT GIVEN"] } as const;

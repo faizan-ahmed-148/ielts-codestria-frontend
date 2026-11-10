@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/components/AuthProvider";
 import {
   EmptyState,
   PageHeader,
@@ -23,6 +24,7 @@ import {
   StatCard,
 } from "@/components/ui";
 import { IELTS_VOCABULARY } from "@/lib/ielts-content-data";
+import { fetchMasteredVocabulary, saveMasteredVocabulary } from "@/lib/user-data-service";
 
 export default function VocabularyPage() {
   const [activeTab, setActiveTab] = useState<"flashcards" | "quiz" | "directory">("flashcards");
@@ -34,7 +36,8 @@ export default function VocabularyPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [masteredIds, setMasteredIds] = useState<string[]>([]);
-  const [isClient, setIsClient] = useState(false);
+  const { user } = useAuth();
+  const [hydrated, setHydrated] = useState(false);
 
   // Quiz State
   const [quizIndex, setQuizIndex] = useState(0);
@@ -42,24 +45,30 @@ export default function VocabularyPage() {
   const [quizScore, setQuizScore] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
 
-  // Load mastered words from localStorage
+  // Load mastered words from the backend (MySQL).
   useEffect(() => {
-    setIsClient(true);
-    const saved = localStorage.getItem("ielts_mastered_vocab");
-    if (saved) {
-      try {
-        setMasteredIds(JSON.parse(saved));
-      } catch (e) {
-        // ignore fallback
-      }
+    let active = true;
+    if (!user) {
+      setHydrated(true);
+      return;
     }
-  }, []);
+    fetchMasteredVocabulary()
+      .then((ids) => active && setMasteredIds(ids))
+      .catch(() => {})
+      .finally(() => active && setHydrated(true));
+    return () => {
+      active = false;
+    };
+  }, [user]);
 
-  // Save mastered words
+  // Persist mastered words (debounced).
   useEffect(() => {
-    if (!isClient) return;
-    localStorage.setItem("ielts_mastered_vocab", JSON.stringify(masteredIds));
-  }, [masteredIds, isClient]);
+    if (!hydrated || !user) return;
+    const t = setTimeout(() => {
+      saveMasteredVocabulary(masteredIds).catch(() => {});
+    }, 500);
+    return () => clearTimeout(t);
+  }, [masteredIds, hydrated, user]);
 
   // Filtered Vocabulary items
   const filteredVocab = useMemo(() => {

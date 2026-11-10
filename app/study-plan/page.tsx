@@ -16,13 +16,15 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useAuth } from "@/components/AuthProvider";
 import {
   EmptyState,
   PageHeader,
   ProgressBar,
   StatCard,
 } from "@/components/ui";
+import { fetchStudyPlan, saveStudyPlan } from "@/lib/user-data-service";
 
 interface DailyTask {
   id: string;
@@ -134,56 +136,56 @@ export default function StudyPlanPage() {
   const [tasks, setTasks] = useState<DailyTask[]>(DEFAULT_TASKS);
   const [newTaskText, setNewTaskText] = useState("");
   const [newTaskModule, setNewTaskModule] = useState<DailyTask["module"]>("Writing");
-  const [isClient, setIsClient] = useState(false);
+  const { user } = useAuth();
+  const [loaded, setLoaded] = useState(false);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load from local storage
+  // Load the saved study plan from MySQL for the signed-in candidate.
   useEffect(() => {
-    setIsClient(true);
-    const savedTasks = localStorage.getItem("ielts_study_tasks");
-    if (savedTasks) {
-      try {
-        setTasks(JSON.parse(savedTasks));
-      } catch (e) {
-        // ignore fallback
-      }
+    let active = true;
+    if (!user) {
+      setLoaded(true);
+      return;
     }
+    fetchStudyPlan()
+      .then((plan) => {
+        if (!active || !plan) return;
+        setCurrentBand(plan.currentBand);
+        setTargetBand(plan.targetBand);
+        setWeeksRemaining(plan.weeksRemaining);
+        setDailyHours(plan.dailyHours);
+        setWeakestModule(plan.weakestModule);
+        setExamType(plan.examType);
+        if (Array.isArray(plan.tasks) && plan.tasks.length) setTasks(plan.tasks);
+      })
+      .catch(() => {
+        // Signed-out visitors get the default plan; nothing is persisted.
+      })
+      .finally(() => active && setLoaded(true));
+    return () => {
+      active = false;
+    };
+  }, [user]);
 
-    const savedPlan = localStorage.getItem("ielts_study_plan_meta");
-    if (savedPlan) {
-      try {
-        const meta = JSON.parse(savedPlan);
-        if (meta.currentBand) setCurrentBand(meta.currentBand);
-        if (meta.targetBand) setTargetBand(meta.targetBand);
-        if (meta.weeksRemaining) setWeeksRemaining(meta.weeksRemaining);
-        if (meta.dailyHours) setDailyHours(meta.dailyHours);
-        if (meta.weakestModule) setWeakestModule(meta.weakestModule);
-        if (meta.examType) setExamType(meta.examType);
-      } catch (e) {
-        // ignore fallback
-      }
-    }
-  }, []);
-
-  // Save to local storage on change
+  // Debounced autosave of the plan + checklist to the backend.
   useEffect(() => {
-    if (!isClient) return;
-    localStorage.setItem("ielts_study_tasks", JSON.stringify(tasks));
-  }, [tasks, isClient]);
-
-  useEffect(() => {
-    if (!isClient) return;
-    localStorage.setItem(
-      "ielts_study_plan_meta",
-      JSON.stringify({
+    if (!loaded || !user) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      saveStudyPlan({
         currentBand,
         targetBand,
         weeksRemaining,
         dailyHours,
         weakestModule,
         examType,
-      })
-    );
-  }, [currentBand, targetBand, weeksRemaining, dailyHours, weakestModule, examType, isClient]);
+        tasks,
+      }).catch(() => {});
+    }, 600);
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, [loaded, user, currentBand, targetBand, weeksRemaining, dailyHours, weakestModule, examType, tasks]);
 
   const bandGap = useMemo(() => {
     const diff = Number((targetBand - currentBand).toFixed(1));

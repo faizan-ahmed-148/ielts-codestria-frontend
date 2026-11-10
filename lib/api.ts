@@ -41,12 +41,23 @@ export type TestType = "ACADEMIC" | "GENERAL";
 export type ModuleStatus = "NOT_STARTED" | "IN_PROGRESS" | "SCORING" | "FAILED" | "COMPLETED";
 export type AttemptStatus = "IN_PROGRESS" | "SCORING" | "COMPLETED" | "FAILED";
 
+export interface ExamRoomPreferences {
+  contrastTheme?: "standard" | "yellow" | "inverted" | "cream";
+  fontScale?: "standard" | "medium" | "large";
+  audioSpeed?: number;
+  timeAlerts?: boolean;
+}
+
 export interface User {
   id: string;
   email: string;
   name: string;
-  targetBand?: number;
-  track?: TestType;
+  targetBand?: number | null;
+  track?: TestType | null;
+  examDate?: string | null;
+  preferences?: ExamRoomPreferences | null;
+  createdAt?: string;
+  lastActiveAt?: string | null;
 }
 
 export interface ModuleProgress {
@@ -125,6 +136,12 @@ export interface Attempt {
   module: ModuleKind;
   status: AttemptStatus;
   answers: Record<string, unknown>;
+  /** Scratchpad notes, persisted server-side. */
+  notes: string | null;
+  /** 1-based ordinal of this attempt for the same test + module. */
+  attemptNumber: number;
+  sessionId: string | null;
+  timeSpentSeconds: number | null;
   startedAt: string;
   submittedAt: string | null;
   deadline: string;

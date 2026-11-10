@@ -23,9 +23,11 @@ import { useEffect, useState } from "react";
 import { RequireAuth, useAuth } from "@/components/AuthProvider";
 import { AiKeySettings } from "@/components/AiKeySetup";
 import { ErrorBox, PageHeader } from "@/components/ui";
-import { api, type TestType, type User } from "@/lib/api";
+import { api, type ExamRoomPreferences, type TestType, type User } from "@/lib/api";
 import { track as trackEvent } from "@/lib/analytics";
 import { isStrongPassword, passwordChecks, PASSWORD_MIN_LENGTH } from "@/lib/password";
+import { fetchMyAnalytics, type PersonalAnalytics } from "@/lib/test-runner-service";
+import { clearPracticeHistory, exportMyData } from "@/lib/user-data-service";
 
 type Tab = "profile" | "security" | "ai" | "preferences" | "data";
 
@@ -96,16 +98,20 @@ function ProfileView() {
   const newPasswordChecks = passwordChecks(newPassword);
   const newPasswordStrong = isStrongPassword(newPassword);
 
-  // Exam room preferences (localStorage)
+  // Exam room preferences (persisted on the User row)
   const [contrastTheme, setContrastTheme] = useState<"standard" | "yellow" | "inverted" | "cream">("standard");
   const [fontScale, setFontScale] = useState<"standard" | "medium" | "large">("standard");
   const [audioSpeed, setAudioSpeed] = useState<number>(1.0);
   const [timeAlerts, setTimeAlerts] = useState<boolean>(true);
   const [prefsSaved, setPrefsSaved] = useState(false);
+  const [prefsSaving, setPrefsSaving] = useState(false);
 
-  // Data / storage
-  const [localAttemptsCount, setLocalAttemptsCount] = useState<number>(0);
+  // Data / storage (all from MySQL)
+  const [analytics, setAnalytics] = useState<PersonalAnalytics | null>(null);
   const [clearSuccess, setClearSuccess] = useState("");
+  const [dataError, setDataError] = useState("");
+  const [exporting, setExporting] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -113,28 +119,30 @@ function ProfileView() {
       setEmail(user.email);
       if (user.targetBand) setTargetBand(user.targetBand);
       if (user.track) setTrack(user.track);
+      if (user.examDate) setExamDate(user.examDate.slice(0, 10));
+      const prefs = user.preferences;
+      if (prefs) {
+        if (prefs.contrastTheme) setContrastTheme(prefs.contrastTheme);
+        if (prefs.fontScale) setFontScale(prefs.fontScale);
+        if (prefs.audioSpeed) setAudioSpeed(prefs.audioSpeed);
+        if (prefs.timeAlerts !== undefined) setTimeAlerts(prefs.timeAlerts);
+      }
     }
   }, [user]);
 
   useEffect(() => {
-    try {
-      const rawPrefs = localStorage.getItem("ielts_user_preferences");
-      if (rawPrefs) {
-        const p = JSON.parse(rawPrefs);
-        if (p.contrastTheme) setContrastTheme(p.contrastTheme);
-        if (p.fontScale) setFontScale(p.fontScale);
-        if (p.audioSpeed) setAudioSpeed(p.audioSpeed);
-        if (p.timeAlerts !== undefined) setTimeAlerts(p.timeAlerts);
-        if (p.examDate) setExamDate(p.examDate);
-      }
+    if (!user) return;
+    fetchMyAnalytics()
+      .then(setAnalytics)
+      .catch(() => setAnalytics(null));
+  }, [user]);
 
-      const rawAttempts = localStorage.getItem("ielts_local_attempts_v2");
-      if (rawAttempts) {
-        const map = JSON.parse(rawAttempts);
-        setLocalAttemptsCount(Object.keys(map).length);
-      }
-    } catch {}
-  }, []);
+  const currentPreferences = (): ExamRoomPreferences => ({
+    contrastTheme,
+    fontScale,
+    audioSpeed,
+    timeAlerts,
+  });
 
   async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
@@ -143,34 +151,22 @@ function ProfileView() {
     setProfileError("");
 
     try {
-      let updatedUser: User = {
-        id: user?.id || "user",
-        name: name.trim(),
-        email: email.trim().toLowerCase(),
-        targetBand,
-        track,
-      };
+      const remote = await api<User>("/auth/profile", {
+        method: "PATCH",
+        body: {
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          track,
+          targetBand,
+          examDate: examDate || null,
+          preferences: currentPreferences(),
+        },
+      });
 
+      setUser(remote);
       try {
-        const remote = await api<User>("/auth/profile", {
-          method: "PATCH",
-          body: { name: name.trim(), email: email.trim().toLowerCase() },
-        });
-        if (remote) {
-          updatedUser = { ...remote, targetBand, track };
-        }
-      } catch {
-        // Offline / client fallback
-      }
-
-      setUser(updatedUser);
-      localStorage.setItem("ielts_current_user", JSON.stringify(updatedUser));
-
-      const existingPrefs = JSON.parse(localStorage.getItem("ielts_user_preferences") || "{}");
-      localStorage.setItem(
-        "ielts_user_preferences",
-        JSON.stringify({ ...existingPrefs, examDate, targetBand, track }),
-      );
+        localStorage.setItem("ielts_current_user", JSON.stringify(remote));
+      } catch {}
 
       setProfileSuccess("Candidate profile updated successfully!");
       trackEvent("profile_update", { target_band: targetBand, track });
@@ -219,58 +215,70 @@ function ProfileView() {
     }
   }
 
-  function handleSavePreferences() {
+  async function handleSavePreferences() {
+    setPrefsSaving(true);
     try {
-      const existing = JSON.parse(localStorage.getItem("ielts_user_preferences") || "{}");
-      localStorage.setItem(
-        "ielts_user_preferences",
-        JSON.stringify({ ...existing, contrastTheme, fontScale, audioSpeed, timeAlerts, examDate }),
-      );
+      const remote = await api<User>("/auth/profile", {
+        method: "PATCH",
+        body: { preferences: currentPreferences() },
+      });
+      setUser(remote);
+      try {
+        localStorage.setItem("ielts_current_user", JSON.stringify(remote));
+      } catch {}
       setPrefsSaved(true);
       trackEvent("preferences_saved", { exam_date: examDate || undefined, target_band: targetBand, track });
       setTimeout(() => setPrefsSaved(false), 3000);
-    } catch {}
-  }
-
-  function handleClearData() {
-    if (confirm("Are you sure you want to clear your local test practice history? This action cannot be undone.")) {
-      try {
-        localStorage.removeItem("ielts_local_attempts_v2");
-        setLocalAttemptsCount(0);
-        setClearSuccess("Local test attempts have been reset.");
-        trackEvent("local_data_cleared");
-        setTimeout(() => setClearSuccess(""), 4000);
-      } catch {}
+    } catch (err: any) {
+      setDataError(err?.message || "Failed to save preferences");
+    } finally {
+      setPrefsSaving(false);
     }
   }
 
-  function handleExportData() {
+  async function handleClearData() {
+    if (
+      !confirm(
+        "This permanently deletes every practice attempt, answer, band score and activity record stored for your account. Your account and the test library are not affected. Continue?",
+      )
+    ) {
+      return;
+    }
+    setClearing(true);
+    setDataError("");
     try {
-      const attempts = localStorage.getItem("ielts_local_attempts_v2") || "{}";
-      const userMeta = localStorage.getItem("ielts_current_user") || "{}";
-      const blob = new Blob(
-        [
-          JSON.stringify(
-            {
-              platform: "Codestria IELTS",
-              exportedAt: new Date().toISOString(),
-              user: JSON.parse(userMeta),
-              attempts: JSON.parse(attempts),
-            },
-            null,
-            2,
-          ),
-        ],
-        { type: "application/json" },
+      const res = await clearPracticeHistory();
+      setAnalytics(await fetchMyAnalytics());
+      setClearSuccess(
+        `Practice history cleared: ${res.deleted.attempts} attempts, ${res.deleted.responses} answers, ${res.deleted.activityEvents} activity records.`,
       );
+      trackEvent("practice_history_cleared", { attempts: res.deleted.attempts });
+      setTimeout(() => setClearSuccess(""), 6000);
+    } catch (err: any) {
+      setDataError(err?.message || "Failed to clear practice history");
+    } finally {
+      setClearing(false);
+    }
+  }
+
+  async function handleExportData() {
+    setExporting(true);
+    setDataError("");
+    try {
+      const data = await exportMyData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = `codestria-ielts-transcript-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      trackEvent("data_exported");
-    } catch {}
+      trackEvent("data_exported", data.counts);
+    } catch (err: any) {
+      setDataError(err?.message || "Failed to export your data");
+    } finally {
+      setExporting(false);
+    }
   }
 
   const memberName = user?.name || name || "Candidate";
@@ -595,6 +603,7 @@ function ProfileView() {
       {activeTab === "preferences" && (
         <div className="max-w-3xl space-y-5 animate-fade-up">
           {prefsSaved && <SuccessBox message="Exam room preferences saved. They apply to all future mock tests." />}
+          {dataError && <ErrorBox message={dataError} />}
 
           <div className="card space-y-8 p-6 sm:p-8">
             <SectionHead
@@ -702,10 +711,11 @@ function ProfileView() {
               <button
                 type="button"
                 onClick={handleSavePreferences}
-                className="btn-primary cursor-pointer px-6 py-3"
+                disabled={prefsSaving}
+                className="btn-primary cursor-pointer px-6 py-3 disabled:opacity-60"
               >
-                <Save className="h-4 w-4" />
-                <span>Save interface presets</span>
+                {prefsSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                <span>{prefsSaving ? "Saving…" : "Save interface presets"}</span>
               </button>
             </div>
           </div>
@@ -716,48 +726,74 @@ function ProfileView() {
       {activeTab === "data" && (
         <div className="max-w-3xl space-y-5 animate-fade-up">
           {clearSuccess && <SuccessBox message={clearSuccess} />}
+          {dataError && <ErrorBox message={dataError} />}
 
           <div className="card space-y-6 p-6 sm:p-8">
             <SectionHead
               title="Practice history & diagnostics"
-              description="Review cached attempts and export a complete record of your practice history."
+              description="Every attempt, answer and activity record is stored with your account in the exam database. Export a complete copy or reset your history at any time."
             />
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-2xl border border-surface-200 bg-surface-50 p-5">
                 <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-surface-500">
-                  Local stored attempts
+                  Attempts stored
                 </div>
                 <div className="mt-1.5 font-display text-3xl font-extrabold text-surface-900">
-                  {localAttemptsCount} <span className="text-base font-semibold text-surface-400">tests</span>
+                  {analytics ? analytics.totals.attempts : "—"}{" "}
+                  <span className="text-base font-semibold text-surface-400">attempts</span>
                 </div>
                 <p className="mt-1.5 text-[13px] leading-relaxed text-surface-500">
-                  Cached in your browser for instant offline access and fast result retrieval.
+                  {analytics
+                    ? `${analytics.totals.completedAttempts} completed · ${analytics.totals.inProgress} in progress · ${Math.round(analytics.totals.timeSpentSeconds / 60)} min active time.`
+                    : "Loading your stored history…"}
                 </p>
               </div>
 
               <div className="rounded-2xl border border-surface-200 bg-surface-50 p-5">
                 <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-surface-500">
-                  Exportable summary
+                  Answers & activity
                 </div>
-                <div className="mt-1.5 font-display text-3xl font-extrabold text-surface-900">JSON</div>
+                <div className="mt-1.5 font-display text-3xl font-extrabold text-surface-900">
+                  {analytics
+                    ? analytics.questionTypes.reduce((n, q) => n + q.answered, 0)
+                    : "—"}{" "}
+                  <span className="text-base font-semibold text-surface-400">questions</span>
+                </div>
                 <p className="mt-1.5 text-[13px] leading-relaxed text-surface-500">
-                  Download every submitted answer, band score and test date in one archive.
+                  {analytics
+                    ? `${analytics.totals.studyDays} study days · ${analytics.totals.eventsLast30Days} events in the last 30 days.`
+                    : "Answers, scores and events are loaded from the database."}
                 </p>
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 pt-1">
-              <button type="button" onClick={handleExportData} className="btn-secondary cursor-pointer">
-                <Download className="h-4 w-4 text-surface-500" />
-                <span>Export diagnostic record</span>
+              <button
+                type="button"
+                onClick={handleExportData}
+                disabled={exporting}
+                className="btn-secondary cursor-pointer disabled:opacity-60"
+              >
+                {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4 text-surface-500" />}
+                <span>{exporting ? "Preparing archive…" : "Export diagnostic record"}</span>
               </button>
 
-              <button type="button" onClick={handleClearData} className="btn-destructive cursor-pointer">
-                <Trash2 className="h-4 w-4" />
-                <span>Clear local practice cache</span>
+              <button
+                type="button"
+                onClick={handleClearData}
+                disabled={clearing}
+                className="btn-destructive cursor-pointer disabled:opacity-60"
+              >
+                {clearing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                <span>{clearing ? "Clearing…" : "Delete practice history"}</span>
               </button>
             </div>
+
+            <p className="text-[12px] leading-relaxed text-surface-400">
+              The export contains your profile, every attempt with its answers and band, test-score snapshots, AI
+              scoring runs, study plan, vocabulary progress and activity log as JSON.
+            </p>
           </div>
         </div>
       )}

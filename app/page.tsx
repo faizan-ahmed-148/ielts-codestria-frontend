@@ -34,11 +34,11 @@ import { useEffect, useState } from "react";
 import { BandRing, SectionHeading } from "@/components/ui";
 import { FaqJsonLd } from "@/components/JsonLd";
 import {
-  CAMBRIDGE_BOOKS,
   calculateIELTSBand,
   calculateOverallBand,
   getCEFRLevel,
-} from "@/lib/cambridge-library";
+} from "@/lib/ielts-bands";
+import { fetchBookCatalogue, type CambridgeBook } from "@/lib/catalog";
 
 const HIGHLIGHTS: Record<string, string> = {
   yellow: "bg-amber-200/80 text-amber-950",
@@ -100,7 +100,17 @@ export default function Home() {
 
   /* Bookshelf */
   const [bookFilter, setBookFilter] = useState<"all" | "latest" | "classic">("all");
-  const filteredBooks = CAMBRIDGE_BOOKS.filter((book) => {
+  const [books, setBooks] = useState<CambridgeBook[]>([]);
+  useEffect(() => {
+    let active = true;
+    fetchBookCatalogue()
+      .then((data) => active && setBooks(data))
+      .catch(() => active && setBooks([]));
+    return () => {
+      active = false;
+    };
+  }, []);
+  const filteredBooks = books.filter((book) => {
     if (bookFilter === "latest") return book.volume >= 17;
     if (bookFilter === "classic") return book.volume <= 16;
     return true;

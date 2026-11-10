@@ -20,9 +20,10 @@ import {
   type TestOverview,
   type WritingFeedback,
 } from "@/lib/api";
-import { createAttempt, getAttemptDetails, fetchTestOverview, submitExamAttempt } from "@/lib/test-runner-service";
+import { analyticsSessionId } from "@/lib/analytics";
+import { createAttempt, getAttemptDetails, fetchTestOverview } from "@/lib/test-runner-service";
 import { testPath } from "@/lib/seo";
-import { getCEFRLevel } from "@/lib/cambridge-library";
+import { getCEFRLevel } from "@/lib/ielts-bands";
 import type { ListeningContent, ReadingContent, SpeakingContent, WritingContent } from "@/lib/content.types";
 
 export default function ResultPage() {
@@ -79,13 +80,8 @@ function ResultView() {
     setError("");
     setRetrying(true);
     try {
-      if (id.startsWith("local-att-")) {
-        const updated = await submitExamAttempt(id);
-        setAttempt(updated);
-      } else {
-        await api(`/attempts/${id}/retry-scoring`, { method: "POST" });
-        setReloadKey((k) => k + 1);
-      }
+      await api(`/attempts/${id}/retry-scoring`, { method: "POST" });
+      setReloadKey((k) => k + 1);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -98,7 +94,15 @@ function ResultView() {
     setError("");
     setRetaking(true);
     try {
-      const { id: attemptId } = await createAttempt(attempt.test.id, attempt.module);
+      const { id: attemptId } = await createAttempt(attempt.test.id, attempt.module, {
+        sessionId: analyticsSessionId(),
+        clientMeta: {
+          viewport: typeof window !== "undefined" ? `${window.innerWidth}x${window.innerHeight}` : undefined,
+          locale: typeof navigator !== "undefined" ? navigator.language : undefined,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          userAgent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 250) : undefined,
+        },
+      });
       router.push(`/attempt/${attemptId}`);
     } catch (e) {
       setError((e as Error).message);
@@ -492,21 +496,19 @@ function Explain({
     setBusy(true);
     setError("");
 
-    // 1. If it's a server attempt, try the attempt-specific explanation endpoint
-    if (!attemptId.startsWith("local-att-")) {
-      try {
-        const { explanation } = await api<{ explanation: string }>(`/attempts/${attemptId}/explain`, {
-          method: "POST",
-          body: { questionId },
-        });
-        if (explanation) {
-          setText(explanation);
-          setBusy(false);
-          return;
-        }
-      } catch {
-        // Fall through to generic explain or local rationale
+    // 1. Attempt-specific explanation endpoint (server attempt with stored context)
+    try {
+      const { explanation } = await api<{ explanation: string }>(`/attempts/${attemptId}/explain`, {
+        method: "POST",
+        body: { questionId },
+      });
+      if (explanation) {
+        setText(explanation);
+        setBusy(false);
+        return;
       }
+    } catch {
+      // Fall through to the generic explain endpoint or the built-in rationale.
     }
 
     // 2. Try the general AI scoring explanation endpoint if source text is available

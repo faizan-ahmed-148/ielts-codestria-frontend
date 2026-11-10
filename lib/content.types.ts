@@ -59,3 +59,12 @@ export interface SpeakingContent {
 /** questionId -> accepted answers (first one is the canonical answer shown to users). */
 export type AnswerKey = Record<string, string[]>;
 
+/** Cambridge examiner explanation shown after a Reading/Listening answer. */
+export interface QuestionExplanation {
+  questionId: string;
+  correctAnswer: string;
+  explanation: string;
+  paragraphRef?: string;
+  keyVocabulary?: string[];
+}
+
