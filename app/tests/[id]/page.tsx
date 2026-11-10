@@ -10,11 +10,12 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }): Promise<Metadata> {
+  const { id } = await params;
   let test: TestOverview | null = null;
   try {
-    test = await fetchTestOverview(params.id);
+    test = await fetchTestOverview(id);
   } catch {
     // Backend unavailable or test missing: fall back to generic metadata.
   }
@@ -23,7 +24,7 @@ export async function generateMetadata({
   const trackLabel = test.type === "ACADEMIC" ? "Academic" : "General Training";
   const title = `Cambridge ${test.book} · Practice Test ${test.testNumber} · ${trackLabel} | Codestria IELTS`;
   const description = `Practise Cambridge ${test.book} Practice Test ${test.testNumber} (${trackLabel}) — authentic computer-delivered IELTS paper with instant band scoring, highlighters and scratchpad. Free CD-IELTS simulator by Codestria.`;
-  const url = `https://ielts.codestria.com/tests/${params.id}`;
+  const url = `https://ielts.codestria.com/tests/${id}`;
 
   return {
     title,
