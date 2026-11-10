@@ -17,17 +17,8 @@ export function Logo({
   showSubtitle = false,
   size = "md",
 }: LogoProps) {
-  const iconSizes = {
-    sm: "h-7 w-7 rounded-lg",
-    md: "h-8 w-8 rounded-lg",
-    lg: "h-9 w-9 rounded-xl",
-  };
-
-  const textSizes = {
-    sm: "text-sm",
-    md: "text-base",
-    lg: "text-lg",
-  };
+  const iconSizes = { sm: "h-6 w-6", md: "h-8 w-8", lg: "h-10 w-10" };
+  const textSizes = { sm: "text-sm", md: "text-base", lg: "text-lg" };
 
   return (
     <div className="flex items-center gap-2.5">
@@ -35,40 +26,40 @@ export function Logo({
         href={href}
         className="group flex items-center gap-2.5 select-none transition-opacity hover:opacity-90"
       >
-        {/* Official Codestria Mark with Sapphire Accent */}
+        {/* Mark */}
         <div
-          className={`relative flex shrink-0 items-center justify-center bg-surface-950 text-white shadow-xs transition-transform duration-150 group-hover:scale-[1.03] ${iconSizes[size]}`}
+          className={`relative flex shrink-0 items-center justify-center rounded-xl bg-surface-950 text-white shadow-sm transition-transform duration-200 group-hover:rotate-12 ${iconSizes[size]}`}
           style={{
-            border: dark ? "1px solid rgba(255,255,255,0.15)" : "1px solid rgba(0,0,0,0.1)",
+            border: dark ? "1px solid rgba(255,255,255,0.2)" : "1px solid rgba(0,0,0,0.06)",
           }}
         >
-          <svg viewBox="0 0 32 32" className="h-4 w-4" fill="none">
+          <svg viewBox="0 0 32 32" fill="none" className="h-5 w-5">
             <path
-              d="M25.37 6.63A13.25 13.25 0 1 0 25.37 25.37L21.48 21.48A7.75 7.75 0 1 1 21.48 10.52Z"
+              d="M16 3C9.373 3 4 8.373 4 15s5.373 12 12 12 12-5.373 12-12S22.627 3 16 3zM16 21c-2.757 0-5-2.243-5-5s2.243-5 5-5 5 2.243 5 5-2.243 5-5 5z"
               fill="#ffffff"
             />
-            <rect x="22" y="13" width="5.5" height="5.5" rx="1" fill="#4356e8" />
+            <rect x="19" y="17" width="5" height="5" rx="1" fill="#4356e8" />
           </svg>
         </div>
 
         {/* Wordmark */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col items-start gap-0.5">
           <span
-            className={`font-display font-bold tracking-tight text-surface-900 ${textSizes[size]} ${
+            className={`font-display font-bold tracking-tight ${textSizes[size]} ${
               dark ? "text-white" : "text-surface-900"
             }`}
           >
             Codestria
           </span>
-          <span
-            className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ${
-              dark
-                ? "border border-white/10 bg-white/10 text-white/80"
-                : "border border-brand-200 bg-brand-50 text-brand-700"
-            }`}
-          >
-            IELTS
-          </span>
+          {showBadge && (
+            <span
+              className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold tracking-wider uppercase ${
+                dark ? "border border-white/10 bg-white/10 text-white/80" : "border border-brand-200 bg-brand-50 text-brand-700"
+              }`}
+            >
+              IELTS
+            </span>
+          )}
         </div>
       </Link>
     </div>
