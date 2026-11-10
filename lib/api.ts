@@ -11,8 +11,14 @@ export class ApiError extends Error {
   }
 }
 
+function apiBaseUrl(): string {
+  if (typeof window !== "undefined") return "";
+  // Server-side (RSC / generateMetadata): call the Nest API directly.
+  return (process.env.API_URL ?? "http://localhost:4000").replace(/\/+$/, "");
+}
+
 export async function api<T>(path: string, options: { method?: string; body?: unknown } = {}): Promise<T> {
-  const res = await fetch(`/api${path}`, {
+  const res = await fetch(`${apiBaseUrl()}/api${path}`, {
     method: options.method ?? "GET",
     headers: options.body !== undefined ? { "Content-Type": "application/json" } : undefined,
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
