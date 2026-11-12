@@ -58,8 +58,12 @@ function ExamView() {
   notesRef.current = notes;
   const startedAtRef = useRef(0);
 
+  // Wall-clock time since the attempt started, capped at 24 h: an attempt
+  // reopened days later must still save and submit (the API accepts 0–86400).
   const elapsedSeconds = () =>
-    startedAtRef.current ? Math.round((Date.now() - startedAtRef.current) / 1000) : undefined;
+    startedAtRef.current
+      ? Math.min(86_400, Math.max(0, Math.round((Date.now() - startedAtRef.current) / 1000)))
+      : undefined;
 
   const updateNotes = (val: string) => {
     setNotes(val);
