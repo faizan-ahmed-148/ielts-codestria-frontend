@@ -8,6 +8,7 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
+  Flame,
   GraduationCap,
   ListChecks,
   Mic,
@@ -164,6 +165,11 @@ function DashboardView() {
             <StatCard label="Full tests completed" value={data.totals.testsCompleted} Icon={Award} />
             <StatCard label="Modules completed" value={data.totals.modulesCompleted} Icon={CheckCircle2} />
             <StatCard label="Modules in progress" value={data.totals.inProgress} Icon={Clock} />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <StreakCard data={data} />
+            <ExamDateCard />
           </div>
 
           <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
@@ -382,6 +388,160 @@ function ContinueCard({ data }: { data: Dashboard }) {
         </div>
       </div>
     </section>
+  );
+}
+
+/** Local calendar-day key (YYYY-MM-DD) for a timestamp. */
+function dayKey(date: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/**
+ * Practice streak from the attempt timestamps the dashboard API returns:
+ * start/submit times of the 10 most recent attempts plus the submit time of
+ * every completed module. Older in-progress-only activity is not included.
+ */
+function practiceStats(data: Dashboard) {
+  const days = new Set<string>();
+  const add = (iso: string | null | undefined) => {
+    if (!iso) return;
+    const d = new Date(iso);
+    if (!Number.isNaN(d.getTime())) days.add(dayKey(d));
+  };
+  for (const a of data.recent) {
+    add(a.startedAt);
+    add(a.submittedAt);
+  }
+  for (const t of data.trend) add(t.date);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const shift = (n: number) => new Date(today.getFullYear(), today.getMonth(), today.getDate() + n);
+
+  // A streak stays alive until the end of the day after the last practice.
+  let streak = 0;
+  let offset = days.has(dayKey(today)) ? 0 : days.has(dayKey(shift(-1))) ? -1 : null;
+  while (offset !== null && days.has(dayKey(shift(offset)))) {
+    streak += 1;
+    offset -= 1;
+  }
+
+  // Monday-start week.
+  const mondayOffset = -((today.getDay() + 6) % 7);
+  const week = Array.from({ length: 7 }, (_, i) => {
+    const d = shift(mondayOffset + i);
+    return {
+      label: d.toLocaleDateString(undefined, { weekday: "narrow" }),
+      active: days.has(dayKey(d)),
+      future: mondayOffset + i > 0,
+    };
+  });
+
+  return { streak, practisedToday: days.has(dayKey(today)), week, weekCount: week.filter((d) => d.active).length };
+}
+
+function StreakCard({ data }: { data: Dashboard }) {
+  const { streak, practisedToday, week, weekCount } = practiceStats(data);
+  return (
+    <section className="card flex flex-col gap-4 p-5 sm:p-6">
+      <div className="flex items-center gap-4">
+        <span
+          className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
+            streak > 0 ? "bg-amber-50 text-amber-600" : "bg-surface-100 text-surface-400"
+          }`}
+        >
+          <Flame className="h-5 w-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="font-display text-2xl font-bold leading-none tabular-nums text-surface-900">
+            {streak} day{streak === 1 ? "" : "s"}
+          </div>
+          <div className="mt-1.5 text-[13px] font-semibold text-surface-700">Practice streak</div>
+          <div className="text-xs text-surface-500">
+            {streak === 0
+              ? "Practise today to start a streak."
+              : practisedToday
+                ? "You've practised today — keep it going."
+                : "Practise today to keep your streak."}
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="font-display text-lg font-bold tabular-nums text-surface-900">{weekCount}/7</div>
+          <div className="text-xs text-surface-500">days this week</div>
+        </div>
+      </div>
+      <div className="flex justify-between gap-1.5">
+        {week.map((d, i) => (
+          <div key={i} className="flex flex-1 flex-col items-center gap-1">
+            <span
+              className={`h-2.5 w-full rounded-full ${
+                d.active ? "bg-amber-400" : d.future ? "bg-surface-100" : "bg-surface-200"
+              }`}
+            />
+            <span className="text-[11px] font-medium text-surface-400">{d.label}</span>
+          </div>
+        ))}
+      </div>
+      <p className="text-[11.5px] text-surface-400">Counted from your mock-test attempts (started or submitted).</p>
+    </section>
+  );
+}
+
+/** Same key the /exam-countdown page writes to. */
+const EXAM_PLAN_STORAGE_KEY = "codestria:exam-countdown";
+
+function ExamDateCard() {
+  const [plan, setPlan] = useState<{ date: string; target: number; days: number } | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(EXAM_PLAN_STORAGE_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw) as { date?: unknown; target?: unknown };
+      if (typeof saved.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(saved.date)) return;
+      const [y, m, d] = saved.date.split("-").map(Number);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const days = Math.round((new Date(y, m - 1, d).getTime() - today.getTime()) / 86_400_000);
+      if (days < 0) return;
+      setPlan({ date: saved.date, target: typeof saved.target === "number" ? saved.target : 7, days });
+    } catch {
+      /* storage unavailable */
+    }
+  }, []);
+
+  const href = plan ? `/exam-countdown?date=${plan.date}&target=${plan.target}` : "/exam-countdown";
+
+  return (
+    <Link href={href} className="card-hover group flex items-center gap-4 p-5 sm:p-6">
+      <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600">
+        <Calendar className="h-5 w-5" />
+      </span>
+      <div className="min-w-0 flex-1">
+        {plan ? (
+          <>
+            <div className="font-display text-2xl font-bold leading-none tabular-nums text-surface-900">
+              {plan.days === 0 ? "Today" : `${plan.days} day${plan.days === 1 ? "" : "s"}`}
+            </div>
+            <div className="mt-1.5 text-[13px] font-semibold text-surface-700">
+              {plan.days === 0 ? "Exam day — good luck!" : "until your IELTS exam"}
+            </div>
+            <div className="text-xs text-surface-500">
+              Target band {plan.target.toFixed(1)} · view your week-by-week plan
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="text-[15px] font-bold text-surface-900">Set your exam date</div>
+            <p className="mt-0.5 text-[13px] leading-snug text-surface-500">
+              Get a countdown and a week-by-week plan scaled to the time you have left.
+            </p>
+          </>
+        )}
+      </div>
+      <ArrowRight className="h-4 w-4 shrink-0 text-surface-300 transition group-hover:translate-x-0.5 group-hover:text-surface-700" />
+    </Link>
   );
 }
 

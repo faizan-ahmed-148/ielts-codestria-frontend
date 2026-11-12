@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { NoAdsZone } from "@/components/NoAdsZone";
 import { privateMetadata } from "@/lib/seo";
 
 export async function generateMetadata({
@@ -15,5 +16,10 @@ export async function generateMetadata({
 }
 
 export default function AttemptLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <>
+      <NoAdsZone />
+      {children}
+    </>
+  );
 }

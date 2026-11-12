@@ -1,5 +1,6 @@
 "use client";
 
+import { AdBanner } from "@/components/AdBanner";
 import {
   ArrowRight,
   Award,
@@ -698,6 +699,10 @@ export default function Home() {
       </section>
 
       {/* ── CALCULATOR ───────────────────────────────────────────────────── */}
+      <div className="page-container">
+        <AdBanner placement="display" />
+      </div>
+
       <section id="calculator" className="section-pad border-b border-surface-200 bg-surface-50">
         <div className="page-container">
           <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
@@ -946,6 +951,10 @@ export default function Home() {
       </section>
 
       {/* ── CODESTRIA ────────────────────────────────────────────────────── */}
+      <div className="page-container">
+        <AdBanner placement="multiplex" />
+      </div>
+
       <section className="bg-white py-14">
         <div className="page-container">
           <div className="flex flex-col items-start justify-between gap-6 rounded-2xl border border-surface-200 bg-surface-50/60 p-6 sm:p-8 lg:flex-row lg:items-center">

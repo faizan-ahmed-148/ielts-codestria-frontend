@@ -4,6 +4,7 @@ import {
   BookOpen,
   CheckCircle2,
   Clock,
+  ExternalLink,
   Lightbulb,
   Mic,
   Play,
@@ -11,9 +12,16 @@ import {
   Sparkles,
   Square,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { PageHeader, ProgressBar } from "@/components/ui";
-import { SAMPLE_CUE_CARDS, type CueCardData } from "@/lib/speaking-cue-cards";
+import {
+  SAMPLE_CUE_CARDS,
+  cueCardPath,
+  cueCardSlug,
+  findCueCardBySlug,
+  type CueCardData,
+} from "@/lib/speaking-cue-cards";
 
 const ASSESSMENT_CRITERIA = [
   {
@@ -54,6 +62,21 @@ export default function SpeakingPracticeClient() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+
+  // Preselect a card from ?card=<slug> (links from the cue card topic pages).
+  useEffect(() => {
+    const slug = new URLSearchParams(window.location.search).get("card");
+    const card = slug ? findCueCardBySlug(slug) : undefined;
+    if (card) setSelectedCard(card);
+  }, []);
+
+  function chooseCard(card: CueCardData) {
+    setSelectedCard(card);
+    resetSession();
+    const url = new URL(window.location.href);
+    url.searchParams.set("card", cueCardSlug(card));
+    window.history.replaceState(null, "", url);
+  }
 
   // Preparation Timer (60s countdown)
   useEffect(() => {
@@ -177,7 +200,7 @@ export default function SpeakingPracticeClient() {
           {/* Topic selector */}
           <section className="card p-5 sm:p-6">
             <label className="eyebrow block">Speaking topic</label>
-            <div className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+            <div className="mt-3 grid max-h-80 grid-cols-2 gap-2.5 overflow-y-auto pr-1 sm:grid-cols-3">
               {SAMPLE_CUE_CARDS.map((card) => {
                 const active = selectedCard.id === card.id;
                 return (
@@ -185,10 +208,7 @@ export default function SpeakingPracticeClient() {
                     key={card.id}
                     type="button"
                     aria-pressed={active}
-                    onClick={() => {
-                      setSelectedCard(card);
-                      resetSession();
-                    }}
+                    onClick={() => chooseCard(card)}
                     className={`cursor-pointer rounded-xl border p-3 text-left transition ${
                       active
                         ? "border-brand-300 bg-brand-50 text-brand-900 shadow-xs"
@@ -250,6 +270,11 @@ export default function SpeakingPracticeClient() {
                   </p>
                 </div>
               </div>
+
+              <Link href={cueCardPath(selectedCard)} className="btn-ghost btn-sm mt-4 text-brand-700">
+                Sample answer, notes &amp; Part 3 questions for this card
+                <ExternalLink className="h-3.5 w-3.5" />
+              </Link>
             </div>
           </section>
 
@@ -464,7 +489,7 @@ export default function SpeakingPracticeClient() {
           {/* Examiner checklist */}
           <section className="card p-5 sm:p-6">
             <h2 className="text-[12px] font-bold uppercase tracking-[0.12em] text-surface-500">
-              Official assessment check
+              Assessment criteria check
             </h2>
             <ul className="mt-4 space-y-3.5">
               {ASSESSMENT_CRITERIA.map(({ title, copy }) => (

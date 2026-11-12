@@ -1,22 +1,23 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { ADSENSE_CLIENT_ID } from "@/lib/seo";
+import { usePathname } from "next/navigation";
+import { ADSENSE_CLIENT_ID, ADSENSE_SLOTS, type AdPlacement } from "@/lib/seo";
 
 interface AdBannerProps {
-  /** Optional custom ad slot ID configured in Google AdSense console. */
+  /**
+   * Which AdSense unit to show. Each placement maps to an ad unit ID set in
+   * the environment (NEXT_PUBLIC_ADSENSE_SLOT_DISPLAY / _IN_ARTICLE / _MULTIPLEX).
+   * Defaults to "display".
+   */
+  placement?: AdPlacement;
+  /** Explicit ad slot ID; overrides the placement's configured slot. */
   slot?: string;
-  /** Responsive ad format. Defaults to "auto". */
-  format?: "auto" | "fluid" | "rectangle" | "horizontal" | "vertical";
-  /** Whether ad should take full container width. Defaults to true. */
-  responsive?: boolean;
-  /** Additional CSS classes for wrapper. */
+  /** Additional CSS classes for the wrapper. */
   className?: string;
-  /** Optional inline styles for the <ins> tag. */
-  style?: React.CSSProperties;
-  /** Shows a subtle compliant "ADVERTISEMENT" badge. Defaults to true. */
+  /** Shows a small "Advertisement" label (AdSense-compliant). Defaults to true. */
   showLabel?: boolean;
-  /** Minimum container height to prevent Cumulative Layout Shift (CLS). Defaults to 90. */
+  /** Reserved height to prevent layout shift (CLS). Defaults per placement. */
   minHeight?: number;
 }
 
@@ -26,35 +27,51 @@ declare global {
   }
 }
 
+const DEFAULT_HEIGHT: Record<AdPlacement, number> = {
+  display: 100,
+  "in-article": 120,
+  multiplex: 280,
+};
+
+/**
+ * A single AdSense unit. Renders nothing when the unit's slot ID is not
+ * configured, so pages never show empty ad boxes (Auto ads, enabled in the
+ * AdSense console, still work through the global script in app/layout.tsx).
+ */
 export function AdBanner({
+  placement = "display",
   slot,
-  format = "auto",
-  responsive = true,
   className = "",
-  style,
   showLabel = true,
-  minHeight = 90,
+  minHeight,
 }: AdBannerProps) {
+  const adSlot = slot || ADSENSE_SLOTS[placement];
+  const pathname = usePathname();
   const adRef = useRef<HTMLModElement | null>(null);
-  const pushed = useRef(false);
 
   useEffect(() => {
-    if (pushed.current) return;
+    const el = adRef.current;
+    if (!el || el.getAttribute("data-adsbygoogle-status")) return;
     try {
-      // Avoid pushing multiple times to the same DOM element on re-renders
-      if (adRef.current && !adRef.current.getAttribute("data-adsbygoogle-status")) {
-        pushed.current = true;
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-      }
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
     } catch {
-      // Gracefully handle adblocker or runtime network blocks
+      // Ad blockers or network failures: fail silently.
     }
-  }, []);
+  }, [adSlot, pathname]);
+
+  if (!adSlot) return null;
+
+  const formatProps =
+    placement === "in-article"
+      ? { "data-ad-format": "fluid", "data-ad-layout": "in-article", style: { display: "block", textAlign: "center" as const } }
+      : placement === "multiplex"
+        ? { "data-ad-format": "autorelaxed", style: { display: "block" } }
+        : { "data-ad-format": "auto", "data-full-width-responsive": "true", style: { display: "block", width: "100%" } };
 
   return (
     <aside
       aria-label="Advertisement"
-      className={`my-6 w-full overflow-hidden text-center transition-opacity duration-200 ${className}`}
+      className={`my-8 w-full overflow-hidden text-center ${className}`}
       data-analytics-ignore="true"
     >
       {showLabel && (
@@ -62,18 +79,15 @@ export function AdBanner({
           Advertisement
         </span>
       )}
-      <div
-        className="flex w-full items-center justify-center overflow-hidden rounded-xl border border-surface-200/60 bg-surface-100/40"
-        style={{ minHeight: `${minHeight}px` }}
-      >
+      <div className="w-full overflow-hidden" style={{ minHeight: `${minHeight ?? DEFAULT_HEIGHT[placement]}px` }}>
+        {/* key forces a fresh <ins> per route so AdSense can fill it again after client navigation */}
         <ins
+          key={`${pathname}-${adSlot}`}
           ref={adRef}
           className="adsbygoogle"
-          style={{ display: "block", width: "100%", ...style }}
           data-ad-client={ADSENSE_CLIENT_ID}
-          {...(slot ? { "data-ad-slot": slot } : {})}
-          data-ad-format={format}
-          data-full-width-responsive={responsive ? "true" : "false"}
+          data-ad-slot={adSlot}
+          {...formatProps}
         />
       </div>
     </aside>

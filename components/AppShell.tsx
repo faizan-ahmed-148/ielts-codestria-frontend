@@ -3,6 +3,14 @@
 import {
   ArrowRight,
   BookOpen,
+  CheckSquare,
+  Clock,
+  FileText,
+  Gauge,
+  Headphones,
+  Layers,
+  Library,
+  Wrench,
   Briefcase,
   Calculator,
   Calendar,
@@ -63,10 +71,11 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
 
   const navLinks = [
     { href: "/tests", label: "Mock Tests" },
+    { href: "/guides", label: "Guides" },
     { href: "/model-answers", label: "Model Answers" },
     { href: "/speaking-practice", label: "Speaking" },
-    { href: "/vocabulary", label: "Vocabulary" },
-    { href: "/calculator", label: "Band Calculator" },
+    { href: "/writing-checker", label: "Writing Checker" },
+    { href: "/tools", label: "Free Tools" },
   ];
 
   return (
@@ -163,11 +172,12 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
                 {[
                   { href: "/tests?type=ACADEMIC", label: "Academic Mock Tests", icon: GraduationCap },
                   { href: "/tests?type=GENERAL", label: "General Training Tests", icon: Briefcase },
+                  { href: "/guides", label: "IELTS Guides", icon: Library },
                   { href: "/model-answers", label: "Band 9 Model Answers", icon: PenTool },
                   { href: "/speaking-practice", label: "Speaking Studio", icon: Mic },
-                  { href: "/vocabulary", label: "Vocabulary Lab", icon: Sparkles },
+                  { href: "/writing-checker", label: "Writing Checker", icon: FileText },
+                  { href: "/tools", label: "All Free Tools", icon: Wrench },
                   { href: "/calculator", label: "Band Calculator", icon: Calculator },
-                  { href: "/study-plan", label: "Study Roadmap", icon: Calendar },
                 ].map(({ href, label, icon: Icon }) => (
                   <Link
                     key={href}
@@ -246,12 +256,17 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
                 <h3 className="text-xs font-bold uppercase tracking-[0.12em] text-surface-900">Practice Studios</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-surface-500">
                   {[
+                    { href: "/guides", label: "IELTS Guides" },
                     { href: "/model-answers", label: "Model Answers" },
+                    { href: "/writing-checker", label: "Writing Checker" },
                     { href: "/speaking-practice", label: "Speaking Studio" },
-                    { href: "/vocabulary", label: "Vocabulary Lab" },
-                    { href: "/study-plan", label: "Study Roadmap" },
-                    { href: "/calculator", label: "Score Calculator" },
-                    { href: "/band-descriptors", label: "Band Descriptors" },
+                    { href: "/dictation", label: "Listening Dictation" },
+                    { href: "/reading-speed-test", label: "Reading Speed Test" },
+                    { href: "/grammar", label: "Grammar Exercises" },
+                    { href: "/flashcards", label: "Flashcards" },
+                    { href: "/score-converter", label: "Score Converter" },
+                    { href: "/calculator", label: "Band Calculator" },
+                    { href: "/tools", label: "All free tools" },
                   ].map(({ href, label }) => (
                     <li key={href}>
                       <Link href={href} className="transition hover:text-surface-900">
@@ -265,32 +280,19 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
               <div>
                 <h3 className="text-xs font-bold uppercase tracking-[0.12em] text-surface-900">Studio &amp; Legal</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-surface-500">
-                  <li>
-                    <a
-                      href="https://codestria.com/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 transition hover:text-surface-900"
-                    >
-                      About studio <ExternalLink className="h-3 w-3 text-surface-400" />
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="mailto:mail.codestria@gmail.com"
-                      className="inline-flex items-center gap-1 transition hover:text-surface-900"
-                    >
-                      Contact &amp; feedback
-                    </a>
-                  </li>
-                  <li>
-                    <Link href="/band-descriptors" className="transition hover:text-surface-900">
-                      Scoring rubric
-                    </Link>
-                  </li>
-                  <li>
-                    <span className="text-surface-400">v3.0</span>
-                  </li>
+                  {[
+                    { href: "/about", label: "About us" },
+                    { href: "/contact", label: "Contact & feedback" },
+                    { href: "/privacy-policy", label: "Privacy policy" },
+                    { href: "/terms", label: "Terms of use" },
+                    { href: "/band-descriptors", label: "Scoring rubric" },
+                  ].map(({ href, label }) => (
+                    <li key={href}>
+                      <Link href={href} className="transition hover:text-surface-900">
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>
@@ -487,21 +489,29 @@ function SidebarNav() {
           Icon: Briefcase,
           active: pathname === "/tests" && type === "GENERAL",
         },
-        { href: "/speaking-practice", label: "Speaking studio", Icon: Mic, active: pathname === "/speaking-practice" },
+        { href: "/speaking-practice", label: "Speaking studio", Icon: Mic, active: pathname.startsWith("/speaking-practice") },
       ],
     },
     {
       title: "Skills & language",
       items: [
-        { href: "/model-answers", label: "Model answers", Icon: PenTool, active: pathname === "/model-answers" },
+        { href: "/guides", label: "IELTS guides", Icon: Library, active: pathname.startsWith("/guides") },
+        { href: "/model-answers", label: "Model answers", Icon: PenTool, active: pathname.startsWith("/model-answers") },
+        { href: "/writing-checker", label: "Writing checker", Icon: FileText, active: pathname === "/writing-checker" },
+        { href: "/dictation", label: "Listening dictation", Icon: Headphones, active: pathname === "/dictation" },
+        { href: "/reading-speed-test", label: "Reading speed", Icon: Gauge, active: pathname === "/reading-speed-test" },
+        { href: "/grammar", label: "Grammar exercises", Icon: CheckSquare, active: pathname === "/grammar" },
         { href: "/vocabulary", label: "Vocabulary lab", Icon: Sparkles, active: pathname === "/vocabulary" },
+        { href: "/flashcards", label: "Flashcards", Icon: Layers, active: pathname === "/flashcards" },
       ],
     },
     {
       title: "Insights & tools",
       items: [
+        { href: "/exam-countdown", label: "Exam countdown", Icon: Clock, active: pathname === "/exam-countdown" },
         { href: "/study-plan", label: "Study roadmap", Icon: Calendar, active: pathname === "/study-plan" },
         { href: "/calculator", label: "Band calculator", Icon: Calculator, active: pathname === "/calculator" },
+        { href: "/score-converter", label: "Score converter", Icon: Wrench, active: pathname === "/score-converter" },
         { href: "/band-descriptors", label: "Band descriptors", Icon: BookOpen, active: pathname === "/band-descriptors" },
         { href: "/profile", label: "Settings", Icon: User, active: pathname === "/profile" },
       ],

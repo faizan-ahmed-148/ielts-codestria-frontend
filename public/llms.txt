@@ -17,17 +17,24 @@
 ## Core pages
 
 - [Home](https://ielts.codestria.com/): overview of the simulator, exam tools and FAQ.
-- [Cambridge test library](https://ielts.codestria.com/tests): full-length Academic and General Training papers.
+- [Practice test library](https://ielts.codestria.com/tests): full-length IELTS-style Academic and General Training tests.
 - [Band score calculator](https://ielts.codestria.com/calculator): raw marks to band conversion and official .25/.75 rounding.
 - [Band 9 model answers](https://ielts.codestria.com/model-answers): annotated Writing Task 1 and Task 2 essays.
 - [Speaking practice](https://ielts.codestria.com/speaking-practice): Part 2 cue cards, timed preparation and recording.
 - [Vocabulary lab](https://ielts.codestria.com/vocabulary): academic vocabulary, collocations and pronunciation.
 - [Band descriptors](https://ielts.codestria.com/band-descriptors): official Writing and Speaking assessment criteria.
 - [Study plan](https://ielts.codestria.com/study-plan): target-band roadmap and daily checklist.
+- [IELTS guides](https://ielts.codestria.com/guides): 16 in-depth strategy guides for Writing, Speaking, Reading, Listening and exam day.
+- [Free tools](https://ielts.codestria.com/tools): directory of every free practice tool.
+- [Writing checker](https://ielts.codestria.com/writing-checker): instant essay analysis plus optional AI band estimate.
+- [Score converter](https://ielts.codestria.com/score-converter): approximate IELTS equivalents for CEFR, TOEFL iBT, PTE Academic and Duolingo.
+- [Exam countdown](https://ielts.codestria.com/exam-countdown): week-by-week plan to the exam date.
+- [Listening dictation](https://ielts.codestria.com/dictation), [Reading speed test](https://ielts.codestria.com/reading-speed-test), [Grammar exercises](https://ielts.codestria.com/grammar), [Flashcards](https://ielts.codestria.com/flashcards).
+- Individual pages: /model-answers/{slug} (13 annotated essays) and /speaking-practice/{slug} (30 cue cards with sample answers).
 
 ## Test URL pattern
 
-Full Cambridge papers use a stable slug: /tests/c{book}-{academic|general}-{testNumber}
+Full practice tests use a stable slug: /tests/c{book}-{academic|general}-{testNumber}
 Example: https://ielts.codestria.com/tests/c19-academic-1
 
 ## Scoring model

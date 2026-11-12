@@ -434,3 +434,10 @@ button:disabled,
     scroll-behavior: auto !important;
   }
 }
+
+/* Policy / information pages (components/LegalPage.tsx) */
+.legal-prose ul { list-style: disc; padding-left: 1.25rem; display: grid; gap: 0.4rem; }
+.legal-prose ol { list-style: decimal; padding-left: 1.25rem; display: grid; gap: 0.4rem; }
+.legal-prose a { color: var(--color-brand-600); font-weight: 600; }
+.legal-prose a:hover { text-decoration: underline; }
+.legal-prose strong { color: var(--color-surface-900); font-weight: 600; }

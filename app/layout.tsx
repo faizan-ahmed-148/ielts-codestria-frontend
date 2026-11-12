@@ -20,6 +20,16 @@ import {
 } from "@/lib/seo";
 import "./globals.css";
 
+const CONSENT_REGIONS = [
+  "AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IS", "IE", "IT", "LV", "LI",
+  "LT", "LU", "MT", "NL", "NO", "PL", "PT", "RO", "SK", "SI", "ES", "SE", "GB", "CH",
+];
+
+const CONSENT_DEFAULT_SCRIPT = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=window.gtag||gtag;
+gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',wait_for_update:500,region:${JSON.stringify(CONSENT_REGIONS)}});
+gtag('consent','default',{ad_storage:'granted',ad_user_data:'granted',ad_personalization:'granted',analytics_storage:'granted'});
+gtag('set','ads_data_redaction',true);gtag('set','url_passthrough',true);`;
+
 export const viewport: Viewport = {
   themeColor: "#f6f8fc",
   colorScheme: "light",
@@ -99,9 +109,14 @@ export const metadata: Metadata = {
     },
   },
   // Google Search Console HTML-tag verification (set NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION).
-  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
-    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
-    : undefined,
+  verification: {
+    ...(process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+      : {}),
+    ...(process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+      ? { other: { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION } }
+      : {}),
+  },
   other: {
     "msapplication-TileColor": "#4356e8",
     "msapplication-config": "none",
@@ -121,6 +136,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
         />
         <link rel="alternate" type="text/plain" href="/llms.txt" title="LLM-friendly site summary" />
+        {/* Google Consent Mode v2 defaults. Must run before any Google tag. Visitors in the
+            EEA, UK and Switzerland start "denied" until they answer the consent message
+            (AdSense → Privacy & messaging), which updates these values. */}
+        <script id="consent-default" dangerouslySetInnerHTML={{ __html: CONSENT_DEFAULT_SCRIPT }} />
         <script
           async
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}

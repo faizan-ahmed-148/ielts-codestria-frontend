@@ -9,6 +9,7 @@ import { ChartView } from "@/components/ChartView";
 import { Logo } from "@/components/Logo";
 import { countQuestions, QuestionGroups } from "@/components/Questions";
 import { AdBanner } from "@/components/AdBanner";
+import { ShareScoreCard } from "@/components/ShareScoreCard";
 import { type SpeakingAnswer, speakingItems } from "@/components/runners/SpeakingRunner";
 import { BandRing, bandTone, ErrorBox, MODULE_INFO, MODULE_ORDER, ModuleIcon, wordCount } from "@/components/ui";
 import {
@@ -239,6 +240,18 @@ function ResultView() {
                 </div>
               </div>
             </div>
+            <ShareScoreCard
+              className="border-t border-surface-100 px-6 py-3 sm:px-8 print:hidden"
+              track={attempt.test.type}
+              testTitle={attempt.test.title}
+              overallBand={overview?.overallBand ?? null}
+              bands={Object.fromEntries(
+                MODULE_ORDER.map((m) => [
+                  m,
+                  overview?.modules[m].band ?? (attempt.module === m ? (attempt.result?.band ?? null) : null),
+                ]),
+              )}
+            />
             {overview && (
               <div className="flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-surface-100 bg-surface-50/70 px-6 py-4 sm:px-8">
                 {MODULE_ORDER.map((m) => (

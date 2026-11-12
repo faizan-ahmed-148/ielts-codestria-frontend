@@ -9,7 +9,24 @@ export const SITE_NAME = "Codestria IELTS";
 export const SITE_LOCALE = "en_GB";
 export const SITE_TWITTER = "@codestria";
 export const PUBLISHER_URL = "https://codestria.com";
-export const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID ?? "ca-pub-1275878727832310";
+export const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || "ca-pub-1275878727832310";
+
+/** AdSense ad unit placements used across the site. */
+export type AdPlacement = "display" | "in-article" | "multiplex";
+
+/**
+ * Ad unit (slot) IDs from AdSense → Ads → By ad unit. They are public (they
+ * appear in page HTML), so the live units are the defaults; the env vars only
+ * override them at build time.
+ */
+export const ADSENSE_SLOTS: Record<AdPlacement, string | undefined> = {
+  display: process.env.NEXT_PUBLIC_ADSENSE_SLOT_DISPLAY || "5779204500",
+  "in-article": process.env.NEXT_PUBLIC_ADSENSE_SLOT_IN_ARTICLE || "2426941992",
+  multiplex: process.env.NEXT_PUBLIC_ADSENSE_SLOT_MULTIPLEX || "7487696984",
+};
+
+/** Contact e-mail shown on legal and contact pages. */
+export const CONTACT_EMAIL = "mail.codestria@gmail.com";
 
 export const DEFAULT_TITLE =
   "Codestria IELTS · Free Computer-Delivered IELTS Practice Tests";

@@ -1,4 +1,7 @@
 import type { MetadataRoute } from "next";
+import { GUIDES } from "@/lib/guides";
+import { MODEL_ESSAYS, essayPath } from "@/lib/ielts-content-data";
+import { SAMPLE_CUE_CARDS, cueCardPath } from "@/lib/speaking-cue-cards";
 import { SITE_URL, catalogueTests, isCataloguedTest, testSlug, type TestIdentity } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +19,19 @@ const STATIC_PAGES: {
   { path: "/vocabulary", priority: 0.85, changeFrequency: "weekly" },
   { path: "/band-descriptors", priority: 0.85, changeFrequency: "monthly" },
   { path: "/study-plan", priority: 0.8, changeFrequency: "monthly" },
+  { path: "/guides", priority: 0.9, changeFrequency: "weekly" },
+  { path: "/tools", priority: 0.85, changeFrequency: "weekly" },
+  { path: "/writing-checker", priority: 0.9, changeFrequency: "monthly" },
+  { path: "/score-converter", priority: 0.85, changeFrequency: "monthly" },
+  { path: "/exam-countdown", priority: 0.75, changeFrequency: "monthly" },
+  { path: "/dictation", priority: 0.8, changeFrequency: "monthly" },
+  { path: "/reading-speed-test", priority: 0.8, changeFrequency: "monthly" },
+  { path: "/grammar", priority: 0.8, changeFrequency: "monthly" },
+  { path: "/flashcards", priority: 0.75, changeFrequency: "weekly" },
+  { path: "/about", priority: 0.4, changeFrequency: "monthly" },
+  { path: "/contact", priority: 0.4, changeFrequency: "monthly" },
+  { path: "/privacy-policy", priority: 0.3, changeFrequency: "monthly" },
+  { path: "/terms", priority: 0.3, changeFrequency: "monthly" },
 ];
 
 /**
@@ -95,5 +111,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  return [...staticEntries, ...testEntries];
+  const guideEntries: MetadataRoute.Sitemap = GUIDES.map((guide) => ({
+    url: `${SITE_URL}/guides/${guide.slug}`,
+    lastModified: new Date(guide.updated),
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
+
+  const contentEntries: MetadataRoute.Sitemap = [
+    ...MODEL_ESSAYS.map((essay) => essayPath(essay)),
+    ...SAMPLE_CUE_CARDS.map((card) => cueCardPath(card)),
+  ].map((path) => ({
+    url: `${SITE_URL}${path}`,
+    lastModified,
+    changeFrequency: "monthly" as const,
+    priority: 0.75,
+  }));
+
+  return [...staticEntries, ...guideEntries, ...contentEntries, ...testEntries];
 }

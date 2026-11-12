@@ -1,6 +1,33 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { SAMPLE_CUE_CARDS } from "@/lib/speaking-cue-cards";
+import { AdBanner } from "@/components/AdBanner";
+import { SAMPLE_CUE_CARDS, cueCardPath, type CueCardData } from "@/lib/speaking-cue-cards";
+import {
+  BreadcrumbsJsonLd,
+  HowToJsonLd,
+  LearningResourceJsonLd,
+} from "@/components/JsonLd";
+import { absoluteUrl, pageMetadata } from "@/lib/seo";
 import SpeakingPracticeClient from "./SpeakingPracticeClient";
+
+const KEYWORDS = [
+  "IELTS speaking practice",
+  "IELTS speaking part 2",
+  "IELTS cue card",
+  "IELTS speaking topics",
+  "IELTS speaking preparation time",
+  "IELTS speaking band 8",
+  "IELTS speaking simulator",
+  "IELTS speaking recording practice",
+];
+
+export const metadata: Metadata = pageMetadata({
+  title: "IELTS Speaking Part 2 Cue Cards & Voice Examiner Studio",
+  description:
+    "Practise IELTS Speaking Part 2 with exam-style cue cards, a timed 1-minute preparation window, 2-minute recording and Band 8.5 model transcripts using the four IELTS Speaking criteria.",
+  path: "/speaking-practice",
+  keywords: KEYWORDS,
+});
 
 const STEPS = [
   {
@@ -19,6 +46,13 @@ const STEPS = [
 
 /** Server-rendered guide and cue card bank below the interactive studio. */
 function SpeakingGuide() {
+  const topics = Object.entries(
+    SAMPLE_CUE_CARDS.reduce<Record<string, CueCardData[]>>((groups, card) => {
+      (groups[card.topic] ??= []).push(card);
+      return groups;
+    }, {}),
+  );
+
   return (
     <section className="page-container space-y-6 pb-12" aria-labelledby="speaking-guide">
       <div className="max-w-3xl space-y-3 text-sm leading-relaxed text-surface-600">
@@ -46,48 +80,83 @@ function SpeakingGuide() {
         </ol>
       </div>
 
-      <h2 className="font-display text-lg font-bold text-surface-900">Practice cue cards with model answers</h2>
-      <div className="grid gap-4 lg:grid-cols-2">
-        {SAMPLE_CUE_CARDS.map((card) => (
-          <article key={card.id} className="card p-5 sm:p-6 text-[13px] leading-relaxed text-surface-600">
-            <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-surface-400">{card.topic}</p>
-            <h3 className="mt-1 text-[15px] font-bold text-surface-900">{card.title}</h3>
-            <p className="mt-2 font-medium text-surface-800">{card.prompt}</p>
-            <p className="mt-2">You should say:</p>
-            <ul className="mt-1 list-disc pl-5">
-              {card.bullets.map((b) => (
-                <li key={b}>{b}</li>
-              ))}
-            </ul>
-            <h4 className="mt-3 font-semibold text-surface-800">Useful phrases</h4>
-            <ul className="mt-1 space-y-0.5">
-              {card.vocabTips.map((tip) => (
-                <li key={tip.phrase}>
-                  <span className="font-medium text-surface-700">{tip.phrase}</span>: {tip.meaning}
-                </li>
-              ))}
-            </ul>
-            <details className="mt-3">
-              <summary className="cursor-pointer font-semibold text-brand-600">Band 8+ model answer</summary>
-              {card.modelTranscript.split("\n\n").map((para, i) => (
-                <p key={i} className="mt-2">
-                  {para}
-                </p>
-              ))}
-            </details>
-            <p className="mt-3">
-              <span className="font-semibold text-surface-800">Part 3 follow-up:</span> {card.followUp}
-            </p>
-          </article>
-        ))}
+      <div className="space-y-2">
+        <h2 id="cue-card-index" className="font-display text-lg font-bold text-surface-900">
+          {SAMPLE_CUE_CARDS.length} IELTS Speaking Part 2 cue cards with sample answers
+        </h2>
+        <p className="max-w-3xl text-sm leading-relaxed text-surface-600">
+          Each topic page has the full cue card, example one-minute notes, a Band 8–9 sample answer, useful
+          phrases and Part 3 discussion questions. Practise any card above with the timer and recorder.
+        </p>
       </div>
+      {topics.map(([topic, cards]) => (
+        <div key={topic} className="space-y-2.5">
+          <h3 className="text-[12px] font-bold uppercase tracking-[0.12em] text-surface-500">{topic}</h3>
+          <ul className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+            {cards.map((card) => (
+              <li key={card.id}>
+                <Link
+                  href={cueCardPath(card)}
+                  className="card flex h-full flex-col gap-1 p-4 transition hover:border-brand-300 hover:bg-brand-50/40"
+                >
+                  <span className="text-[14px] font-bold leading-snug text-surface-900">{card.title}</span>
+                  <span className="line-clamp-2 text-[12px] leading-relaxed text-surface-500">{card.prompt}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+
+      <AdBanner placement="display" />
     </section>
   );
 }
 
 export default function SpeakingPracticePage() {
+  const url = absoluteUrl("/speaking-practice");
+  const breadcrumbs = [
+    { name: "Home", url: absoluteUrl("/") },
+    { name: "Speaking Practice Studio", url },
+  ];
+
   return (
     <>
+      <BreadcrumbsJsonLd items={breadcrumbs} />
+      <LearningResourceJsonLd
+        name="IELTS Speaking Part 2 Practice Studio"
+        description="Interactive cue card simulator with timed preparation, live recording and model transcripts aligned to the four IELTS Speaking criteria."
+        url={url}
+        teaches={[
+          "Fluency and Coherence",
+          "Lexical Resource",
+          "Grammatical Range and Accuracy",
+          "Pronunciation",
+        ]}
+      />
+      <HowToJsonLd
+        name="How to practise IELTS Speaking Part 2"
+        description="Use a cue card, prepare for one minute and speak for up to two minutes under exam conditions."
+        url={url}
+        steps={[
+          {
+            name: "Choose a cue card",
+            text: "Pick an IELTS-style Speaking Part 2 cue card with its bullet-point prompts.",
+          },
+          {
+            name: "Use the one-minute preparation",
+            text: "Make brief notes during the one-minute preparation window without writing a full script.",
+          },
+          {
+            name: "Record your two-minute answer",
+            text: "Speak continuously for up to two minutes, covering every bullet point on the card.",
+          },
+          {
+            name: "Review the feedback",
+            text: "Compare your answer with the model transcript and review fluency, vocabulary, grammar and pronunciation.",
+          },
+        ]}
+      />
       <SpeakingPracticeClient />
       <SpeakingGuide />
     </>
