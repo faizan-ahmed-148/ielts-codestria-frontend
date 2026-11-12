@@ -16,7 +16,7 @@ const KEYWORDS = [
 export const metadata: Metadata = pageMetadata({
   title: "Band 8+ Academic Vocabulary Lab & Topic Collocations",
   description:
-    "Master high-scoring IELTS vocabulary across frequent Cambridge topics such as environment, technology, education and society, with pronunciation, collocations and CEFR indicators.",
+    "Master high-scoring IELTS vocabulary across frequent IELTS topics such as environment, technology, education and society, with pronunciation, collocations and CEFR indicators.",
   path: "/vocabulary",
   keywords: KEYWORDS,
 });

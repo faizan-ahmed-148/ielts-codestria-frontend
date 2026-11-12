@@ -295,7 +295,7 @@ export function ObjectiveRunner({
                   className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-surface-700 hover:bg-surface-100"
                 >
                   <span className="h-3 w-3 rounded-full bg-black text-[#ffe600]" />
-                  <span>Yellow on Black (IDP)</span>
+                  <span>Yellow on Black</span>
                 </button>
                 <button
                   onClick={() => {

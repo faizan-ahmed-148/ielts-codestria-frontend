@@ -4,7 +4,7 @@ import { DEFAULT_DESCRIPTION, SITE_NAME } from "@/lib/seo";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: `${SITE_NAME} · Official CD Simulator`,
+    name: `${SITE_NAME} · IELTS Practice Tests`,
     short_name: SITE_NAME,
     description: DEFAULT_DESCRIPTION,
     start_url: "/",
@@ -50,14 +50,14 @@ export default function manifest(): MetadataRoute.Manifest {
       {
         name: "Practice tests",
         short_name: "Tests",
-        description: "Browse Cambridge Academic and General Training mock tests",
+        description: "Browse Academic and General Training mock tests",
         url: "/tests",
         icons: [{ src: "/codestria-icon-512.png", sizes: "512x512", type: "image/png" }],
       },
       {
         name: "Band calculator",
         short_name: "Calculator",
-        description: "Convert raw marks into an official IELTS band score",
+        description: "Convert raw marks into an IELTS band score",
         url: "/calculator",
         icons: [{ src: "/codestria-icon-512.png", sizes: "512x512", type: "image/png" }],
       },

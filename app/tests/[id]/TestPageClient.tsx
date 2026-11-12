@@ -27,10 +27,10 @@ import { analyticsSessionId } from "@/lib/analytics";
 import type { ModuleKind } from "@/lib/content.types";
 import { createAttempt, fetchTestOverview } from "@/lib/test-runner-service";
 
-export default function TestPageClient() {
+export default function TestPageClient({ initialTest = null }: { initialTest?: TestOverview | null }) {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const [test, setTest] = useState<TestOverview | null>(null);
+  const [test, setTest] = useState<TestOverview | null>(initialTest);
   const [error, setError] = useState("");
   const [starting, setStarting] = useState<ModuleKind | null>(null);
 
@@ -87,13 +87,13 @@ export default function TestPageClient() {
     MODULE_ORDER.find((m) => test.modules[m].band === null);
 
   return (
-    <div className="page-container space-y-8 py-8 sm:py-10">
+    <div className="page-container space-y-8 pt-8 pb-8 sm:pt-10">
       <nav className="flex flex-wrap items-center gap-1.5 text-[13px] text-surface-500">
         <Link href={`/tests?type=${test.type}`} className="transition hover:text-surface-900">
           {trackLabel} library
         </Link>
         <ChevronRight className="h-3.5 w-3.5 text-surface-300" />
-        <span>Cambridge Book {test.book}</span>
+        <span>Book {test.book}</span>
         <ChevronRight className="h-3.5 w-3.5 text-surface-300" />
         <span className="font-semibold text-surface-900">Practice Test {test.testNumber}</span>
       </nav>
@@ -125,7 +125,7 @@ export default function TestPageClient() {
             </div>
 
             <h1 className="mt-2 font-display text-2xl font-extrabold tracking-tight text-surface-900 sm:text-[1.75rem]">
-              Cambridge {test.book} · Practice Test {test.testNumber}
+              IELTS {trackLabel} Practice Test · Book {test.book} Test {test.testNumber}
             </h1>
 
             {test.overallBand !== null ? (
@@ -135,7 +135,7 @@ export default function TestPageClient() {
               </p>
             ) : (
               <p className="mt-2 max-w-xl text-sm leading-relaxed text-surface-600">
-                Sit the paper under authentic computer-delivered conditions. Your overall score
+                Sit the paper in the computer-delivered exam format. Your overall score
                 unlocks once Listening, Reading, Writing and Speaking are complete.
               </p>
             )}
@@ -241,9 +241,9 @@ export default function TestPageClient() {
                     {m === "READING"
                       ? "Split-screen reader with three-colour highlighting, matching headings, summary gaps and True / False / Not Given."
                       : m === "LISTENING"
-                        ? "Cambridge audio with playback controls, speech-rate adjustment and automatic raw-to-band conversion."
+                        ? "Recorded audio with playback controls, speech-rate adjustment and automatic raw-to-band conversion."
                         : m === "WRITING"
-                          ? "Official essay pad with live word counters, data charts and an examiner criteria breakdown."
+                          ? "Exam-style essay pad with live word counters, data charts and an examiner criteria breakdown."
                           : "Interactive speaking room with speech recognition, a 60-second cue-card pad and follow-up questions."}
                   </p>
                 </div>

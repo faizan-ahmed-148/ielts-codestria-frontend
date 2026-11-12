@@ -23,22 +23,22 @@ export async function generateMetadata({
 
   if (!test) {
     return pageMetadata({
-      title: "Cambridge IELTS Practice Test",
+      title: "IELTS Practice Test",
       description:
-        "Practise a full Cambridge IELTS paper with computer-delivered Reading and Listening modules, Writing tasks and Speaking cue cards.",
+        "Practise a full IELTS-style mock test with computer-delivered Reading and Listening modules, Writing tasks and Speaking cue cards.",
       path: `/tests/${id}`,
-      keywords: ["Cambridge IELTS practice test", "IELTS mock test"],
+      keywords: ["IELTS practice test", "IELTS mock test"],
       noindex: true,
     });
   }
 
   return pageMetadata({
-    title: `Cambridge ${test.book} · ${test.typeLabel} Test ${test.testNumber} (Full CD-IELTS Exam)`,
-    description: `Sit full Cambridge ${test.book} ${test.typeLabel} Test ${test.testNumber} under official British Council and IDP computer-delivered conditions, with instant Reading and Listening band scoring and examiner answer rationales.`,
+    title: `IELTS ${test.typeLabel} Practice Test · Book ${test.book} Test ${test.testNumber}`,
+    description: `Sit Book ${test.book} ${test.typeLabel} Test ${test.testNumber}, a full IELTS-style mock exam in the computer-delivered format, with instant Reading and Listening band scoring and examiner answer rationales.`,
     path: `/tests/${id}`,
     keywords: [
-      `Cambridge IELTS ${test.book}`,
-      `Cambridge ${test.book} ${test.typeLabel}`,
+      `IELTS ${test.typeLabel} practice test`,
+      `IELTS ${test.typeLabel} mock test`,
       `IELTS ${test.typeLabel} Test ${test.testNumber}`,
       "full IELTS mock test",
       "computer delivered IELTS",
@@ -63,7 +63,7 @@ export default async function TestDetailLayout({
         <BreadcrumbsJsonLd
           items={[
             { name: "Home", url: absoluteUrl("/") },
-            { name: "Cambridge Tests Library", url: absoluteUrl("/tests") },
+            { name: "IELTS Tests Library", url: absoluteUrl("/tests") },
             { name: "Practice Test", url },
           ]}
         />
@@ -78,7 +78,7 @@ export default async function TestDetailLayout({
       name: `${test.typeLabel} Tests`,
       url: absoluteUrl(`/tests?type=${test.type}`),
     },
-    { name: `Cambridge ${test.book}`, url: absoluteUrl("/tests") },
+    { name: `Book ${test.book}`, url: absoluteUrl("/tests") },
     { name: `Test ${test.testNumber}`, url },
   ];
 
@@ -86,8 +86,8 @@ export default async function TestDetailLayout({
     <>
       <BreadcrumbsJsonLd items={breadcrumbs} />
       <QuizJsonLd
-        name={`Cambridge ${test.book} ${test.typeLabel} Test ${test.testNumber}`}
-        description={`Full Cambridge IELTS ${test.typeLabel} paper with Reading, Listening, Writing and Speaking modules.`}
+        name={`IELTS ${test.typeLabel} Practice Test · Book ${test.book} Test ${test.testNumber}`}
+        description={`Full IELTS-style ${test.typeLabel} mock test with Reading, Listening, Writing and Speaking modules.`}
         url={url}
         about={[
           "IELTS Reading",

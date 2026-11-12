@@ -256,7 +256,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             <div>
               <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-brand-600">Overall band</div>
               <div className="font-display text-lg font-bold text-surface-900">Band 8.0 achieved</div>
-              <div className="text-xs text-surface-500">Cambridge Academic · Test 1</div>
+              <div className="text-xs text-surface-500">Academic · Book 19 Test 1</div>
             </div>
           </div>
 
@@ -267,13 +267,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
             Improve with every attempt.
           </h2>
           <p className="mt-4 text-[15px] leading-relaxed text-surface-500">
-            Cambridge Books 12–19 in a calm, computer-delivered test room, with instant objective marking and AI
+            Full IELTS-style mock tests in a calm, computer-delivered test room, with instant objective marking and AI
             examiner feedback.
           </p>
 
           <ul className="mt-8 space-y-4">
             {[
-              { icon: Trophy, text: "Full Cambridge papers for Academic and General Training" },
+              { icon: Trophy, text: "Full mock tests for Academic and General Training" },
               { icon: Zap, text: "Instant Listening and Reading bands with answer review" },
               { icon: Sparkles, text: "Writing and Speaking feedback from your own AI examiner" },
               { icon: Clock, text: "Progress tracking across every module and attempt" },

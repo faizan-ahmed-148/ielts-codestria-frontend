@@ -36,7 +36,7 @@ export function JsonLd() {
         name: "Codestria IELTS",
         alternateName: "Codestria IELTS Simulator",
         description:
-          "Official-standard Computer-Delivered CD-IELTS simulation platform with Cambridge Academic and General Training papers, instant objective marking and AI examiner feedback.",
+          "Free computer-delivered IELTS practice platform with full-length Academic and General Training mock tests, instant objective marking and AI examiner feedback.",
         publisher: { "@id": ORG_ID },
         inLanguage: "en-GB",
       },
@@ -83,7 +83,7 @@ export function JsonLd() {
         offers: { "@type": "Offer", price: "0", priceCurrency: "GBP" },
         provider: { "@id": ORG_ID },
         featureList: [
-          "Cambridge Academic and General Training mock tests",
+          "IELTS Academic and General Training mock tests",
           "Computer-delivered Reading and Listening interface",
           "Three-colour text highlighters and scratchpad",
           "Instant Reading and Listening band scoring",
@@ -100,28 +100,28 @@ export function JsonLd() {
             "@type": "SiteNavigationElement",
             position: 1,
             name: "Academic Mock Tests",
-            description: "Authentic Cambridge Academic IELTS full tests",
+            description: "Full-length IELTS Academic mock tests",
             url: `${SITE}/tests?type=ACADEMIC`,
           },
           {
             "@type": "SiteNavigationElement",
             position: 2,
             name: "General Training Tests",
-            description: "Cambridge General Training mock tests with workplace texts and letters",
+            description: "IELTS General Training mock tests with workplace texts and letters",
             url: `${SITE}/tests?type=GENERAL`,
           },
           {
             "@type": "SiteNavigationElement",
             position: 3,
             name: "IELTS Band Score Calculator",
-            description: "Official Cambridge rounding calculator and raw mark converter",
+            description: "IELTS band rounding calculator and raw mark converter",
             url: `${SITE}/calculator`,
           },
           {
             "@type": "SiteNavigationElement",
             position: 4,
             name: "Band 9 Model Essays",
-            description: "Cambridge examiner annotated model essays and Band 6 comparisons",
+            description: "Examiner-style annotated model essays and Band 6 comparisons",
             url: `${SITE}/model-answers`,
           },
           {
@@ -157,9 +157,9 @@ export function JsonLd() {
       {
         "@type": "LearningResource",
         "@id": `${SITE}/#learning-resource`,
-        name: "Cambridge IELTS Computer-Delivered Simulation Course",
+        name: "IELTS Computer-Delivered Practice Course",
         description:
-          "Authentic Cambridge Academic and General Training examination practice featuring three-colour text highlighters, candidate notes scratchpad, timed audio tracks and automated examiner assessment.",
+          "IELTS Academic and General Training exam practice featuring three-colour text highlighters, candidate notes scratchpad, timed audio tracks and automated examiner assessment.",
         educationalLevel: ["B2", "C1", "C2"],
         inLanguage: "en-GB",
         isAccessibleForFree: true,

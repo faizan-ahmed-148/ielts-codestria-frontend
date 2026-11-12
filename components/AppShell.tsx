@@ -206,7 +206,7 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
               <div className="col-span-2 space-y-4">
                 <Logo showBadge={false} />
                 <p className="max-w-sm text-sm leading-relaxed text-surface-500">
-                  A complete, free IELTS preparation studio: authentic Cambridge papers, instant objective marking,
+                  A complete, free IELTS preparation studio: full-length IELTS-style mock tests, instant objective marking,
                   AI examiner feedback and a library of Band 9 model answers.
                 </p>
                 <div className="flex flex-wrap items-center gap-2 pt-1">
@@ -224,7 +224,7 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
               </div>
 
               <div>
-                <h3 className="text-xs font-bold uppercase tracking-[0.12em] text-surface-900">Cambridge Books</h3>
+                <h3 className="text-xs font-bold uppercase tracking-[0.12em] text-surface-900">Practice Books</h3>
                 <ul className="mt-4 space-y-2.5 text-sm text-surface-500">
                   {[
                     { label: "19 Academic", href: testPath({ book: 19, type: "ACADEMIC", testNumber: 1 }) },
@@ -320,7 +320,8 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
               </p>
               <p className="max-w-md text-center sm:text-right">
                 IELTS® is a registered trademark of Cambridge University Press &amp; Assessment, British Council and
-                IDP. This is an independent simulation product.
+                IDP. Codestria IELTS is an independent practice product and is not affiliated with or endorsed by
+                them. All practice tests are original material.
               </p>
             </div>
           </div>

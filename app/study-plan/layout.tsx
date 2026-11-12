@@ -16,7 +16,7 @@ const KEYWORDS = [
 export const metadata: Metadata = pageMetadata({
   title: "IELTS Target Band Study Roadmap & Daily Preparation Blueprint",
   description:
-    "Generate a reverse-engineered IELTS study plan from Cambridge assessment standards. Set your target band, remaining weeks and daily study time to get a week-by-week roadmap and daily checklist.",
+    "Generate a reverse-engineered IELTS study plan from the public IELTS band descriptors. Set your target band, remaining weeks and daily study time to get a week-by-week roadmap and daily checklist.",
   path: "/study-plan",
   keywords: KEYWORDS,
 });

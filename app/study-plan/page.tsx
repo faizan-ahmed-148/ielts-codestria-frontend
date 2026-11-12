@@ -37,7 +37,7 @@ interface DailyTask {
 const DEFAULT_TASKS: DailyTask[] = [
   {
     id: "task-1",
-    text: "Complete 1 Cambridge Academic Reading Passage (13 questions) under strict 20-min timer",
+    text: "Complete 1 Academic Reading Passage (13 questions) under strict 20-min timer",
     module: "Reading",
     durationMinutes: 20,
     completed: false,
@@ -234,7 +234,7 @@ export default function StudyPlanPage() {
       <PageHeader
         eyebrow="Strategic preparation blueprint"
         title="IELTS target band study roadmap"
-        description="Reverse-engineered preparation strategy based on Cambridge assessment standards. Configure your target band, timeline, and daily routine, then work through the checklist below."
+        description="Reverse-engineered preparation strategy based on the public IELTS band descriptors. Configure your target band, timeline, and daily routine, then work through the checklist below."
         actions={
           <>
             <Link href="/calculator" className="btn-secondary">
@@ -397,7 +397,7 @@ export default function StudyPlanPage() {
               </div>
 
               <p className="mt-4 text-[13px] leading-relaxed text-surface-600">
-                💡 <strong className="font-semibold text-surface-800">Cambridge research rule:</strong> Each
+                💡 <strong className="font-semibold text-surface-800">Study rule:</strong> Each
                 0.5 band increase typically requires ~60 to 80 hours of guided practice and active review.
               </p>
 
@@ -554,7 +554,7 @@ export default function StudyPlanPage() {
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <input
                   type="text"
-                  placeholder="Add custom task (e.g., 'Review Cambridge 18 Reading 2 error log')..."
+                  placeholder="Add custom task (e.g., 'Review Book 18 Reading 2 error log')..."
                   value={newTaskText}
                   onChange={(e) => setNewTaskText(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addTask()}
@@ -640,11 +640,11 @@ export default function StudyPlanPage() {
                 Ready to put your roadmap into action?
               </div>
               <p className="mt-0.5 text-[13px] leading-relaxed text-surface-500">
-                Jump right into authentic Cambridge mock tests with instant AI scoring.
+                Jump right into full IELTS mock tests with instant AI scoring.
               </p>
             </div>
             <Link href="/tests?type=ACADEMIC" className="btn-primary shrink-0">
-              Browse Cambridge mocks
+              Browse mock tests
               <ArrowRight className="h-4 w-4" />
             </Link>
           </section>

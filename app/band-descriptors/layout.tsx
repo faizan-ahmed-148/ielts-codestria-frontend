@@ -15,9 +15,9 @@ const KEYWORDS = [
 ];
 
 export const metadata: Metadata = pageMetadata({
-  title: "Official IELTS Band Descriptors · Writing & Speaking Rubrics",
+  title: "IELTS Band Descriptors Explained · Writing & Speaking Rubrics",
   description:
-    "Official IELTS Band Descriptors (Bands 5 to 9) for Writing Task 1, Task 2 and Speaking. See exactly how examiners mark Task Achievement, Coherence & Cohesion, Lexical Resource and Grammatical Range.",
+    "The IELTS band descriptors (Bands 5 to 9) explained for Writing Task 1, Task 2 and Speaking. See exactly how examiners mark Task Achievement, Coherence & Cohesion, Lexical Resource and Grammatical Range.",
   path: "/band-descriptors",
   keywords: KEYWORDS,
 });
@@ -32,7 +32,7 @@ export default function BandDescriptorsLayout({ children }: { children: React.Re
     <>
       <BreadcrumbsJsonLd items={breadcrumbs} />
       <LearningResourceJsonLd
-        name="Official IELTS Band Descriptors"
+        name="IELTS Band Descriptors Explained"
         description="Public examiner assessment rubrics for IELTS Writing Task 1, Writing Task 2 and Speaking across Bands 5 to 9."
         url={absoluteUrl("/band-descriptors")}
         teaches={[

@@ -34,16 +34,16 @@ const SEARCH_CATALOG: SearchItem[] = [
   // Core Tools
   {
     id: "calc",
-    title: "Official IELTS Band Score Calculator",
+    title: "IELTS Band Score Calculator",
     category: "Tools",
     description: "Convert raw Listening/Reading scores (0-40) and calculate overall rounded band.",
     href: "/calculator",
     icon: Calculator,
-    badge: "Official",
+    badge: "Tool",
   },
   {
     id: "descriptors",
-    title: "Official Band Descriptors Matrix",
+    title: "Band Descriptors Matrix",
     category: "Tools",
     description: "Examiner rubrics for Writing Task 1, Task 2, and Speaking across Bands 5-9.",
     href: "/band-descriptors",
@@ -98,7 +98,7 @@ const SEARCH_CATALOG: SearchItem[] = [
   // Tests
   {
     id: "academic-moks",
-    title: "Academic Practice Tests (Cambridge 16-19)",
+    title: "Academic Practice Tests (Books 16-19)",
     category: "Tests",
     description: "Full Academic Listening, Reading, Writing, and Speaking test papers.",
     href: "/tests?type=ACADEMIC",
@@ -106,7 +106,7 @@ const SEARCH_CATALOG: SearchItem[] = [
   },
   {
     id: "general-mocks",
-    title: "General Training Practice Tests (Cambridge 16-19)",
+    title: "General Training Practice Tests (Books 16-19)",
     category: "Tests",
     description: "General Training modules tailored for work and immigration visas.",
     href: "/tests?type=GENERAL",
@@ -310,7 +310,7 @@ export function CommandPalette({
                 <span>Select: <kbd className="font-semibold">↵</kbd></span>
                 <span>Close: <kbd className="font-semibold">esc</kbd></span>
               </div>
-              <span className="font-medium text-brand-600">Cambridge IELTS 16-19</span>
+              <span className="font-medium text-brand-600">Practice Books 16-19</span>
             </div>
           </div>
         </div>

@@ -18,9 +18,9 @@ const KEYWORDS = [
 ];
 
 export const metadata: Metadata = pageMetadata({
-  title: "Official IELTS Band Score Calculator · Overall & Raw Score Converter",
+  title: "IELTS Band Score Calculator · Overall & Raw Score Converter",
   description:
-    "Free interactive IELTS band score calculator. Calculate your overall band with official British Council and IDP rounding rules (.25 and .75 boundaries) and convert raw Listening and Reading scores (0–40) into bands and CEFR levels.",
+    "Free interactive IELTS band score calculator. Calculate your overall band with the standard IELTS rounding rules (.25 and .75 boundaries) and convert raw Listening and Reading scores (0–40) into bands and CEFR levels.",
   path: "/calculator",
   keywords: KEYWORDS,
 });
@@ -37,7 +37,7 @@ export default function CalculatorLayout({ children }: { children: React.ReactNo
       <BreadcrumbsJsonLd items={breadcrumbs} />
       <WebApplicationJsonLd
         name="IELTS Band Score Calculator"
-        description="Interactive IELTS overall band calculator and raw Listening and Reading mark converter using official Cambridge rounding rules."
+        description="Interactive IELTS overall band calculator and raw Listening and Reading mark converter using the standard IELTS rounding rules."
         url={url}
         keywords={KEYWORDS}
       />

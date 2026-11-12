@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import type { TestOverview } from "@/lib/api";
 import { fetchTestOverview } from "@/lib/test-runner-service";
 import TestPageClient from "./TestPageClient";
+import TestPreview, { fetchTestPreview } from "./TestPreview";
 
 export const dynamic = "force-dynamic";
 
@@ -22,8 +24,8 @@ export async function generateMetadata({
   if (!test) notFound();
 
   const trackLabel = test.type === "ACADEMIC" ? "Academic" : "General Training";
-  const title = `Cambridge ${test.book} · Practice Test ${test.testNumber} · ${trackLabel} | Codestria IELTS`;
-  const description = `Practise Cambridge ${test.book} Practice Test ${test.testNumber} (${trackLabel}) — authentic computer-delivered IELTS paper with instant band scoring, highlighters and scratchpad. Free CD-IELTS simulator by Codestria.`;
+  const title = `IELTS ${trackLabel} Practice Test · Book ${test.book} Test ${test.testNumber} | Codestria IELTS`;
+  const description = `Practise Book ${test.book} Test ${test.testNumber} (${trackLabel}), a full IELTS-style mock exam in the computer-delivered format, with instant band scoring, highlighters and scratchpad. Free IELTS practice by Codestria.`;
   const url = `https://ielts.codestria.com/tests/${id}`;
 
   return {
@@ -56,6 +58,35 @@ export async function generateMetadata({
   };
 }
 
-export default function TestPage() {
-  return <TestPageClient />;
+const API_URL = (process.env.API_URL ?? "http://localhost:4000").replace(/\/+$/, "");
+
+/**
+ * Server-side overview so the hero, heading and module cards are in the HTML
+ * crawlers receive. The visitor's cookie is forwarded so signed-in candidates
+ * see their own progress on first paint; the client refetches after hydration.
+ */
+async function fetchInitialOverview(id: string): Promise<TestOverview | null> {
+  try {
+    const cookie = (await headers()).get("cookie");
+    const res = await fetch(`${API_URL}/api/tests/${encodeURIComponent(id)}`, {
+      cache: "no-store",
+      signal: AbortSignal.timeout(5000),
+      headers: { accept: "application/json", ...(cookie ? { cookie } : {}) },
+    });
+    return res.ok ? ((await res.json()) as TestOverview) : null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function TestPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const [initialTest, preview] = await Promise.all([fetchInitialOverview(id), fetchTestPreview(id)]);
+
+  return (
+    <>
+      <TestPageClient initialTest={initialTest} />
+      {preview && <TestPreview preview={preview} />}
+    </>
+  );
 }

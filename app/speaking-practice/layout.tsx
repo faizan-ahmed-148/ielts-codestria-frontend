@@ -20,7 +20,7 @@ const KEYWORDS = [
 export const metadata: Metadata = pageMetadata({
   title: "IELTS Speaking Part 2 Cue Cards & Voice Examiner Studio",
   description:
-    "Practise IELTS Speaking Part 2 with authentic Cambridge cue cards, a timed 1-minute preparation window, 2-minute recording and Band 8.5 model transcripts using the four official criteria.",
+    "Practise IELTS Speaking Part 2 with exam-style cue cards, a timed 1-minute preparation window, 2-minute recording and Band 8.5 model transcripts using the four official criteria.",
   path: "/speaking-practice",
   keywords: KEYWORDS,
 });
@@ -53,7 +53,7 @@ export default function SpeakingLayout({ children }: { children: React.ReactNode
         steps={[
           {
             name: "Choose a cue card",
-            text: "Pick an authentic Cambridge Speaking Part 2 cue card with its bullet-point prompts.",
+            text: "Pick an IELTS-style Speaking Part 2 cue card with its bullet-point prompts.",
           },
           {
             name: "Use the one-minute preparation",

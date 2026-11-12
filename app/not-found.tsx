@@ -23,7 +23,7 @@ export default function NotFound() {
         </Link>
         <Link href="/tests" className="btn-secondary px-5 py-3">
           <BookOpen className="h-4 w-4 text-surface-500" />
-          Browse Cambridge tests
+          Browse practice tests
         </Link>
         <Link href="/calculator" className="btn-secondary px-5 py-3">
           <Calculator className="h-4 w-4 text-surface-500" />

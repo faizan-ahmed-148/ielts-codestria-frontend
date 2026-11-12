@@ -71,9 +71,9 @@ export default function ModelAnswersPage() {
   return (
     <div className="page-container space-y-8 py-8 sm:py-10">
       <PageHeader
-        eyebrow="Cambridge examiner benchmarks"
+        eyebrow="Examiner-style benchmarks"
         title="Band 9 model answers"
-        description="Study authentic Band 9 responses with examiner commentary across Task Response, Coherence & Cohesion, Lexical Resource and Grammatical Range — then compare against common Band 6 pitfalls."
+        description="Study Band 9 responses with examiner-style commentary across Task Response, Coherence & Cohesion, Lexical Resource and Grammatical Range — then compare against common Band 6 pitfalls."
         actions={
           <Link href="/tests?type=ACADEMIC" className="btn-secondary">
             <PenTool className="h-4 w-4" />
@@ -234,7 +234,7 @@ export default function ModelAnswersPage() {
           <div className="card-muted p-5 sm:p-6">
             <span className="flex items-center gap-2 text-[12px] font-bold uppercase tracking-[0.1em] text-surface-500">
               <FileText className="h-3.5 w-3.5 text-brand-500" />
-              Official IELTS exam prompt
+              IELTS-style exam prompt
             </span>
             <p className="mt-2.5 text-[15px] font-medium leading-relaxed text-surface-800">
               &ldquo;{selectedEssay.prompt}&rdquo;

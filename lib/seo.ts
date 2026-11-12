@@ -12,14 +12,14 @@ export const PUBLISHER_URL = "https://codestria.com";
 export const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID ?? "ca-pub-1275878727832310";
 
 export const DEFAULT_TITLE =
-  "Codestria IELTS · Official Computer-Delivered CD-IELTS Simulator";
+  "Codestria IELTS · Free Computer-Delivered IELTS Practice Tests";
 export const DEFAULT_DESCRIPTION =
-  "Official-standard Computer-Delivered IELTS simulator. Practise authentic Cambridge IELTS papers (Academic & General Training) with real exam highlighters, scratchpad, timed audio, instant band scoring and detailed examiner rationales. Free and engineered by Codestria.";
+  "Free computer-delivered IELTS practice tests. Sit full-length IELTS-style Academic and General Training mock exams with exam-style highlighters, scratchpad, timed audio, instant band scoring and detailed examiner rationales. Free and engineered by Codestria.";
 
 export const OG_IMAGE = "/og-image.png";
 export const OG_IMAGE_WIDTH = 1200;
 export const OG_IMAGE_HEIGHT = 630;
-export const OG_IMAGE_ALT = "Codestria IELTS — Official Computer-Delivered CD-IELTS Simulator";
+export const OG_IMAGE_ALT = "Codestria IELTS — Free Computer-Delivered IELTS Practice Tests";
 export const LOGO_IMAGE = "/codestria-logo.png";
 
 /** Cambridge books and tests served by the API. */
@@ -33,14 +33,12 @@ export const DEFAULT_KEYWORDS = [
   "IELTS",
   "IELTS Academic",
   "IELTS General Training",
-  "Cambridge IELTS",
-  "Cambridge IELTS 19",
-  "Cambridge IELTS 18",
-  "Cambridge IELTS Books",
+  "IELTS practice test",
+  "IELTS mock test",
+  "IELTS full test online",
   "CD-IELTS simulation",
   "Computer Delivered IELTS",
-  "British Council IELTS mock test",
-  "IDP IELTS practice test",
+  "computer-delivered IELTS practice",
   "IELTS reading practice",
   "IELTS listening practice",
   "IELTS writing task 1",

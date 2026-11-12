@@ -53,7 +53,7 @@ const HOME_FAQ = [
       "Codestria IELTS recreates the computer-delivered IELTS test room with dual-pane Reading, synchronised Listening audio, three-colour highlighters, a notes scratchpad, official time alerts and question navigation. Reading and Listening are marked instantly from your correct answers; Writing and Speaking are scored by the AI examiner using your own provider key.",
   },
   {
-    question: "Are the Cambridge IELTS practice tests free?",
+    question: "Are the IELTS practice tests free?",
     answer:
       "Yes. Every full-length Academic and General Training paper in the library is free to sit, including the 40-question Reading and Listening modules with instant band scores. AI feedback for Writing and Speaking uses your own OpenAI, Groq or Anthropic API key, so you control the cost.",
   },
@@ -144,20 +144,20 @@ export default function Home() {
                 className="inline-flex items-center gap-2 rounded-full border border-surface-200 bg-white/90 px-4 py-1.5 text-[13px] font-medium text-surface-600 shadow-xs transition hover:border-brand-200 hover:text-surface-900"
               >
                 <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse-dot" />
-                <span className="font-semibold text-surface-900">Cambridge Books 19 → 12</span>
+                <span className="font-semibold text-surface-900">Practice Books 19 → 12</span>
                 <span className="text-surface-300">·</span>
                 <span>100% free</span>
                 <ChevronRight className="h-3.5 w-3.5 text-surface-400" />
               </Link>
 
               <h1 className="mt-7 font-display text-[2.4rem] font-extrabold leading-[1.08] tracking-tight text-surface-900 sm:text-5xl lg:text-[3.4rem]">
-                Practise the real IELTS.
+                Practise for the real IELTS.
                 <br />
                 <span className="gradient-brand">Know your band.</span>
               </h1>
 
               <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-surface-600 sm:text-[17px] lg:mx-0">
-                Full Cambridge examination papers in a calm, computer-delivered test room. Dual-pane reading,
+                Full IELTS-style mock tests in a calm, computer-delivered test room. Dual-pane reading,
                 synchronised audio, instant objective marking and AI examiner feedback for Writing and Speaking.
               </p>
 
@@ -174,7 +174,7 @@ export default function Home() {
               </div>
 
               <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm text-surface-500 lg:justify-start">
-                {["40 questions per paper", "Official 3-colour highlighter", "No account to browse"].map((item) => (
+                {["40 questions per paper", "3-colour highlighter", "No account to browse"].map((item) => (
                   <span key={item} className="inline-flex items-center gap-1.5">
                     <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                     {item}
@@ -184,7 +184,7 @@ export default function Home() {
 
               <div className="mt-10 grid grid-cols-3 gap-3 sm:gap-4">
                 {[
-                  { value: "8", suffix: " books", label: "Cambridge volumes" },
+                  { value: "8", suffix: " books", label: "Practice books" },
                   { value: "32", suffix: "+", label: "Full mock tests" },
                   { value: "9.0", suffix: "", label: "Band scale" },
                 ].map((stat) => (
@@ -210,7 +210,7 @@ export default function Home() {
                       <span className="h-2.5 w-2.5 rounded-full bg-emerald-300" />
                     </span>
                     <span className="ml-1 text-xs font-bold uppercase tracking-wide text-surface-500">
-                      Cambridge 19 · Academic Reading
+                      Book 19 · Academic Reading
                     </span>
                   </div>
                   <span className="inline-flex items-center gap-1.5 rounded-lg bg-surface-100 px-2 py-1 font-mono text-[11px] font-bold text-surface-600">
@@ -357,8 +357,8 @@ export default function Home() {
         <div className="page-container">
           <div className="grid grid-cols-1 divide-y divide-surface-100 sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x">
             {[
-              { num: "Books 19 → 12", label: "Official Cambridge papers", icon: BookOpen },
-              { num: "40 questions", label: "Full-length authentic exams", icon: FileText },
+              { num: "Books 19 → 12", label: "Original IELTS-style papers", icon: BookOpen },
+              { num: "40 questions", label: "Full-length mock exams", icon: FileText },
               { num: "Instant marking", label: "Reading & Listening bands", icon: Zap },
               { num: "AI examiner", label: "Writing & Speaking feedback", icon: Sparkles },
             ].map((item) => {
@@ -386,11 +386,11 @@ export default function Home() {
             eyebrow={
               <>
                 <BookOpen className="h-4 w-4" />
-                Cambridge University Press &amp; Assessment
+                IELTS practice library
               </>
             }
             title="Choose a paper and start today"
-            description="Every volume includes four complete examination papers for Academic and General Training, with native audio players, reading highlighters and official score conversion."
+            description="Every volume includes four complete examination papers for Academic and General Training, with native audio players, reading highlighters and standard band score conversion."
             actions={
               <div className="inline-flex rounded-xl border border-surface-200 bg-white p-1">
                 {[
@@ -430,7 +430,7 @@ export default function Home() {
                 </div>
 
                 <h3 className="mt-4 font-display text-lg font-bold text-surface-900 transition-colors group-hover:text-brand-700">
-                  Cambridge IELTS {book.volume}
+                  Practice Book {book.volume}
                 </h3>
                 <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-surface-500">{book.description}</p>
 
@@ -562,7 +562,7 @@ export default function Home() {
               <div className="grid items-center gap-8 lg:grid-cols-12">
                 <div className="space-y-4 lg:col-span-5">
                   <span className="badge-brand">
-                    <Headphones className="h-3.5 w-3.5" /> Cambridge audio, built in
+                    <Headphones className="h-3.5 w-3.5" /> Listening audio, built in
                   </span>
                   <h3 className="font-display text-2xl font-bold text-surface-900">Listen once, answer as you go</h3>
                   <p className="text-[15px] leading-relaxed text-surface-600">
@@ -703,11 +703,11 @@ export default function Home() {
           <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
             <div className="space-y-5 lg:col-span-5">
               <span className="badge-brand">
-                <Calculator className="h-3.5 w-3.5" /> Official band simulator
+                <Calculator className="h-3.5 w-3.5" /> Band score simulator
               </span>
               <h2 className="section-heading">See exactly how raw scores become a band</h2>
               <p className="text-[15px] leading-relaxed text-surface-600 sm:text-base">
-                Move the sliders to explore the official Cambridge and IDP conversion curves, including quarter-band
+                Move the sliders to explore the published IELTS raw-score conversion curves, including quarter-band
                 rounding (.25 → .5, .75 → whole band) and CEFR levels.
               </p>
               <ul className="space-y-2.5 text-sm text-surface-600">
@@ -819,7 +819,7 @@ export default function Home() {
             {[
               {
                 icon: Target,
-                title: "Authentic exam conditions",
+                title: "Real exam conditions",
                 copy: "Timers, question palettes, flag-for-review and a distraction-free test room, exactly like test day.",
                 tone: "bg-brand-50 text-brand-600",
               },
@@ -883,7 +883,7 @@ export default function Home() {
                 Your next band starts with one honest mock test.
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-[15px] leading-relaxed text-surface-600 sm:text-base">
-                Pick a Cambridge paper, sit it under real conditions and find out exactly where you stand.
+                Pick a practice paper, sit it under real conditions and find out exactly where you stand.
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <Link href="/tests?type=ACADEMIC" className="btn-primary btn-lg">
@@ -904,7 +904,7 @@ export default function Home() {
                   <CheckCircle2 className="h-4 w-4 text-emerald-500" /> No account to browse
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <Award className="h-4 w-4 text-brand-500" /> Official Cambridge papers
+                  <Award className="h-4 w-4 text-brand-500" /> Full-length mock tests
                 </span>
               </div>
             </div>

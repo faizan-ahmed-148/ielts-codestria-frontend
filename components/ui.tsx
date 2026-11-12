@@ -33,7 +33,7 @@ export const MODULE_INFO: Record<
     tile: "bg-emerald-50 text-emerald-700 border-emerald-200",
     bar: "bg-emerald-500",
     scoring: "40 questions · instant marking",
-    description: "Three comprehensive passages with authentic academic texts.",
+    description: "Three comprehensive passages in the style of academic texts.",
   },
   WRITING: {
     label: "Writing",

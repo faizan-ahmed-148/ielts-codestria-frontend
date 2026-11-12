@@ -16,7 +16,7 @@ const KEYWORDS = [
 export const metadata: Metadata = pageMetadata({
   title: "Band 9.0 Model Writing Essays & Examiner Annotations · Task 1 & Task 2",
   description:
-    "Study authentic Band 9 sample responses side-by-side with Cambridge examiner commentary on Task Response, Coherence & Cohesion, Lexical Resource and Grammatical Range, plus common Band 6 pitfalls.",
+    "Study Band 9 sample responses side-by-side with examiner-style commentary on Task Response, Coherence & Cohesion, Lexical Resource and Grammatical Range, plus common Band 6 pitfalls.",
   path: "/model-answers",
   keywords: KEYWORDS,
 });
